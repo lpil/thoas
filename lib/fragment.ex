@@ -1,4 +1,4 @@
-defmodule Jason.Fragment do
+defmodule :jaserl_fragment do
   defstruct [:encode]
 
   def new(iodata) when is_list(iodata) or is_binary(iodata) do
