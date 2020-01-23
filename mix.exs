@@ -1,4 +1,4 @@
-defmodule Jason.Mixfile do
+defmodule :jaserl_mixfile do
   use Mix.Project
 
   @version "1.1.2"
@@ -29,7 +29,8 @@ defmodule Jason.Mixfile do
     [
       {:decimal, "~> 1.0", optional: true},
       {:dialyxir, "~> 0.5", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.18", only: :docs},
+      {:mix_test_watch, "~> 1.0", only: [:dev, :test], runtime: false},
+      {:ex_doc, "~> 0.18", only: :docs}
     ] ++ maybe_stream_data()
   end
 

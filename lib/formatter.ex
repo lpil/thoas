@@ -1,4 +1,4 @@
-defmodule Jason.Formatter do
+defmodule :jaserl_formatter do
   @moduledoc ~S"""
   Pretty-printing and minimizing functions for JSON-encoded data.
 
@@ -34,7 +34,7 @@ defmodule Jason.Formatter do
 
   ## Examples
 
-      iex> Jason.Formatter.pretty_print(~s|{"a":{"b": [1, 2]}}|)
+      iex> :jaserl_formatter.pretty_print(~s|{"a":{"b": [1, 2]}}|)
       ~s|{
         "a": {
           "b": [
@@ -49,6 +49,7 @@ defmodule Jason.Formatter do
   def pretty_print(input, opts \\ []) do
     input
     |> pretty_print_to_iodata(opts)
+    # TODO
     |> IO.iodata_to_binary()
   end
 
@@ -86,7 +87,7 @@ defmodule Jason.Formatter do
 
   ## Examples
 
-      iex> Jason.Formatter.minimize(~s|{ "a" : "b" , "c": \n\n 2}|)
+      iex> :jaserl_formatter.minimize(~s|{ "a" : "b" , "c": \n\n 2}|)
       ~s|{"a":"b","c":2}|
 
   """
@@ -94,6 +95,7 @@ defmodule Jason.Formatter do
   def minimize(input, opts \\ []) do
     input
     |> minimize_to_iodata(opts)
+    # TODO
     |> IO.iodata_to_binary()
   end
 
@@ -108,6 +110,7 @@ defmodule Jason.Formatter do
   """
   @spec minimize_to_iodata(iodata, opts) :: iodata
   def minimize_to_iodata(input, opts) do
+    # TODO
     record = Keyword.get(opts, :record_separator, "\n")
     opts = opts(indent: "", line: "", record: record, colon: "")
 
@@ -120,7 +123,9 @@ defmodule Jason.Formatter do
   end
 
   defp parse_opts([{option, value} | opts], indent, line, record, colon) do
+    # TODO
     value = IO.iodata_to_binary(value)
+
     case option do
       :indent -> parse_opts(opts, value, line, record, colon)
       :record_separator -> parse_opts(opts, indent, line, value, colon)
@@ -134,10 +139,12 @@ defmodule Jason.Formatter do
   end
 
   for depth <- 1..16 do
+    # TODO
     defp tab("  ", unquote(depth)), do: unquote(String.duplicate("  ", depth))
   end
 
   defp tab("", _), do: ""
+  # TODO
   defp tab(indent, depth), do: List.duplicate(indent, depth)
 
   defp pp_iodata(<<>>, output_acc, depth, empty, opts) do
@@ -225,8 +232,10 @@ defmodule Jason.Formatter do
     case :binary.match(binary, ["\"", "\\"]) do
       :nomatch ->
         {[output_acc | binary], &pp_string(&1, &2, false, cont)}
+
       {pos, 1} ->
         {head, tail} = :erlang.split_binary(binary, pos + 1)
+
         case :binary.at(binary, pos) do
           ?\\ -> pp_string(tail, [output_acc | head], true, cont)
           ?" -> cont.(tail, [output_acc | head])

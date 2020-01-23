@@ -1,18 +1,16 @@
-defmodule Jason.Helpers do
+defmodule :jaserl_helpers do
   @moduledoc """
   Provides macro facilities for partial compile-time encoding of JSON.
   """
-
-  alias Jason.{Codegen, Fragment}
 
   @doc ~S"""
   Encodes a JSON map from a compile-time keyword.
 
   Encodes the keys at compile time and strives to create as flat iodata
   structure as possible to achieve maximum efficiency. Does encoding
-  right at the call site, but returns an `%Jason.Fragment{}` struct
+  right at the call site, but returns an `%:jaserl_:jaserl_fragment{}` struct
   that needs to be passed to one of the "main" encoding functions -
-  for example `Jason.encode/2` for final encoding into JSON - this
+  for example `:jaserl_encode/2` for final encoding into JSON - this
   makes it completely transparent for most uses.
 
   Only allows keys that do not require escaping in any of the supported
@@ -25,13 +23,13 @@ defmodule Jason.Helpers do
   ## Example
 
       iex> fragment = json_map(foo: 1, bar: 2)
-      iex> Jason.encode!(fragment)
+      iex> :jaserl.encode!(fragment)
       "{\"foo\":1,\"bar\":2}"
 
   """
   defmacro json_map(kv) do
     kv_values = Macro.expand(kv, __CALLER__)
-    kv_vars = Enum.map(kv_values, fn {key, _} -> {key, generated_var(key, Codegen)} end)
+    kv_vars = Enum.map(kv_values, fn {key, _} -> {key, generated_var(key, :jaserl_codegen)} end)
 
     values = Enum.map(kv_values, &elem(&1, 1))
     vars = Enum.map(kv_vars, &elem(&1, 1))
@@ -39,12 +37,12 @@ defmodule Jason.Helpers do
     escape = quote(do: escape)
     encode_map = quote(do: encode_map)
     encode_args = [escape, encode_map]
-    kv_iodata = Codegen.build_kv_iodata(kv_vars, encode_args)
+    kv_iodata = :jaserl_codegen.build_kv_iodata(kv_vars, encode_args)
 
     quote do
       {unquote_splicing(vars)} = {unquote_splicing(values)}
 
-      %Fragment{
+      %:jaserl_fragment{
         encode: fn {unquote(escape), unquote(encode_map)} ->
           unquote(kv_iodata)
         end
@@ -63,22 +61,22 @@ defmodule Jason.Helpers do
 
       iex> map = %{a: 1, b: 2, c: 3}
       iex> fragment = json_map_take(map, [:c, :b])
-      iex> Jason.encode!(fragment)
+      iex> :jaserl.encode!(fragment)
       "{\"c\":3,\"b\":2}"
 
   """
   defmacro json_map_take(map, take) do
     take = Macro.expand(take, __CALLER__)
-    kv = Enum.map(take, &{&1, generated_var(&1, Codegen)})
+    kv = Enum.map(take, &{&1, generated_var(&1, :jaserl_codegen)})
     escape = quote(do: escape)
     encode_map = quote(do: encode_map)
     encode_args = [escape, encode_map]
-    kv_iodata = Codegen.build_kv_iodata(kv, encode_args)
+    kv_iodata = :jaserl_codegen.build_kv_iodata(kv, encode_args)
 
     quote do
       case unquote(map) do
         %{unquote_splicing(kv)} ->
-          %Fragment{
+          %:jaserl_fragment{
             encode: fn {unquote(escape), unquote(encode_map)} ->
               unquote(kv_iodata)
             end

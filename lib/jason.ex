@@ -1,14 +1,15 @@
-defmodule Jason do
+defmodule :jaserl do
   @moduledoc """
   A blazing fast JSON parser and generator in pure Elixir.
   """
 
-  alias Jason.{Encode, Decoder, DecodeError, EncodeError, Formatter}
+  alias Jaserl.{DecodeError, EncodeError}
 
   @type escape :: :json | :unicode_safe | :html_safe | :javascript_safe
   @type maps :: :naive | :strict
 
-  @type encode_opt :: {:escape, escape} | {:maps, maps} | {:pretty, boolean | Formatter.opts()}
+  @type encode_opt ::
+          {:escape, escape} | {:maps, maps} | {:pretty, boolean | :jaserl_formatter.opts()}
 
   @type keys :: :atoms | :atoms! | :strings | :copy | (String.t() -> term)
 
@@ -44,16 +45,16 @@ defmodule Jason do
 
   ## Examples
 
-      iex> Jason.decode("{}")
+      iex> :jaserl.decode("{}")
       {:ok, %{}}
 
-      iex> Jason.decode("invalid")
+      iex> :jaserl.decode("invalid")
       {:error, %Jason.DecodeError{data: "invalid", position: 0, token: nil}}
   """
   @spec decode(iodata, [decode_opt]) :: {:ok, term} | {:error, DecodeError.t()}
   def decode(input, opts \\ []) do
     input = IO.iodata_to_binary(input)
-    Decoder.parse(input, format_decode_opts(opts))
+    :jaserl_decoder.parse(input, format_decode_opts(opts))
   end
 
   @doc """
@@ -64,10 +65,10 @@ defmodule Jason do
 
   ## Examples
 
-      iex> Jason.decode!("{}")
+      iex> :jaserl.decode!("{}")
       %{}
 
-      iex> Jason.decode!("invalid")
+      iex> :jaserl.decode!("invalid")
       ** (Jason.DecodeError) unexpected byte at position 0: 0x69 ('i')
 
   """
@@ -108,21 +109,23 @@ defmodule Jason do
     * `:pretty` - controls pretty printing of the output. Possible values are:
 
       * `true` to pretty print with default configuration
-      * a keyword of options as specified by `Jason.Formatter.pretty_print/2`.
+      * a keyword of options as specified by `:jaserl.:jaserl_formatter.pretty_print/2`.
 
   ## Examples
 
-      iex> Jason.encode(%{a: 1})
+      iex> :jaserl.encode(%{a: 1})
       {:ok, ~S|{"a":1}|}
 
-      iex> Jason.encode("\\xFF")
+      iex> :jaserl.encode("\\xFF")
       {:error, %Jason.EncodeError{message: "invalid byte 0xFF in <<255>>"}}
 
   """
+  # TODO
   @spec encode(term, [encode_opt]) ::
           {:ok, String.t()} | {:error, EncodeError.t() | Exception.t()}
   def encode(input, opts \\ []) do
     case do_encode(input, format_encode_opts(opts)) do
+      # TODO
       {:ok, result} -> {:ok, IO.iodata_to_binary(result)}
       {:error, error} -> {:error, error}
     end
@@ -131,21 +134,23 @@ defmodule Jason do
   @doc """
   Generates JSON corresponding to `input`.
 
-  Similar to `encode/1` except it will unwrap the error tuple and raise
+  Similar to `:jaserl_encode/1` except it will unwrap the error tuple and raise
   in case of errors.
 
   ## Examples
 
-      iex> Jason.encode!(%{a: 1})
+      iex> :jaserl.encode!(%{a: 1})
       ~S|{"a":1}|
 
-      iex> Jason.encode!("\\xFF")
+      iex> :jaserl.encode!("\\xFF")
       ** (Jason.EncodeError) invalid byte 0xFF in <<255>>
 
   """
+  # TODO
   @spec encode!(term, [encode_opt]) :: String.t() | no_return
   def encode!(input, opts \\ []) do
     case do_encode(input, format_encode_opts(opts)) do
+      # TODO
       {:ok, result} -> IO.iodata_to_binary(result)
       {:error, error} -> raise error
     end
@@ -154,7 +159,7 @@ defmodule Jason do
   @doc """
   Generates JSON corresponding to `input` and returns iodata.
 
-  This function should be preferred to `encode/2`, if the generated
+  This function should be preferred to `:jaserl_encode/2`, if the generated
   JSON will be handed over to one of the IO functions or sent
   over the socket. The Erlang runtime is able to leverage vectorised
   writes and avoid allocating a continuous buffer for the whole
@@ -162,14 +167,15 @@ defmodule Jason do
 
   ## Examples
 
-      iex> {:ok, iodata} = Jason.encode_to_iodata(%{a: 1})
+      iex> {:ok, iodata} = :jaserl.encode_to_iodata(%{a: 1})
       iex> IO.iodata_to_binary(iodata)
       ~S|{"a":1}|
 
-      iex> Jason.encode_to_iodata("\\xFF")
+      iex> :jaserl.encode_to_iodata("\\xFF")
       {:error, %Jason.EncodeError{message: "invalid byte 0xFF in <<255>>"}}
 
   """
+  # TODO
   @spec encode_to_iodata(term, [encode_opt]) ::
           {:ok, iodata} | {:error, EncodeError.t() | Exception.t()}
   def encode_to_iodata(input, opts \\ []) do
@@ -184,11 +190,11 @@ defmodule Jason do
 
   ## Examples
 
-      iex> iodata = Jason.encode_to_iodata!(%{a: 1})
+      iex> iodata = :jaserl.encode_to_iodata!(%{a: 1})
       iex> IO.iodata_to_binary(iodata)
       ~S|{"a":1}|
 
-      iex> Jason.encode_to_iodata!("\\xFF")
+      iex> :jaserl.encode_to_iodata!("\\xFF")
       ** (Jason.EncodeError) invalid byte 0xFF in <<255>>
 
   """
@@ -201,28 +207,32 @@ defmodule Jason do
   end
 
   defp do_encode(input, %{pretty: true} = opts) do
-    case Encode.encode(input, opts) do
-      {:ok, encoded} -> {:ok, Formatter.pretty_print_to_iodata(encoded)}
+    case :jaserl_encode.encode(input, opts) do
+      # TODO
+      {:ok, encoded} -> {:ok, :jaserl_formatter.pretty_print_to_iodata(encoded)}
       other -> other
     end
   end
 
   defp do_encode(input, %{pretty: pretty} = opts) when pretty !== false do
-    case Encode.encode(input, opts) do
-      {:ok, encoded} -> {:ok, Formatter.pretty_print_to_iodata(encoded, pretty)}
+    case :jaserl_encode.encode(input, opts) do
+      # TODO
+      {:ok, encoded} -> {:ok, :jaserl_formatter.pretty_print_to_iodata(encoded, pretty)}
       other -> other
     end
   end
 
   defp do_encode(input, opts) do
-    Encode.encode(input, opts)
+    :jaserl_encode.encode(input, opts)
   end
 
   defp format_encode_opts(opts) do
+    # TODO
     Enum.into(opts, %{escape: :json, maps: :naive})
   end
 
   defp format_decode_opts(opts) do
+    # TODO
     Enum.into(opts, %{keys: :strings, strings: :reference})
   end
 end

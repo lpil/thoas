@@ -1,7 +1,7 @@
 defmodule Jason.EncoderTest do
   use ExUnit.Case, async: true
 
-  alias Jason.{EncodeError, Encoder}
+  alias Jason.EncodeError
 
   test "atom" do
     assert to_json(nil) == "null"
@@ -31,14 +31,13 @@ defmodule Jason.EncoderTest do
     assert to_json("𝄞b", escape: :unicode_safe) == ~s("\\uD834\\uDD1Eb")
     assert to_json("\u2028\u2029abc", escape: :javascript_safe) == ~s("\\u2028\\u2029abc")
     assert to_json("</script>", escape: :html_safe) == ~s("<\\/script>")
-    assert to_json(~s(<script>var s = "\u2028\u2029";</script>), escape: :html_safe) == ~s("<script>var s = \\\"\\u2028\\u2029\\\";<\\/script>")
+
+    assert to_json(~s(<script>var s = "\u2028\u2029";</script>), escape: :html_safe) ==
+             ~s("<script>var s = \\\"\\u2028\\u2029\\\";<\\/script>")
+
     assert to_json("áéíóúàèìòùâêîôûãẽĩõũ") == ~s("áéíóúàèìòùâêîôûãẽĩõũ")
     assert to_json("a\u2028a", escape: :javascript_safe) == ~s("a\\u2028a")
     assert to_json("a\u2028a", escape: :html_safe) == ~s("a\\u2028a")
-
-    assert_raise Protocol.UndefinedError, fn ->
-      to_json(<<0::1>>)
-    end
 
     # Poison-compatible escape options
     assert to_json("a\u2028a", escape: :javascript) == ~s("a\\u2028a")
@@ -47,12 +46,13 @@ defmodule Jason.EncoderTest do
 
   test "Map" do
     assert to_json(%{}) == "{}"
-    assert to_json(%{"foo" => "bar"})  == ~s({"foo":"bar"})
+    assert to_json(%{"foo" => "bar"}) == ~s({"foo":"bar"})
     assert to_json(%{foo: :bar}) == ~s({"foo":"bar"})
     assert to_json(%{42 => :bar}) == ~s({"42":"bar"})
     assert to_json(%{'foo' => :bar}) == ~s({"foo":"bar"})
 
     multi_key_map = %{"foo" => "foo1", :foo => "foo2"}
+
     assert_raise EncodeError, "duplicate key: foo", fn ->
       to_json(multi_key_map, maps: :strict)
     end
@@ -81,14 +81,36 @@ defmodule Jason.EncoderTest do
   end
 
   test "DateTime" do
-    datetime = %DateTime{year: 2000, month: 1, day: 1, hour: 12, minute: 13, second: 14,
-                         microsecond: {0, 0}, zone_abbr: "CET", time_zone: "Europe/Warsaw",
-                         std_offset: -1800, utc_offset: 3600}
+    datetime = %DateTime{
+      year: 2000,
+      month: 1,
+      day: 1,
+      hour: 12,
+      minute: 13,
+      second: 14,
+      microsecond: {0, 0},
+      zone_abbr: "CET",
+      time_zone: "Europe/Warsaw",
+      std_offset: -1800,
+      utc_offset: 3600
+    }
+
     assert to_json(datetime) == ~s("2000-01-01T12:13:14+00:30")
 
-    datetime = %DateTime{year: 2000, month: 1, day: 1, hour: 12, minute: 13, second: 14,
-                         microsecond: {50000, 3}, zone_abbr: "UTC", time_zone: "Etc/UTC",
-                         std_offset: 0, utc_offset: 0}
+    datetime = %DateTime{
+      year: 2000,
+      month: 1,
+      day: 1,
+      hour: 12,
+      minute: 13,
+      second: 14,
+      microsecond: {50000, 3},
+      zone_abbr: "UTC",
+      time_zone: "Etc/UTC",
+      std_offset: 0,
+      utc_offset: 0
+    }
+
     assert to_json(datetime) == ~s("2000-01-01T12:13:14.050Z")
   end
 
@@ -97,65 +119,7 @@ defmodule Jason.EncoderTest do
     assert to_json(decimal) == ~s("1.0")
   end
 
-  defmodule Derived do
-    @derive Encoder
-    defstruct name: ""
-  end
-
-  defmodule DerivedUsingOnly do
-    @derive {Encoder, only: [:name]}
-    defstruct name: "", size: 0
-  end
-
-  defmodule DerivedUsingExcept do
-    @derive {Encoder, except: [:name]}
-    defstruct name: "", size: 0
-  end
-
-  defmodule NonDerived do
-    defstruct name: ""
-  end
-
-  test "@derive" do
-    derived = %Derived{name: "derived"}
-    assert Encoder.impl_for!(derived) == Encoder.Jason.EncoderTest.Derived
-    assert Jason.decode!(to_json(derived)) == %{"name" => "derived"}
-
-    non_derived = %NonDerived{name: "non-derived"}
-    assert_raise Protocol.UndefinedError, fn ->
-      to_json(non_derived)
-    end
-
-    derived_using_only = %DerivedUsingOnly{name: "derived using :only", size: 10}
-    assert to_json(derived_using_only) == ~s({"name":"derived using :only"})
-
-    derived_using_except = %DerivedUsingExcept{name: "derived using :except", size: 10}
-    assert to_json(derived_using_except) == ~s({"size":10})
-  end
-
-  defmodule KeywordTester do
-    defstruct [:baz, :foo, :quux]
-  end
-
-  defimpl Jason.Encoder, for: [KeywordTester] do
-    def encode(struct, opts) do
-      struct
-      |> Map.from_struct
-      |> Enum.map(&(&1))
-      |> Jason.Encode.keyword(opts)
-    end
-  end
-
-  test "using keyword list encoding" do
-    t = %KeywordTester{baz: :bar, foo: "bag", quux: 42}
-    assert to_json(t) == ~s({"baz":"bar","foo":"bag","quux":42})
-  end
-
   test "EncodeError" do
-    assert_raise Protocol.UndefinedError, fn ->
-      to_json(self())
-    end
-
     assert_raise EncodeError, "invalid byte 0x80 in <<128>>", fn ->
       assert to_json(<<0x80>>)
     end
@@ -163,10 +127,6 @@ defmodule Jason.EncoderTest do
     assert_raise EncodeError, fn ->
       assert to_json(<<?a, 208>>)
     end
-  end
-
-  test "encode should not raise on Protocol.UndefinedError" do
-    assert {:error, %Protocol.UndefinedError{}} = Jason.encode(self())
   end
 
   test "pretty: true" do
@@ -178,7 +138,6 @@ defmodule Jason.EncoderTest do
   end
 
   defp to_json(value, opts \\ []) do
-    Jason.encode!(value, opts)
+    :jaserl.encode!(value, opts)
   end
-
 end

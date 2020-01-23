@@ -1,46 +1,44 @@
 defmodule Jason.HelpersTest do
   use ExUnit.Case, async: true
 
-  alias Jason.{Helpers, Fragment, EncodeError}
-  import Helpers
+  alias Jason.{EncodeError}
+  import :jaserl_helpers
 
-  doctest Helpers
+  doctest :jaserl_helpers
 
   describe "json_map/2" do
     test "does not delay execution" do
-      %Fragment{} = json_map(
-        foo: Process.put(:json, :bar)
-      )
+      %:jaserl_fragment{} = json_map(foo: Process.put(:json, :bar))
 
       assert Process.get(:json) == :bar
     end
 
     test "produces same output as regular encoding" do
-      assert %Fragment{} = helper = json_map(bar: 2, baz: 3, foo: 1)
-      assert Jason.encode!(helper) == Jason.encode!(%{bar: 2, baz: 3, foo: 1})
+      assert %:jaserl_fragment{} = helper = json_map(bar: 2, baz: 3, foo: 1)
+      assert :jaserl.encode!(helper) == :jaserl.encode!(%{bar: 2, baz: 3, foo: 1})
     end
 
     test "rejects keys with invalid characters" do
-      assert_eval_raise EncodeError, """
+      assert_eval_raise(EncodeError, """
       json_map("/foo": 1)
-      """
+      """)
 
-      assert_eval_raise EncodeError, ~S"""
+      assert_eval_raise(EncodeError, ~S"""
       json_map("\\foo": 1)
-      """
+      """)
 
-      assert_eval_raise EncodeError, ~S"""
+      assert_eval_raise(EncodeError, ~S"""
       json_map("\"foo": 1)
-      """
+      """)
     end
   end
 
   describe "json_map_take/3" do
     test "is hygienic" do
       map = %{escape: 1}
-      assert %Fragment{} = helper = json_map_take(map, [:escape])
+      assert %:jaserl_fragment{} = helper = json_map_take(map, [:escape])
       assert Keyword.keys(binding()) == [:helper, :map]
-      assert Jason.encode!(helper) == Jason.encode!(map)
+      assert :jaserl.encode!(helper) == :jaserl.encode!(map)
     end
 
     test "fails gracefully" do

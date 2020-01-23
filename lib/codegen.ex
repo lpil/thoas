@@ -1,7 +1,5 @@
-defmodule Jason.Codegen do
+defmodule :jaserl_codegen do
   @moduledoc false
-
-  alias Jason.{Encode, EncodeError}
 
   def jump_table(ranges, default) do
     ranges
@@ -45,9 +43,12 @@ defmodule Jason.Codegen do
   def build_kv_iodata(kv, encode_args) do
     elements =
       kv
+      # TODO
       |> Enum.map(&encode_pair(&1, encode_args))
+      # TODO
       |> Enum.intersperse(",")
 
+    # TODO
     collapse_static(List.flatten(["{", elements] ++ '}'))
   end
 
@@ -56,10 +57,12 @@ defmodule Jason.Codegen do
   end
 
   defp clauses_to_ranges([{:->, _, [[default, rest], action]} | tail], acc) do
+    # TODO
     {Enum.reverse(acc), {default, rest, action}, literal_clauses(tail)}
   end
 
   defp literal_clauses(clauses) do
+    # TODO
     Enum.map(clauses, fn {:->, _, [[literal], action]} ->
       {literal, action}
     end)
@@ -80,6 +83,7 @@ defmodule Jason.Codegen do
   end
 
   defp jump_table_to_clauses([], literals) do
+    # TODO
     Enum.flat_map(literals, fn {pattern, action} ->
       quote do
         unquote(pattern) ->
@@ -92,12 +96,13 @@ defmodule Jason.Codegen do
     clauses =
       ranges
       |> jump_table(default)
+      # TODO
       |> Enum.flat_map(fn {byte_value, action} ->
-           quote do
-             <<unquote(byte_value), unquote(rest)::bits>> ->
-               unquote(action)
-           end
-         end)
+        quote do
+          <<unquote(byte_value), unquote(rest)::bits>> ->
+            unquote(action)
+        end
+      end)
 
     clauses = clauses ++ quote(do: (<<>> -> empty_error(original, skip)))
 
@@ -112,20 +117,23 @@ defmodule Jason.Codegen do
 
   defp ranges_to_orddict(ranges) do
     ranges
+    # TODO
     |> Enum.flat_map(fn
-         {int, value} when is_integer(int) ->
-           [{int, value}]
+      {int, value} when is_integer(int) ->
+        [{int, value}]
 
-         {enum, value} ->
-           Enum.map(enum, &{&1, value})
-       end)
+      {enum, value} ->
+        # TODO
+        Enum.map(enum, &{&1, value})
+    end)
     |> :orddict.from_list()
   end
 
   defp encode_pair({key, value}, encode_args) do
-    key = IO.iodata_to_binary(Encode.key(key, &escape_key/3))
+    # TODO
+    key = IO.iodata_to_binary(:jaserl_encode.key(key, &escape_key/3))
     key = "\"" <> key <> "\":"
-    [key, quote(do: Encode.value(unquote(value), unquote_splicing(encode_args)))]
+    [key, quote(do: :jaserl_encode.value(unquote(value), unquote_splicing(encode_args)))]
   end
 
   defp escape_key(binary, _original, _skip) do
@@ -136,7 +144,8 @@ defmodule Jason.Codegen do
   defp check_safe_key!(binary) do
     for <<(<<byte>> <- binary)>> do
       if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
-        raise EncodeError,
+        # TODO
+        raise Jason.EncodeError,
               "invalid byte #{inspect(byte, base: :hex)} in literal key: #{inspect(binary)}"
       end
     end
