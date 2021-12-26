@@ -23,30 +23,16 @@ defmodule :jaserl_encode do
 
   alias Jason.{EncodeError}
 
-  @typep escape :: (String.t(), String.t(), integer -> iodata)
-  @typep encode_map :: (map, escape, encode_map -> iodata)
-  @opaque opts :: {escape, encode_map}
-
-  # @compile :native
-
   @doc false
   @spec encode(any, map) :: {:ok, iodata} | {:error, EncodeError.t() | Exception.t()}
   def encode(value, opts) do
     escape = escape_function(opts)
-    encode_map = encode_map_function(opts)
 
     try do
-      {:ok, value(value, escape, encode_map)}
+      {:ok, value(value, escape)}
     catch
       :throw, %Jason.EncodeError{} = e ->
         {:error, e}
-    end
-  end
-
-  defp encode_map_function(%{maps: maps}) do
-    case maps do
-      :naive -> &map_naive/3
-      :strict -> &map_strict/3
     end
   end
 
@@ -59,49 +45,38 @@ defmodule :jaserl_encode do
     end
   end
 
-  @doc """
-  Equivalent to calling the `Jason.Encoder.encode/2` protocol function.
-
-  Slightly more efficient for built-in types because of the internal dispatching.
-  """
-  @spec value(term, opts) :: iodata
-  def value(value, {escape, encode_map}) do
-    value(value, escape, encode_map)
-  end
-
   @doc false
   # We use this directly in the helpers and deriving for extra speed
-  def value(value, escape, _encode_map) when is_atom(value) do
+  def value(value, escape) when is_atom(value) do
     encode_atom(value, escape)
   end
 
-  def value(value, escape, _encode_map) when is_binary(value) do
+  def value(value, escape) when is_binary(value) do
     encode_string(value, escape)
   end
 
-  def value(value, _escape, _encode_map) when is_integer(value) do
+  def value(value, _escape) when is_integer(value) do
     integer(value)
   end
 
-  def value(value, _escape, _encode_map) when is_float(value) do
+  def value(value, _escape) when is_float(value) do
     float(value)
   end
 
-  def value(value, escape, encode_map) when is_list(value) do
-    list(value, escape, encode_map)
+  def value(value, escape) when is_list(value) do
+    list(value, escape)
   end
 
-  def value(value, escape, encode_map) when is_map(value) do
+  def value(value, escape) when is_map(value) do
     case :maps.to_list(value) do
       [] -> "{}"
-      keyword -> encode_map.(keyword, escape, encode_map)
+      keyword -> map_naive(keyword, escape)
     end
   end
 
   @compile {:inline, integer: 1, float: 1}
 
-  @spec atom(atom, opts) :: iodata
-  def atom(atom, {escape, _encode_map}) do
+  def atom(atom, escape) do
     encode_atom(atom, escape)
   end
 
@@ -122,109 +97,65 @@ defmodule :jaserl_encode do
     :io_lib_format.fwrite_g(float)
   end
 
-  @spec list(list, opts) :: iodata
-  def list(list, {escape, encode_map}) do
-    list(list, escape, encode_map)
-  end
-
-  defp list([], _escape, _encode_map) do
+  defp list([], _escape) do
     "[]"
   end
 
-  defp list([head | tail], escape, encode_map) do
+  defp list([head | tail], escape) do
     [
       ?[,
-      value(head, escape, encode_map)
-      | list_loop(tail, escape, encode_map)
+      value(head, escape)
+      | list_loop(tail, escape)
     ]
   end
 
-  defp list_loop([], _escape, _encode_map) do
+  defp list_loop([], _escape) do
     ']'
   end
 
-  defp list_loop([head | tail], escape, encode_map) do
+  defp list_loop([head | tail], escape) do
     [
       ?,,
-      value(head, escape, encode_map)
-      | list_loop(tail, escape, encode_map)
+      value(head, escape)
+      | list_loop(tail, escape)
     ]
   end
 
-  @spec keyword(keyword, opts) :: iodata
   def keyword(list, _) when list == [], do: "{}"
 
-  def keyword(list, {escape, encode_map}) when is_list(list) do
-    encode_map.(list, escape, encode_map)
+  def keyword(list, escape) when is_list(list) do
+    map_naive(list, escape)
   end
 
-  @spec map(map, opts) :: iodata
-  def map(value, {escape, encode_map}) do
+  def map(value, escape) do
     case :maps.to_list(value) do
       [] -> "{}"
-      keyword -> encode_map.(keyword, escape, encode_map)
+      keyword -> map_naive(keyword, escape)
     end
   end
 
-  defp map_naive([{key, value} | tail], escape, encode_map) do
+  defp map_naive([{key, value} | tail], escape) do
     [
       "{\"",
       key(key, escape),
       "\":",
-      value(value, escape, encode_map)
-      | map_naive_loop(tail, escape, encode_map)
+      value(value, escape)
+      | map_naive_loop(tail, escape)
     ]
   end
 
-  defp map_naive_loop([], _escape, _encode_map) do
+  defp map_naive_loop([], _escape) do
     '}'
   end
 
-  defp map_naive_loop([{key, value} | tail], escape, encode_map) do
+  defp map_naive_loop([{key, value} | tail], escape) do
     [
       ",\"",
       key(key, escape),
       "\":",
-      value(value, escape, encode_map)
-      | map_naive_loop(tail, escape, encode_map)
+      value(value, escape)
+      | map_naive_loop(tail, escape)
     ]
-  end
-
-  defp map_strict([{key, value} | tail], escape, encode_map) do
-    key = :erlang.iolist_to_binary(key(key, escape))
-    visited = %{key => []}
-
-    [
-      "{\"",
-      key,
-      "\":",
-      value(value, escape, encode_map)
-      | map_strict_loop(tail, escape, encode_map, visited)
-    ]
-  end
-
-  defp map_strict_loop([], _encode_map, _escape, _visited) do
-    '}'
-  end
-
-  defp map_strict_loop([{key, value} | tail], escape, encode_map, visited) do
-    key = :erlang.iolist_to_binary(key(key, escape))
-
-    case visited do
-      %{^key => _} ->
-        error({:duplicate_key, key})
-
-      _ ->
-        visited = Map.put(visited, key, [])
-
-        [
-          ",\"",
-          key,
-          "\":",
-          value(value, escape, encode_map)
-          | map_strict_loop(tail, escape, encode_map, visited)
-        ]
-    end
   end
 
   @doc false
@@ -243,8 +174,7 @@ defmodule :jaserl_encode do
     escape.(string, string, 0)
   end
 
-  @spec string(String.t(), opts) :: iodata
-  def string(string, {escape, _encode_map}) do
+  def string(string, escape) do
     encode_string(string, escape)
   end
 

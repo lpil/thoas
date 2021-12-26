@@ -49,10 +49,6 @@ defmodule Jason.EncoderTest do
 
     multi_key_map = %{"foo" => "foo1", :foo => "foo2"}
 
-    assert_raise EncodeError, "duplicate key: foo", fn ->
-      to_json(multi_key_map, maps: :strict)
-    end
-
     assert to_json(multi_key_map) == ~s({"foo":"foo2","foo":"foo1"})
   end
 
