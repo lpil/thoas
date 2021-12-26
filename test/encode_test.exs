@@ -1,8 +1,6 @@
 defmodule Jason.EncoderTest do
   use ExUnit.Case, async: true
 
-  alias Jason.EncodeError
-
   test "atom" do
     assert to_json(nil) == "null"
     assert to_json(true) == "true"
@@ -58,16 +56,13 @@ defmodule Jason.EncoderTest do
   end
 
   test "EncodeError" do
-    assert_raise EncodeError, "invalid byte 0x80 in <<128>>", fn ->
-      assert to_json(<<0x80>>)
-    end
+    assert :jaserl.encode(<<0x80>>, []) == {:error, {:invalid_byte, "0x80", <<128>>}}
 
-    assert_raise EncodeError, fn ->
-      assert to_json(<<?a, 208>>)
-    end
+    assert :jaserl.encode(<<?a, 208>>, []) == {:error, {:invalid_byte, "0xD0", <<?a, 208>>}}
   end
 
   defp to_json(value, opts \\ []) do
-    :jaserl.encode!(value, opts)
+    {:ok, json} = :jaserl.encode(value, opts)
+    json
   end
 end
