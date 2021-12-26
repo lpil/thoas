@@ -56,19 +56,11 @@ defmodule :jaserl do
         if they appear. For example `%{:foo => 1, "foo" => 2}` would be
         rejected, since both keys would be encoded to the string `"foo"`.
       * `:naive` (default) - does not perform the check.
-
-  ## Examples
-
-      iex> :jaserl.encode(%{a: 1})
-      {:ok, ~S|{"a":1}|}
-
   """
   def encode(input, opts \\ []) do
-    case do_encode(input, format_encode_opts(opts)) do
-      # TODO
-      {:ok, result} -> {:ok, :erlang.iolist_to_binary(result)}
-      {:error, error} -> {:error, error}
-    end
+    input
+    |> do_encode(format_encode_opts(opts))
+    |> :erlang.iolist_to_binary()
   end
 
   @doc """

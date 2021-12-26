@@ -56,13 +56,11 @@ defmodule Jason.EncoderTest do
   end
 
   test "EncodeError" do
-    assert :jaserl.encode(<<0x80>>, []) == {:error, {:invalid_byte, "0x80", <<128>>}}
-
-    assert :jaserl.encode(<<?a, 208>>, []) == {:error, {:invalid_byte, "0xD0", <<?a, 208>>}}
+    catch_throw(:jaserl.encode(<<0x80>>, []))
+    catch_throw(:jaserl.encode(<<?a, 208>>, []))
   end
 
   defp to_json(value, opts \\ []) do
-    {:ok, json} = :jaserl.encode(value, opts)
-    json
+    :jaserl.encode(value, opts)
   end
 end
