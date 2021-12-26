@@ -42,11 +42,10 @@ defmodule :jaserl_decoder do
   @object 3
 
   def parse(data, opts) when is_binary(data) do
-    key_decode = key_decode_function(opts)
     string_decode = string_decode_function(opts)
 
     try do
-      value(data, data, 0, [@terminate], key_decode, string_decode)
+      value(data, data, 0, [@terminate], string_decode)
     catch
       {:position, position} ->
         {:error, %DecodeError{position: position, data: data}}
@@ -59,46 +58,39 @@ defmodule :jaserl_decoder do
     end
   end
 
-  # TODO
-  defp key_decode_function(%{keys: :atoms}), do: &String.to_atom/1
-  # TODO
-  defp key_decode_function(%{keys: :atoms!}), do: &String.to_existing_atom/1
-  defp key_decode_function(%{keys: :strings}), do: & &1
-  defp key_decode_function(%{keys: fun}) when is_function(fun, 1), do: fun
-
   defp string_decode_function(%{strings: :copy}), do: &:binary.copy/1
   defp string_decode_function(%{strings: :reference}), do: & &1
 
-  defp value(data, original, skip, stack, key_decode, string_decode) do
+  defp value(data, original, skip, stack, string_decode) do
     bytecase data do
       _ in '\s\n\t\r', rest ->
-        value(rest, original, skip + 1, stack, key_decode, string_decode)
+        value(rest, original, skip + 1, stack, string_decode)
 
       _ in '0', rest ->
-        number_zero(rest, original, skip, stack, key_decode, string_decode, 1)
+        number_zero(rest, original, skip, stack, string_decode, 1)
 
       _ in '123456789', rest ->
-        number(rest, original, skip, stack, key_decode, string_decode, 1)
+        number(rest, original, skip, stack, string_decode, 1)
 
       _ in '-', rest ->
-        number_minus(rest, original, skip, stack, key_decode, string_decode)
+        number_minus(rest, original, skip, stack, string_decode)
 
       _ in '"', rest ->
-        string(rest, original, skip + 1, stack, key_decode, string_decode, 0)
+        string(rest, original, skip + 1, stack, string_decode, 0)
 
       _ in '[', rest ->
-        array(rest, original, skip + 1, stack, key_decode, string_decode)
+        array(rest, original, skip + 1, stack, string_decode)
 
       _ in '{', rest ->
-        object(rest, original, skip + 1, stack, key_decode, string_decode)
+        object(rest, original, skip + 1, stack, string_decode)
 
       _ in ']', rest ->
-        empty_array(rest, original, skip + 1, stack, key_decode, string_decode)
+        empty_array(rest, original, skip + 1, stack, string_decode)
 
       _ in 't', rest ->
         case rest do
           <<"rue", rest::bits>> ->
-            continue(rest, original, skip + 4, stack, key_decode, string_decode, true)
+            continue(rest, original, skip + 4, stack, string_decode, true)
 
           <<_::bits>> ->
             error(original, skip)
@@ -107,7 +99,7 @@ defmodule :jaserl_decoder do
       _ in 'f', rest ->
         case rest do
           <<"alse", rest::bits>> ->
-            continue(rest, original, skip + 5, stack, key_decode, string_decode, false)
+            continue(rest, original, skip + 5, stack, string_decode, false)
 
           <<_::bits>> ->
             error(original, skip)
@@ -116,60 +108,60 @@ defmodule :jaserl_decoder do
       _ in 'n', rest ->
         case rest do
           <<"ull", rest::bits>> ->
-            continue(rest, original, skip + 4, stack, key_decode, string_decode, nil)
+            continue(rest, original, skip + 4, stack, string_decode, nil)
 
           <<_::bits>> ->
             error(original, skip)
         end
 
       _, rest ->
-        error(rest, original, skip + 1, stack, key_decode, string_decode)
+        error(rest, original, skip + 1, stack, string_decode)
 
       <<_::bits>> ->
         error(original, skip)
     end
   end
 
-  defp number_minus(<<?0, rest::bits>>, original, skip, stack, key_decode, string_decode) do
-    number_zero(rest, original, skip, stack, key_decode, string_decode, 2)
+  defp number_minus(<<?0, rest::bits>>, original, skip, stack, string_decode) do
+    number_zero(rest, original, skip, stack, string_decode, 2)
   end
 
-  defp number_minus(<<byte, rest::bits>>, original, skip, stack, key_decode, string_decode)
+  defp number_minus(<<byte, rest::bits>>, original, skip, stack, string_decode)
        when byte in '123456789' do
-    number(rest, original, skip, stack, key_decode, string_decode, 2)
+    number(rest, original, skip, stack, string_decode, 2)
   end
 
-  defp number_minus(<<_rest::bits>>, original, skip, _stack, _key_decode, _string_decode) do
+  defp number_minus(<<_rest::bits>>, original, skip, _stack, _string_decode) do
     error(original, skip + 1)
   end
 
-  defp number(<<byte, rest::bits>>, original, skip, stack, key_decode, string_decode, len)
+  defp number(<<byte, rest::bits>>, original, skip, stack, string_decode, len)
        when byte in '0123456789' do
-    number(rest, original, skip, stack, key_decode, string_decode, len + 1)
+    number(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number(<<?., rest::bits>>, original, skip, stack, key_decode, string_decode, len) do
-    number_frac(rest, original, skip, stack, key_decode, string_decode, len + 1)
+  defp number(<<?., rest::bits>>, original, skip, stack, string_decode, len) do
+    number_frac(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number(<<e, rest::bits>>, original, skip, stack, key_decode, string_decode, len)
+  defp number(<<e, rest::bits>>, original, skip, stack, string_decode, len)
        when e in 'eE' do
     prefix = binary_part(original, skip, len)
-    number_exp_copy(rest, original, skip + len + 1, stack, key_decode, string_decode, prefix)
+    number_exp_copy(rest, original, skip + len + 1, stack, string_decode, prefix)
   end
 
-  defp number(<<rest::bits>>, original, skip, stack, key_decode, string_decode, len) do
+  defp number(<<rest::bits>>, original, skip, stack, string_decode, len) do
     # TODO
     int = String.to_integer(binary_part(original, skip, len))
-    continue(rest, original, skip + len, stack, key_decode, string_decode, int)
+    continue(rest, original, skip + len, stack, string_decode, int)
   end
 
-  defp number_frac(<<byte, rest::bits>>, original, skip, stack, key_decode, string_decode, len)
+  defp number_frac(<<byte, rest::bits>>, original, skip, stack, string_decode, len)
        when byte in '0123456789' do
-    number_frac_cont(rest, original, skip, stack, key_decode, string_decode, len + 1)
+    number_frac_cont(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number_frac(<<_rest::bits>>, original, skip, _stack, _key_decode, _string_decode, len) do
+  defp number_frac(<<_rest::bits>>, original, skip, _stack, _string_decode, len) do
     error(original, skip + len)
   end
 
@@ -178,36 +170,35 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          len
        )
        when byte in '0123456789' do
-    number_frac_cont(rest, original, skip, stack, key_decode, string_decode, len + 1)
+    number_frac_cont(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number_frac_cont(<<e, rest::bits>>, original, skip, stack, key_decode, string_decode, len)
+  defp number_frac_cont(<<e, rest::bits>>, original, skip, stack, string_decode, len)
        when e in 'eE' do
-    number_exp(rest, original, skip, stack, key_decode, string_decode, len + 1)
+    number_exp(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number_frac_cont(<<rest::bits>>, original, skip, stack, key_decode, string_decode, len) do
+  defp number_frac_cont(<<rest::bits>>, original, skip, stack, string_decode, len) do
     token = binary_part(original, skip, len)
     float = try_parse_float(token, token, skip)
-    continue(rest, original, skip + len, stack, key_decode, string_decode, float)
+    continue(rest, original, skip + len, stack, string_decode, float)
   end
 
-  defp number_exp(<<byte, rest::bits>>, original, skip, stack, key_decode, string_decode, len)
+  defp number_exp(<<byte, rest::bits>>, original, skip, stack, string_decode, len)
        when byte in '0123456789' do
-    number_exp_cont(rest, original, skip, stack, key_decode, string_decode, len + 1)
+    number_exp_cont(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number_exp(<<byte, rest::bits>>, original, skip, stack, key_decode, string_decode, len)
+  defp number_exp(<<byte, rest::bits>>, original, skip, stack, string_decode, len)
        when byte in '+-' do
-    number_exp_sign(rest, original, skip, stack, key_decode, string_decode, len + 1)
+    number_exp_sign(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number_exp(<<_rest::bits>>, original, skip, _stack, _key_decode, _string_decode, len) do
+  defp number_exp(<<_rest::bits>>, original, skip, _stack, _string_decode, len) do
     error(original, skip + len)
   end
 
@@ -216,15 +207,14 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          len
        )
        when byte in '0123456789' do
-    number_exp_cont(rest, original, skip, stack, key_decode, string_decode, len + 1)
+    number_exp_cont(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number_exp_sign(<<_rest::bits>>, original, skip, _stack, _key_decode, _string_decode, len) do
+  defp number_exp_sign(<<_rest::bits>>, original, skip, _stack, _string_decode, len) do
     error(original, skip + len)
   end
 
@@ -233,18 +223,17 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          len
        )
        when byte in '0123456789' do
-    number_exp_cont(rest, original, skip, stack, key_decode, string_decode, len + 1)
+    number_exp_cont(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number_exp_cont(<<rest::bits>>, original, skip, stack, key_decode, string_decode, len) do
+  defp number_exp_cont(<<rest::bits>>, original, skip, stack, string_decode, len) do
     token = binary_part(original, skip, len)
     float = try_parse_float(token, token, skip)
-    continue(rest, original, skip + len, stack, key_decode, string_decode, float)
+    continue(rest, original, skip + len, stack, string_decode, float)
   end
 
   defp number_exp_copy(
@@ -252,12 +241,11 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          prefix
        )
        when byte in '0123456789' do
-    number_exp_cont(rest, original, skip, stack, key_decode, string_decode, prefix, 1)
+    number_exp_cont(rest, original, skip, stack, string_decode, prefix, 1)
   end
 
   defp number_exp_copy(
@@ -265,12 +253,11 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          prefix
        )
        when byte in '+-' do
-    number_exp_sign(rest, original, skip, stack, key_decode, string_decode, prefix, 1)
+    number_exp_sign(rest, original, skip, stack, string_decode, prefix, 1)
   end
 
   defp number_exp_copy(
@@ -278,7 +265,6 @@ defmodule :jaserl_decoder do
          original,
          skip,
          _stack,
-         _key_decode,
          _string_decode,
          _prefix
        ) do
@@ -290,13 +276,12 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          prefix,
          len
        )
        when byte in '0123456789' do
-    number_exp_cont(rest, original, skip, stack, key_decode, string_decode, prefix, len + 1)
+    number_exp_cont(rest, original, skip, stack, string_decode, prefix, len + 1)
   end
 
   defp number_exp_sign(
@@ -304,7 +289,6 @@ defmodule :jaserl_decoder do
          original,
          skip,
          _stack,
-         _key_decode,
          _string_decode,
          _prefix,
          len
@@ -317,13 +301,12 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          prefix,
          len
        )
        when byte in '0123456789' do
-    number_exp_cont(rest, original, skip, stack, key_decode, string_decode, prefix, len + 1)
+    number_exp_cont(rest, original, skip, stack, string_decode, prefix, len + 1)
   end
 
   defp number_exp_cont(
@@ -331,7 +314,6 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          prefix,
          len
@@ -343,47 +325,47 @@ defmodule :jaserl_decoder do
     final_skip = skip + len
     token = binary_part(original, initial_skip, prefix_size + len + 1)
     float = try_parse_float(string, token, initial_skip)
-    continue(rest, original, final_skip, stack, key_decode, string_decode, float)
+    continue(rest, original, final_skip, stack, string_decode, float)
   end
 
-  defp number_zero(<<?., rest::bits>>, original, skip, stack, key_decode, string_decode, len) do
-    number_frac(rest, original, skip, stack, key_decode, string_decode, len + 1)
+  defp number_zero(<<?., rest::bits>>, original, skip, stack, string_decode, len) do
+    number_frac(rest, original, skip, stack, string_decode, len + 1)
   end
 
-  defp number_zero(<<e, rest::bits>>, original, skip, stack, key_decode, string_decode, len)
+  defp number_zero(<<e, rest::bits>>, original, skip, stack, string_decode, len)
        when e in 'eE' do
-    number_exp_copy(rest, original, skip + len + 1, stack, key_decode, string_decode, "0")
+    number_exp_copy(rest, original, skip + len + 1, stack, string_decode, "0")
   end
 
-  defp number_zero(<<rest::bits>>, original, skip, stack, key_decode, string_decode, len) do
-    continue(rest, original, skip + len, stack, key_decode, string_decode, 0)
+  defp number_zero(<<rest::bits>>, original, skip, stack, string_decode, len) do
+    continue(rest, original, skip + len, stack, string_decode, 0)
   end
 
   @compile {:inline, array: 6}
 
-  defp array(rest, original, skip, stack, key_decode, string_decode) do
-    value(rest, original, skip, [@array, [] | stack], key_decode, string_decode)
+  defp array(rest, original, skip, stack, string_decode) do
+    value(rest, original, skip, [@array, [] | stack], string_decode)
   end
 
-  defp empty_array(<<rest::bits>>, original, skip, stack, key_decode, string_decode) do
+  defp empty_array(<<rest::bits>>, original, skip, stack, string_decode) do
     case stack do
       [@array, [] | stack] ->
-        continue(rest, original, skip, stack, key_decode, string_decode, [])
+        continue(rest, original, skip, stack, string_decode, [])
 
       _ ->
         error(original, skip - 1)
     end
   end
 
-  defp array(data, original, skip, stack, key_decode, string_decode, value) do
+  defp array(data, original, skip, stack, string_decode, value) do
     bytecase data do
       _ in '\s\n\t\r', rest ->
-        array(rest, original, skip + 1, stack, key_decode, string_decode, value)
+        array(rest, original, skip + 1, stack, string_decode, value)
 
       _ in ']', rest ->
         [acc | stack] = stack
         value = :lists.reverse(acc, [value])
-        continue(rest, original, skip + 1, stack, key_decode, string_decode, value)
+        continue(rest, original, skip + 1, stack, string_decode, value)
 
       _ in ',', rest ->
         [acc | stack] = stack
@@ -393,7 +375,6 @@ defmodule :jaserl_decoder do
           original,
           skip + 1,
           [@array, [value | acc] | stack],
-          key_decode,
           string_decode
         )
 
@@ -407,26 +388,26 @@ defmodule :jaserl_decoder do
 
   @compile {:inline, object: 6}
 
-  defp object(rest, original, skip, stack, key_decode, string_decode) do
-    key(rest, original, skip, [[] | stack], key_decode, string_decode)
+  defp object(rest, original, skip, stack, string_decode) do
+    key(rest, original, skip, [[] | stack], string_decode)
   end
 
-  defp object(data, original, skip, stack, key_decode, string_decode, value) do
+  defp object(data, original, skip, stack, string_decode, value) do
     bytecase data do
       _ in '\s\n\t\r', rest ->
-        object(rest, original, skip + 1, stack, key_decode, string_decode, value)
+        object(rest, original, skip + 1, stack, string_decode, value)
 
       _ in '}', rest ->
         skip = skip + 1
         [key, acc | stack] = stack
-        final = [{key_decode.(key), value} | acc]
-        continue(rest, original, skip, stack, key_decode, string_decode, :maps.from_list(final))
+        final = [{key, value} | acc]
+        continue(rest, original, skip, stack, string_decode, :maps.from_list(final))
 
       _ in ',', rest ->
         skip = skip + 1
         [key, acc | stack] = stack
-        acc = [{key_decode.(key), value} | acc]
-        key(rest, original, skip, [acc | stack], key_decode, string_decode)
+        acc = [{key, value} | acc]
+        key(rest, original, skip, [acc | stack], string_decode)
 
       _, _rest ->
         error(original, skip)
@@ -436,22 +417,22 @@ defmodule :jaserl_decoder do
     end
   end
 
-  defp key(data, original, skip, stack, key_decode, string_decode) do
+  defp key(data, original, skip, stack, string_decode) do
     bytecase data do
       _ in '\s\n\t\r', rest ->
-        key(rest, original, skip + 1, stack, key_decode, string_decode)
+        key(rest, original, skip + 1, stack, string_decode)
 
       _ in '}', rest ->
         case stack do
           [[] | stack] ->
-            continue(rest, original, skip + 1, stack, key_decode, string_decode, %{})
+            continue(rest, original, skip + 1, stack, string_decode, %{})
 
           _ ->
             error(original, skip)
         end
 
       _ in '"', rest ->
-        string(rest, original, skip + 1, [@key | stack], key_decode, string_decode, 0)
+        string(rest, original, skip + 1, [@key | stack], string_decode, 0)
 
       _, _rest ->
         error(original, skip)
@@ -461,13 +442,13 @@ defmodule :jaserl_decoder do
     end
   end
 
-  defp key(data, original, skip, stack, key_decode, string_decode, value) do
+  defp key(data, original, skip, stack, string_decode, value) do
     bytecase data do
       _ in '\s\n\t\r', rest ->
-        key(rest, original, skip + 1, stack, key_decode, string_decode, value)
+        key(rest, original, skip + 1, stack, string_decode, value)
 
       _ in ':', rest ->
-        value(rest, original, skip + 1, [@object, value | stack], key_decode, string_decode)
+        value(rest, original, skip + 1, [@object, value | stack], string_decode)
 
       _, _rest ->
         error(original, skip)
@@ -480,96 +461,96 @@ defmodule :jaserl_decoder do
   # TODO: check if this approach would be faster:
   # https://git.ninenines.eu/cowlib.git/tree/src/cow_ws.erl#n469
   # http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
-  defp string(data, original, skip, stack, key_decode, string_decode, len) do
+  defp string(data, original, skip, stack, string_decode, len) do
     bytecase data, 128 do
       _ in '"', rest ->
         string = string_decode.(binary_part(original, skip, len))
-        continue(rest, original, skip + len + 1, stack, key_decode, string_decode, string)
+        continue(rest, original, skip + len + 1, stack, string_decode, string)
 
       _ in '\\', rest ->
         part = binary_part(original, skip, len)
-        escape(rest, original, skip + len, stack, key_decode, string_decode, part)
+        escape(rest, original, skip + len, stack, string_decode, part)
 
       _ in unquote(0x00..0x1F), _rest ->
         error(original, skip)
 
       _, rest ->
-        string(rest, original, skip, stack, key_decode, string_decode, len + 1)
+        string(rest, original, skip, stack, string_decode, len + 1)
 
       <<char::utf8, rest::bits>> when char <= 0x7FF ->
-        string(rest, original, skip, stack, key_decode, string_decode, len + 2)
+        string(rest, original, skip, stack, string_decode, len + 2)
 
       <<char::utf8, rest::bits>> when char <= 0xFFFF ->
-        string(rest, original, skip, stack, key_decode, string_decode, len + 3)
+        string(rest, original, skip, stack, string_decode, len + 3)
 
       <<_char::utf8, rest::bits>> ->
-        string(rest, original, skip, stack, key_decode, string_decode, len + 4)
+        string(rest, original, skip, stack, string_decode, len + 4)
 
       <<_::bits>> ->
         empty_error(original, skip + len)
     end
   end
 
-  defp string(data, original, skip, stack, key_decode, string_decode, acc, len) do
+  defp string(data, original, skip, stack, string_decode, acc, len) do
     bytecase data, 128 do
       _ in '"', rest ->
         last = binary_part(original, skip, len)
         # TODO
         string = IO.iodata_to_binary([acc | last])
-        continue(rest, original, skip + len + 1, stack, key_decode, string_decode, string)
+        continue(rest, original, skip + len + 1, stack, string_decode, string)
 
       _ in '\\', rest ->
         part = binary_part(original, skip, len)
-        escape(rest, original, skip + len, stack, key_decode, string_decode, [acc | part])
+        escape(rest, original, skip + len, stack, string_decode, [acc | part])
 
       _ in unquote(0x00..0x1F), _rest ->
         error(original, skip)
 
       _, rest ->
-        string(rest, original, skip, stack, key_decode, string_decode, acc, len + 1)
+        string(rest, original, skip, stack, string_decode, acc, len + 1)
 
       <<char::utf8, rest::bits>> when char <= 0x7FF ->
-        string(rest, original, skip, stack, key_decode, string_decode, acc, len + 2)
+        string(rest, original, skip, stack, string_decode, acc, len + 2)
 
       <<char::utf8, rest::bits>> when char <= 0xFFFF ->
-        string(rest, original, skip, stack, key_decode, string_decode, acc, len + 3)
+        string(rest, original, skip, stack, string_decode, acc, len + 3)
 
       <<_char::utf8, rest::bits>> ->
-        string(rest, original, skip, stack, key_decode, string_decode, acc, len + 4)
+        string(rest, original, skip, stack, string_decode, acc, len + 4)
 
       <<_::bits>> ->
         empty_error(original, skip + len)
     end
   end
 
-  defp escape(data, original, skip, stack, key_decode, string_decode, acc) do
+  defp escape(data, original, skip, stack, string_decode, acc) do
     bytecase data do
       _ in 'b', rest ->
-        string(rest, original, skip + 2, stack, key_decode, string_decode, [acc | '\b'], 0)
+        string(rest, original, skip + 2, stack, string_decode, [acc | '\b'], 0)
 
       _ in 't', rest ->
-        string(rest, original, skip + 2, stack, key_decode, string_decode, [acc | '\t'], 0)
+        string(rest, original, skip + 2, stack, string_decode, [acc | '\t'], 0)
 
       _ in 'n', rest ->
-        string(rest, original, skip + 2, stack, key_decode, string_decode, [acc | '\n'], 0)
+        string(rest, original, skip + 2, stack, string_decode, [acc | '\n'], 0)
 
       _ in 'f', rest ->
-        string(rest, original, skip + 2, stack, key_decode, string_decode, [acc | '\f'], 0)
+        string(rest, original, skip + 2, stack, string_decode, [acc | '\f'], 0)
 
       _ in 'r', rest ->
-        string(rest, original, skip + 2, stack, key_decode, string_decode, [acc | '\r'], 0)
+        string(rest, original, skip + 2, stack, string_decode, [acc | '\r'], 0)
 
       _ in '"', rest ->
-        string(rest, original, skip + 2, stack, key_decode, string_decode, [acc | '\"'], 0)
+        string(rest, original, skip + 2, stack, string_decode, [acc | '\"'], 0)
 
       _ in '/', rest ->
-        string(rest, original, skip + 2, stack, key_decode, string_decode, [acc | '/'], 0)
+        string(rest, original, skip + 2, stack, string_decode, [acc | '/'], 0)
 
       _ in '\\', rest ->
-        string(rest, original, skip + 2, stack, key_decode, string_decode, [acc | '\\'], 0)
+        string(rest, original, skip + 2, stack, string_decode, [acc | '\\'], 0)
 
       _ in 'u', rest ->
-        escapeu(rest, original, skip, stack, key_decode, string_decode, acc)
+        escapeu(rest, original, skip, stack, string_decode, acc)
 
       _, _rest ->
         error(original, skip + 1)
@@ -584,15 +565,12 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          acc
        ) do
-    # TODO
     require :jaserl_unescape
     last = escapeu_last(int2, original, skip)
 
-    # TODO
     :jaserl_unescape.escapeu_first(
       int1,
       last,
@@ -600,13 +578,12 @@ defmodule :jaserl_decoder do
       original,
       skip,
       stack,
-      key_decode,
       string_decode,
       acc
     )
   end
 
-  defp escapeu(<<_rest::bits>>, original, skip, _stack, _key_decode, _string_decode, _acc) do
+  defp escapeu(<<_rest::bits>>, original, skip, _stack, _string_decode, _acc) do
     empty_error(original, skip)
   end
 
@@ -622,7 +599,6 @@ defmodule :jaserl_decoder do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          acc,
          hi
@@ -637,7 +613,6 @@ defmodule :jaserl_decoder do
       original,
       skip,
       stack,
-      key_decode,
       string_decode,
       acc,
       hi
@@ -649,7 +624,6 @@ defmodule :jaserl_decoder do
          original,
          skip,
          _stack,
-         _key_decode,
          _string_decode,
          _acc,
          _hi
@@ -664,7 +638,7 @@ defmodule :jaserl_decoder do
       token_error(token, skip)
   end
 
-  defp error(<<_rest::bits>>, _original, skip, _stack, _key_decode, _string_decode) do
+  defp error(<<_rest::bits>>, _original, skip, _stack, _string_decode) do
     throw({:position, skip - 1})
   end
 
@@ -685,33 +659,33 @@ defmodule :jaserl_decoder do
     throw({:token, binary_part(token, position, len), position})
   end
 
-  @compile {:inline, continue: 7}
-  defp continue(rest, original, skip, stack, key_decode, string_decode, value) do
+  @compile {:inline, continue: 6}
+  defp continue(rest, original, skip, stack, string_decode, value) do
     case stack do
       [@terminate | stack] ->
-        terminate(rest, original, skip, stack, key_decode, string_decode, value)
+        terminate(rest, original, skip, stack, string_decode, value)
 
       [@array | stack] ->
-        array(rest, original, skip, stack, key_decode, string_decode, value)
+        array(rest, original, skip, stack, string_decode, value)
 
       [@key | stack] ->
-        key(rest, original, skip, stack, key_decode, string_decode, value)
+        key(rest, original, skip, stack, string_decode, value)
 
       [@object | stack] ->
-        object(rest, original, skip, stack, key_decode, string_decode, value)
+        object(rest, original, skip, stack, string_decode, value)
     end
   end
 
-  defp terminate(<<byte, rest::bits>>, original, skip, stack, key_decode, string_decode, value)
+  defp terminate(<<byte, rest::bits>>, original, skip, stack, string_decode, value)
        when byte in '\s\n\r\t' do
-    terminate(rest, original, skip + 1, stack, key_decode, string_decode, value)
+    terminate(rest, original, skip + 1, stack, string_decode, value)
   end
 
-  defp terminate(<<>>, _original, _skip, _stack, _key_decode, _string_decode, value) do
+  defp terminate(<<>>, _original, _skip, _stack, _string_decode, value) do
     value
   end
 
-  defp terminate(<<_rest::bits>>, original, skip, _stack, _key_decode, _string_decode, _value) do
+  defp terminate(<<_rest::bits>>, original, skip, _stack, _string_decode, _value) do
     error(original, skip)
   end
 end

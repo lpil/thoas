@@ -27,9 +27,8 @@ defmodule :jaserl_unescape do
     end
   end
 
-  defmacro escapeu_first(int, last, rest, original, skip, stack, key_decode, string_decode, acc) do
-    clauses =
-      escapeu_first_clauses(last, rest, original, skip, stack, key_decode, string_decode, acc)
+  defmacro escapeu_first(int, last, rest, original, skip, stack, string_decode, acc) do
+    clauses = escapeu_first_clauses(last, rest, original, skip, stack, string_decode, acc)
 
     quote location: :keep do
       case unquote(int) do
@@ -38,9 +37,9 @@ defmodule :jaserl_unescape do
     end
   end
 
-  defp escapeu_first_clauses(last, rest, original, skip, stack, key_decode, string_decode, acc) do
+  defp escapeu_first_clauses(last, rest, original, skip, stack, string_decode, acc) do
     for {int, first} <- unicode_escapes(),
-        not (first in 0xDC..0xDF) do
+        first not in 0xDC..0xDF do
       escapeu_first_clause(
         int,
         first,
@@ -49,7 +48,6 @@ defmodule :jaserl_unescape do
         original,
         skip,
         stack,
-        key_decode,
         string_decode,
         acc
       )
@@ -64,7 +62,6 @@ defmodule :jaserl_unescape do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          acc
        )
@@ -74,7 +71,7 @@ defmodule :jaserl_unescape do
         0x10000 + ((((first &&& 0x03) <<< 8) + last) <<< 10)
       end
 
-    args = [rest, original, skip, stack, key_decode, string_decode, acc, hi]
+    args = [rest, original, skip, stack, string_decode, acc, hi]
 
     [clause] =
       quote location: :keep do
@@ -92,7 +89,6 @@ defmodule :jaserl_unescape do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          acc
        )
@@ -112,7 +108,7 @@ defmodule :jaserl_unescape do
         end
       end
 
-    args = [rest, original, skip, stack, key_decode, string_decode, acc, 0]
+    args = [rest, original, skip, stack, string_decode, acc, 0]
 
     [clause] =
       quote location: :keep do
@@ -130,7 +126,6 @@ defmodule :jaserl_unescape do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          acc
        )
@@ -145,7 +140,7 @@ defmodule :jaserl_unescape do
         [acc, byte1, byte2]
       end
 
-    args = [rest, original, skip, stack, key_decode, string_decode, acc, 0]
+    args = [rest, original, skip, stack, string_decode, acc, 0]
 
     [clause] =
       quote location: :keep do
@@ -163,7 +158,6 @@ defmodule :jaserl_unescape do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          acc
        )
@@ -179,7 +173,7 @@ defmodule :jaserl_unescape do
         [acc, byte1, byte2, byte3]
       end
 
-    args = [rest, original, skip, stack, key_decode, string_decode, acc, 0]
+    args = [rest, original, skip, stack, string_decode, acc, 0]
 
     [clause] =
       quote location: :keep do
@@ -217,7 +211,6 @@ defmodule :jaserl_unescape do
              original,
              skip,
              stack,
-             key_decode,
              string_decode,
              acc,
              hi
@@ -229,7 +222,6 @@ defmodule :jaserl_unescape do
         original,
         skip,
         stack,
-        key_decode,
         string_decode,
         acc,
         hi
@@ -248,7 +240,6 @@ defmodule :jaserl_unescape do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          acc,
          hi
@@ -266,7 +257,6 @@ defmodule :jaserl_unescape do
         original,
         skip,
         stack,
-        key_decode,
         string_decode,
         acc,
         hi
@@ -282,7 +272,6 @@ defmodule :jaserl_unescape do
          original,
          skip,
          stack,
-         key_decode,
          string_decode,
          acc,
          hi
@@ -295,7 +284,7 @@ defmodule :jaserl_unescape do
         [acc | <<hi + lo::utf8>>]
       end
 
-    args = [rest, original, skip, stack, key_decode, string_decode, acc, 0]
+    args = [rest, original, skip, stack, string_decode, acc, 0]
 
     [clause] =
       quote do
