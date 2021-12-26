@@ -142,12 +142,12 @@ defmodule :jaserl_encode do
   end
 
   def key(atom, escape) when is_atom(atom) do
-    string = Atom.to_string(atom)
+    string = :erlang.atom_to_binary(atom, :utf8)
     escape.(string, string, 0)
   end
 
-  def key(other, escape) do
-    string = String.Chars.to_string(other)
+  def key(charlist, escape) when is_list(charlist) do
+    string = :erlang.list_to_binary(charlist)
     escape.(string, string, 0)
   end
 
