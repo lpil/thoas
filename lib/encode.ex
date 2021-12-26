@@ -9,16 +9,10 @@ defmodule :jaserl_encode do
   alias Jason.{EncodeError}
 
   @doc false
-  @spec encode(any, map) :: {:ok, iodata} | {:error, EncodeError.t() | Exception.t()}
+  @spec encode(any, map) :: iodata
   def encode(value, opts) do
     escape = escape_function(opts)
-
-    try do
-      {:ok, value(value, escape)}
-    catch
-      :throw, {:invalid_byte, _, _} = e ->
-        {:error, e}
-    end
+    value(value, escape)
   end
 
   defp escape_function(%{escape: escape}) do
