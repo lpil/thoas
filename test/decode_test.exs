@@ -84,18 +84,18 @@ defmodule Jason.DecodeTest do
 
   test "copying strings on decode" do
     assert parse!("{}", strings: :copy) == %{}
-    as = String.duplicate("a", 101)
-    bs = String.duplicate("b", 102)
+    as = :binary.copy("a", 101)
+    bs = :binary.copy("b", 102)
 
     # Copy decode, copies the key
-    assert [{key, value}] = Map.to_list(parse!(~s({"#{as}": "#{bs}"}), strings: :copy))
+    assert [{key, value}] = :maps.to_list(parse!(~s({"#{as}": "#{bs}"}), strings: :copy))
     assert key == as
     assert value == bs
     assert :binary.referenced_byte_size(key) == byte_size(as)
     assert :binary.referenced_byte_size(value) == byte_size(bs)
 
     # Regular decode references the original string
-    assert [{key, value}] = Map.to_list(parse!(~s({"#{as}": "#{bs}"})))
+    assert [{key, value}] = :maps.to_list(parse!(~s({"#{as}": "#{bs}"})))
     assert key == as
     assert value == bs
     assert :binary.referenced_byte_size(key) > byte_size(as) + byte_size(bs)

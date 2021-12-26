@@ -53,7 +53,7 @@ defmodule :jaserl do
   """
   @spec decode(iodata, [decode_opt]) :: {:ok, term} | {:error, DecodeError.t()}
   def decode(input, opts \\ []) do
-    input = IO.iodata_to_binary(input)
+    input = :erlang.iolist_to_binary(input)
     :jaserl_decoder.parse(input, format_decode_opts(opts))
   end
 
@@ -126,7 +126,7 @@ defmodule :jaserl do
   def encode(input, opts \\ []) do
     case do_encode(input, format_encode_opts(opts)) do
       # TODO
-      {:ok, result} -> {:ok, IO.iodata_to_binary(result)}
+      {:ok, result} -> {:ok, :erlang.iolist_to_binary(result)}
       {:error, error} -> {:error, error}
     end
   end
@@ -151,7 +151,7 @@ defmodule :jaserl do
   def encode!(input, opts \\ []) do
     case do_encode(input, format_encode_opts(opts)) do
       # TODO
-      {:ok, result} -> IO.iodata_to_binary(result)
+      {:ok, result} -> :erlang.iolist_to_binary(result)
       {:error, error} -> raise error
     end
   end
@@ -168,7 +168,7 @@ defmodule :jaserl do
   ## Examples
 
       iex> {:ok, iodata} = :jaserl.encode_to_iodata(%{a: 1})
-      iex> IO.iodata_to_binary(iodata)
+      iex> :erlang.iolist_to_binary(iodata)
       ~S|{"a":1}|
 
       iex> :jaserl.encode_to_iodata("\\xFF")
@@ -191,7 +191,7 @@ defmodule :jaserl do
   ## Examples
 
       iex> iodata = :jaserl.encode_to_iodata!(%{a: 1})
-      iex> IO.iodata_to_binary(iodata)
+      iex> :erlang.iolist_to_binary(iodata)
       ~S|{"a":1}|
 
       iex> :jaserl.encode_to_iodata!("\\xFF")

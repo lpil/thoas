@@ -40,25 +40,13 @@ defmodule :jaserl_codegen do
     end
   end
 
-  def build_kv_iodata(kv, encode_args) do
-    elements =
-      kv
-      # TODO
-      |> Enum.map(&encode_pair(&1, encode_args))
-      # TODO
-      |> Enum.intersperse(",")
-
-    # TODO
-    collapse_static(List.flatten(["{", elements] ++ '}'))
-  end
-
   defp clauses_to_ranges([{:->, _, [[{:in, _, [byte, range]}, rest], action]} | tail], acc) do
     clauses_to_ranges(tail, [{range, {byte, rest, action}} | acc])
   end
 
   defp clauses_to_ranges([{:->, _, [[default, rest], action]} | tail], acc) do
     # TODO
-    {Enum.reverse(acc), {default, rest, action}, literal_clauses(tail)}
+    {:lists.reverse(acc), {default, rest, action}, literal_clauses(tail)}
   end
 
   defp literal_clauses(clauses) do
@@ -127,41 +115,5 @@ defmodule :jaserl_codegen do
         Enum.map(enum, &{&1, value})
     end)
     |> :orddict.from_list()
-  end
-
-  defp encode_pair({key, value}, encode_args) do
-    # TODO
-    key = IO.iodata_to_binary(:jaserl_encode.key(key, &escape_key/3))
-    key = "\"" <> key <> "\":"
-    [key, quote(do: :jaserl_encode.value(unquote(value), unquote_splicing(encode_args)))]
-  end
-
-  defp escape_key(binary, _original, _skip) do
-    check_safe_key!(binary)
-    binary
-  end
-
-  defp check_safe_key!(binary) do
-    for <<(<<byte>> <- binary)>> do
-      if byte > 0x7F or byte < 0x1F or byte in '"\\/' do
-        # TODO
-        raise Jason.EncodeError,
-              "invalid byte #{inspect(byte, base: :hex)} in literal key: #{inspect(binary)}"
-      end
-    end
-
-    :ok
-  end
-
-  defp collapse_static([bin1, bin2 | rest]) when is_binary(bin1) and is_binary(bin2) do
-    collapse_static([bin1 <> bin2 | rest])
-  end
-
-  defp collapse_static([other | rest]) do
-    [other | collapse_static(rest)]
-  end
-
-  defp collapse_static([]) do
-    []
   end
 end
