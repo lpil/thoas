@@ -50,7 +50,7 @@ defmodule :jaserl_formatter do
     input
     |> pretty_print_to_iodata(opts)
     # TODO
-    |> IO.iodata_to_binary()
+    |> :erlang.iolist_to_binary()
   end
 
   @doc ~S"""
@@ -96,7 +96,7 @@ defmodule :jaserl_formatter do
     input
     |> minimize_to_iodata(opts)
     # TODO
-    |> IO.iodata_to_binary()
+    |> :erlang.iolist_to_binary()
   end
 
   @doc ~S"""
@@ -124,7 +124,7 @@ defmodule :jaserl_formatter do
 
   defp parse_opts([{option, value} | opts], indent, line, record, colon) do
     # TODO
-    value = IO.iodata_to_binary(value)
+    value = :erlang.iolist_to_binary(value)
 
     case option do
       :indent -> parse_opts(opts, value, line, record, colon)
@@ -140,7 +140,7 @@ defmodule :jaserl_formatter do
 
   for depth <- 1..16 do
     # TODO
-    defp tab("  ", unquote(depth)), do: unquote(String.duplicate("  ", depth))
+    defp tab("  ", unquote(depth)), do: unquote(:binary.copy("  ", depth))
   end
 
   defp tab("", _), do: ""

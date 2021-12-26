@@ -40,9 +40,6 @@ defmodule :jaserl_encode do
     catch
       :throw, %Jason.EncodeError{} = e ->
         {:error, e}
-
-      :error, %Protocol.UndefinedError{protocol: Jason.Encoder} = e ->
-        {:error, e}
     end
   end
 
@@ -56,12 +53,9 @@ defmodule :jaserl_encode do
   defp escape_function(%{escape: escape}) do
     case escape do
       :json -> &escape_json/3
-      :html_safe -> &escape_html/3
-      :unicode_safe -> &escape_unicode/3
-      :javascript_safe -> &escape_javascript/3
-      # Keep for compatibility with Poison
-      :javascript -> &escape_javascript/3
+      :html -> &escape_html/3
       :unicode -> &escape_unicode/3
+      :javascript -> &escape_javascript/3
     end
   end
 
@@ -97,12 +91,8 @@ defmodule :jaserl_encode do
     list(value, escape, encode_map)
   end
 
-  def value(%{__struct__: module} = value, escape, encode_map) do
-    struct(value, escape, encode_map, module)
-  end
-
   def value(value, escape, encode_map) when is_map(value) do
-    case Map.to_list(value) do
+    case :maps.to_list(value) do
       [] -> "{}"
       keyword -> encode_map.(keyword, escape, encode_map)
     end
@@ -120,11 +110,11 @@ defmodule :jaserl_encode do
   defp encode_atom(false, _escape), do: "false"
 
   defp encode_atom(atom, escape),
-    do: encode_string(Atom.to_string(atom), escape)
+    do: encode_string(:erlang.atom_to_binary(atom, :utf8), escape)
 
   @spec integer(integer) :: iodata
   def integer(integer) do
-    Integer.to_string(integer)
+    :erlang.integer_to_list(integer)
   end
 
   @spec float(float) :: iodata
@@ -170,7 +160,7 @@ defmodule :jaserl_encode do
 
   @spec map(map, opts) :: iodata
   def map(value, {escape, encode_map}) do
-    case Map.to_list(value) do
+    case :maps.to_list(value) do
       [] -> "{}"
       keyword -> encode_map.(keyword, escape, encode_map)
     end
@@ -201,7 +191,7 @@ defmodule :jaserl_encode do
   end
 
   defp map_strict([{key, value} | tail], escape, encode_map) do
-    key = IO.iodata_to_binary(key(key, escape))
+    key = :erlang.iolist_to_binary(key(key, escape))
     visited = %{key => []}
 
     [
@@ -218,7 +208,7 @@ defmodule :jaserl_encode do
   end
 
   defp map_strict_loop([{key, value} | tail], escape, encode_map, visited) do
-    key = IO.iodata_to_binary(key(key, escape))
+    key = :erlang.iolist_to_binary(key(key, escape))
 
     case visited do
       %{^key => _} ->
@@ -235,29 +225,6 @@ defmodule :jaserl_encode do
           | map_strict_loop(tail, escape, encode_map, visited)
         ]
     end
-  end
-
-  @spec struct(struct, opts) :: iodata
-  def struct(%module{} = value, {escape, encode_map}) do
-    struct(value, escape, encode_map, module)
-  end
-
-  # TODO: benchmark the effect of inlining the to_iso8601 functions
-  for module <- [Date, Time, NaiveDateTime, DateTime] do
-    defp struct(value, _escape, _encode_map, unquote(module)) do
-      [?\", unquote(module).to_iso8601(value), ?\"]
-    end
-  end
-
-  defp struct(value, _escape, _encode_map, Decimal) do
-    # silence the xref warning
-    decimal = Decimal
-    [?\", decimal.to_string(value, :normal), ?\"]
-  end
-
-  defp struct(value, escape, encode_map, :jaserl_fragment) do
-    %{encode: encode} = value
-    encode.({escape, encode_map})
   end
 
   @doc false
@@ -393,32 +360,38 @@ defmodule :jaserl_encode do
     escape_javascript(data, [], original, skip)
   end
 
-  Enum.map(json_jt, fn
-    {byte, :chunk} ->
-      defp escape_javascript(<<byte, rest::bits>>, acc, original, skip)
-           when byte === unquote(byte) do
-        escape_javascript_chunk(rest, acc, original, skip, 1)
-      end
+  :lists.map(
+    fn
+      {byte, :chunk} ->
+        defp escape_javascript(<<byte, rest::bits>>, acc, original, skip)
+             when byte === unquote(byte) do
+          escape_javascript_chunk(rest, acc, original, skip, 1)
+        end
 
-    {byte, _escape} ->
-      defp escape_javascript(<<byte, rest::bits>>, acc, original, skip)
-           when byte === unquote(byte) do
-        acc = [acc | escape(byte)]
-        escape_javascript(rest, acc, original, skip + 1)
-      end
-  end)
+      {byte, _escape} ->
+        defp escape_javascript(<<byte, rest::bits>>, acc, original, skip)
+             when byte === unquote(byte) do
+          acc = [acc | escape(byte)]
+          escape_javascript(rest, acc, original, skip + 1)
+        end
+    end,
+    json_jt
+  )
 
   defp escape_javascript(<<char::utf8, rest::bits>>, acc, original, skip)
        when char <= 0x7FF do
     escape_javascript_chunk(rest, acc, original, skip, 2)
   end
 
-  Enum.map(surogate_escapes, fn {byte, escape} ->
-    defp escape_javascript(<<unquote(byte)::utf8, rest::bits>>, acc, original, skip) do
-      acc = [acc | unquote(escape)]
-      escape_javascript(rest, acc, original, skip + 3)
-    end
-  end)
+  :lists.map(
+    fn {byte, escape} ->
+      defp escape_javascript(<<unquote(byte)::utf8, rest::bits>>, acc, original, skip) do
+        acc = [acc | unquote(escape)]
+        escape_javascript(rest, acc, original, skip + 3)
+      end
+    end,
+    surogate_escapes
+  )
 
   defp escape_javascript(<<char::utf8, rest::bits>>, acc, original, skip)
        when char <= 0xFFFF do
@@ -437,34 +410,40 @@ defmodule :jaserl_encode do
     error({:invalid_byte, byte, original})
   end
 
-  Enum.map(json_jt, fn
-    {byte, :chunk} ->
-      defp escape_javascript_chunk(<<byte, rest::bits>>, acc, original, skip, len)
-           when byte === unquote(byte) do
-        escape_javascript_chunk(rest, acc, original, skip, len + 1)
-      end
+  :lists.map(
+    fn
+      {byte, :chunk} ->
+        defp escape_javascript_chunk(<<byte, rest::bits>>, acc, original, skip, len)
+             when byte === unquote(byte) do
+          escape_javascript_chunk(rest, acc, original, skip, len + 1)
+        end
 
-    {byte, _escape} ->
-      defp escape_javascript_chunk(<<byte, rest::bits>>, acc, original, skip, len)
-           when byte === unquote(byte) do
-        part = binary_part(original, skip, len)
-        acc = [acc, part | escape(byte)]
-        escape_javascript(rest, acc, original, skip + len + 1)
-      end
-  end)
+      {byte, _escape} ->
+        defp escape_javascript_chunk(<<byte, rest::bits>>, acc, original, skip, len)
+             when byte === unquote(byte) do
+          part = binary_part(original, skip, len)
+          acc = [acc, part | escape(byte)]
+          escape_javascript(rest, acc, original, skip + len + 1)
+        end
+    end,
+    json_jt
+  )
 
   defp escape_javascript_chunk(<<char::utf8, rest::bits>>, acc, original, skip, len)
        when char <= 0x7FF do
     escape_javascript_chunk(rest, acc, original, skip, len + 2)
   end
 
-  Enum.map(surogate_escapes, fn {byte, escape} ->
-    defp escape_javascript_chunk(<<unquote(byte)::utf8, rest::bits>>, acc, original, skip, len) do
-      part = binary_part(original, skip, len)
-      acc = [acc, part | unquote(escape)]
-      escape_javascript(rest, acc, original, skip + len + 3)
-    end
-  end)
+  :lists.map(
+    fn {byte, escape} ->
+      defp escape_javascript_chunk(<<unquote(byte)::utf8, rest::bits>>, acc, original, skip, len) do
+        part = binary_part(original, skip, len)
+        acc = [acc, part | unquote(escape)]
+        escape_javascript(rest, acc, original, skip + len + 3)
+      end
+    end,
+    surogate_escapes
+  )
 
   defp escape_javascript_chunk(<<char::utf8, rest::bits>>, acc, original, skip, len)
        when char <= 0xFFFF do
@@ -606,25 +585,25 @@ defmodule :jaserl_encode do
 
   defp escape_unicode(<<char::utf8, rest::bits>>, acc, original, skip)
        when char <= 0xFF do
-    acc = [acc, "\\u00" | Integer.to_string(char, 16)]
+    acc = [acc, "\\u00" | :erlang.integer_to_list(char, 16)]
     escape_unicode(rest, acc, original, skip + 2)
   end
 
   defp escape_unicode(<<char::utf8, rest::bits>>, acc, original, skip)
        when char <= 0x7FF do
-    acc = [acc, "\\u0" | Integer.to_string(char, 16)]
+    acc = [acc, "\\u0" | :erlang.integer_to_list(char, 16)]
     escape_unicode(rest, acc, original, skip + 2)
   end
 
   defp escape_unicode(<<char::utf8, rest::bits>>, acc, original, skip)
        when char <= 0xFFF do
-    acc = [acc, "\\u0" | Integer.to_string(char, 16)]
+    acc = [acc, "\\u0" | :erlang.integer_to_list(char, 16)]
     escape_unicode(rest, acc, original, skip + 3)
   end
 
   defp escape_unicode(<<char::utf8, rest::bits>>, acc, original, skip)
        when char <= 0xFFFF do
-    acc = [acc, "\\u" | Integer.to_string(char, 16)]
+    acc = [acc, "\\u" | :erlang.integer_to_list(char, 16)]
     escape_unicode(rest, acc, original, skip + 3)
   end
 
@@ -634,8 +613,8 @@ defmodule :jaserl_encode do
     acc = [
       acc,
       "\\uD",
-      Integer.to_string(0x800 ||| char >>> 10, 16),
-      "\\uD" | Integer.to_string(0xC00 ||| (char &&& 0x3FF), 16)
+      :erlang.integer_to_list(0x800 ||| char >>> 10, 16),
+      "\\uD" | :erlang.integer_to_list(0xC00 ||| (char &&& 0x3FF), 16)
     ]
 
     escape_unicode(rest, acc, original, skip + 4)
@@ -668,28 +647,28 @@ defmodule :jaserl_encode do
   defp escape_unicode_chunk(<<char::utf8, rest::bits>>, acc, original, skip, len)
        when char <= 0xFF do
     part = binary_part(original, skip, len)
-    acc = [acc, part, "\\u00" | Integer.to_string(char, 16)]
+    acc = [acc, part, "\\u00" | :erlang.integer_to_list(char, 16)]
     escape_unicode(rest, acc, original, skip + len + 2)
   end
 
   defp escape_unicode_chunk(<<char::utf8, rest::bits>>, acc, original, skip, len)
        when char <= 0x7FF do
     part = binary_part(original, skip, len)
-    acc = [acc, part, "\\u0" | Integer.to_string(char, 16)]
+    acc = [acc, part, "\\u0" | :erlang.integer_to_list(char, 16)]
     escape_unicode(rest, acc, original, skip + len + 2)
   end
 
   defp escape_unicode_chunk(<<char::utf8, rest::bits>>, acc, original, skip, len)
        when char <= 0xFFF do
     part = binary_part(original, skip, len)
-    acc = [acc, part, "\\u0" | Integer.to_string(char, 16)]
+    acc = [acc, part, "\\u0" | :erlang.integer_to_list(char, 16)]
     escape_unicode(rest, acc, original, skip + len + 3)
   end
 
   defp escape_unicode_chunk(<<char::utf8, rest::bits>>, acc, original, skip, len)
        when char <= 0xFFFF do
     part = binary_part(original, skip, len)
-    acc = [acc, part, "\\u" | Integer.to_string(char, 16)]
+    acc = [acc, part, "\\u" | :erlang.integer_to_list(char, 16)]
     escape_unicode(rest, acc, original, skip + len + 3)
   end
 
@@ -701,8 +680,8 @@ defmodule :jaserl_encode do
       acc,
       part,
       "\\uD",
-      Integer.to_string(0x800 ||| char >>> 10, 16),
-      "\\uD" | Integer.to_string(0xC00 ||| (char &&& 0x3FF), 16)
+      :erlang.integer_to_list(0x800 ||| char >>> 10, 16),
+      "\\uD" | :erlang.integer_to_list(0xC00 ||| (char &&& 0x3FF), 16)
     ]
 
     escape_unicode(rest, acc, original, skip + len + 4)

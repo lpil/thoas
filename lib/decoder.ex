@@ -458,9 +458,6 @@ defmodule :jaserl_decoder do
     end
   end
 
-  # TODO: check if this approach would be faster:
-  # https://git.ninenines.eu/cowlib.git/tree/src/cow_ws.erl#n469
-  # http://bjoern.hoehrmann.de/utf-8/decoder/dfa/
   defp string(data, original, skip, stack, string_decode, len) do
     bytecase data, 128 do
       _ in '"', rest ->
@@ -496,7 +493,7 @@ defmodule :jaserl_decoder do
       _ in '"', rest ->
         last = binary_part(original, skip, len)
         # TODO
-        string = IO.iodata_to_binary([acc | last])
+        string = :erlang.iolist_to_binary([acc | last])
         continue(rest, original, skip + len + 1, stack, string_decode, string)
 
       _ in '\\', rest ->

@@ -33,21 +33,9 @@ if Code.ensure_loaded?(ExUnitProperties) do
       end
     end
 
-    property "unicode escaping" do
+    property "html escaping" do
       check all(string <- string(:printable)) do
-        encoded = encode(string, escape: :unicode)
-
-        for <<(<<byte>> <- encoded)>> do
-          assert byte < 128
-        end
-
-        assert decode(encoded) == string
-      end
-    end
-
-    property "html_safe escaping" do
-      check all(string <- string(:printable)) do
-        encoded = encode(string, escape: :html_safe)
+        encoded = encode(string, escape: :html)
         refute encoded =~ <<0x2028::utf8>>
         refute encoded =~ <<0x2029::utf8>>
         refute encoded =~ ~r"(?<!\\)/"
