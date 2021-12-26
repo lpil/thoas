@@ -82,22 +82,6 @@ defmodule Jason.DecodeTest do
     assert parse!(~s({"foo": {"bar": "baz"}})) == expected
   end
 
-  test "objects with atom keys" do
-    assert parse!("{}", keys: :atoms) == %{}
-    assert parse!("{}", keys: :atoms!) == %{}
-    assert parse!(~s({"foo": "bar"}), keys: :atoms) == %{foo: "bar"}
-    assert parse!(~s({"foo": "bar"}), keys: :atoms!) == %{foo: "bar"}
-
-    key = Integer.to_string(System.unique_integer())
-
-    assert_raise ArgumentError, fn ->
-      parse!(~s({"#{key}": "value"}), keys: :atoms!)
-    end
-
-    key = String.to_atom(key)
-    assert parse!(~s({"#{key}": "value"}), keys: :atoms) == %{key => "value"}
-  end
-
   test "copying strings on decode" do
     assert parse!("{}", strings: :copy) == %{}
     as = String.duplicate("a", 101)
@@ -116,11 +100,6 @@ defmodule Jason.DecodeTest do
     assert value == bs
     assert :binary.referenced_byte_size(key) > byte_size(as) + byte_size(bs)
     assert :binary.referenced_byte_size(value) > byte_size(bs) + byte_size(bs)
-  end
-
-  test "custom object key mapping function" do
-    assert parse!("{}", keys: &String.downcase/1) == %{}
-    assert parse!(~s({"FOO": "bar"}), keys: &String.downcase/1) == %{"foo" => "bar"}
   end
 
   test "arrays" do

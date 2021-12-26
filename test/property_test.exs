@@ -4,43 +4,37 @@ if Code.ensure_loaded?(ExUnitProperties) do
     use ExUnitProperties
 
     property "string rountrip" do
-      check all string <- string(:printable) do
+      check all(string <- string(:printable)) do
         assert decode(encode(string)) == string
       end
     end
 
     property "integer roundtrip" do
-      check all integer <- integer() do
+      check all(integer <- integer()) do
         assert decode(encode(integer)) == integer
       end
     end
 
     property "float roundtrip" do
-      check all float <- float() do
+      check all(float <- float()) do
         assert decode(encode(float)) == float
       end
     end
 
     property "string-keyed objects roundrtip" do
-      check all json <- json(string(:printable)) do
+      check all(json <- json(string(:printable))) do
         assert decode(encode(json)) == json
       end
     end
 
-    property "atom-keyed objects roundtrip" do
-      check all json <- json(atom(:alphanumeric)) do
-        assert decode(encode(json), keys: :atoms!) == json
-      end
-    end
-
     property "pretty roundtrip" do
-      check all json <- json(string(:printable)) do
+      check all(json <- json(string(:printable))) do
         assert decode(encode(json, pretty: true)) == json
       end
     end
 
     property "unicode escaping" do
-      check all string <- string(:printable) do
+      check all(string <- string(:printable)) do
         encoded = encode(string, escape: :unicode)
 
         for <<(<<byte>> <- encoded)>> do
@@ -52,7 +46,7 @@ if Code.ensure_loaded?(ExUnitProperties) do
     end
 
     property "html_safe escaping" do
-      check all string <- string(:printable) do
+      check all(string <- string(:printable)) do
         encoded = encode(string, escape: :html_safe)
         refute encoded =~ <<0x2028::utf8>>
         refute encoded =~ <<0x2029::utf8>>
@@ -62,7 +56,7 @@ if Code.ensure_loaded?(ExUnitProperties) do
     end
 
     property "javascript escaping" do
-      check all string <- string(:printable) do
+      check all(string <- string(:printable)) do
         encoded = encode(string, escape: :javascript)
         refute encoded =~ <<0x2028::utf8>>
         refute encoded =~ <<0x2029::utf8>>
