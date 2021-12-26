@@ -1,38 +1,7 @@
-defmodule Jason.DecodeError do
-  @type t :: %__MODULE__{position: integer, data: String.t()}
-
-  defexception [:position, :token, :data]
-
-  def message(%{position: position, token: token}) when is_binary(token) do
-    "unexpected sequence at position #{position}: #{inspect(token)}"
-  end
-
-  def message(%{position: position, data: data}) when position == byte_size(data) do
-    "unexpected end of input at position #{position}"
-  end
-
-  def message(%{position: position, data: data}) do
-    byte = :binary.at(data, position)
-    str = <<byte>>
-
-    if String.printable?(str) do
-      "unexpected byte at position #{position}: " <>
-        "#{inspect(byte, base: :hex)} ('#{str}')"
-    else
-      "unexpected byte at position #{position}: " <>
-        "#{inspect(byte, base: :hex)}"
-    end
-  end
-end
-
 defmodule :jaserl_decoder do
   @moduledoc false
 
-  alias Jason.{DecodeError}
-
   import :jaserl_codegen, only: [bytecase: 2, bytecase: 3]
-
-  # @compile :native
 
   # We use integers instead of atoms to take advantage of the jump table
   # optimization
@@ -48,10 +17,18 @@ defmodule :jaserl_decoder do
       value(data, data, 0, [@terminate], string_decode)
     catch
       {:position, position} ->
-        {:error, %DecodeError{position: position, data: data}}
+        case position == byte_size(data) do
+          true ->
+            {:error, :unexpected_end_of_input}
+
+          false ->
+            byte = :binary.at(data, position)
+            hex = :erlang.integer_to_binary(byte, 16)
+            {:error, {:unexpected_byte, <<"0x"::utf8, hex::binary>>, position}}
+        end
 
       {:token, token, position} ->
-        {:error, %DecodeError{token: token, position: position, data: data}}
+        {:error, {:unexpected_sequence, token, position}}
     else
       value ->
         {:ok, value}
@@ -93,7 +70,7 @@ defmodule :jaserl_decoder do
             continue(rest, original, skip + 4, stack, string_decode, true)
 
           <<_::bits>> ->
-            error(original, skip)
+            throw_error(original, skip)
         end
 
       _ in 'f', rest ->
@@ -102,7 +79,7 @@ defmodule :jaserl_decoder do
             continue(rest, original, skip + 5, stack, string_decode, false)
 
           <<_::bits>> ->
-            error(original, skip)
+            throw_error(original, skip)
         end
 
       _ in 'n', rest ->
@@ -111,14 +88,14 @@ defmodule :jaserl_decoder do
             continue(rest, original, skip + 4, stack, string_decode, nil)
 
           <<_::bits>> ->
-            error(original, skip)
+            throw_error(original, skip)
         end
 
       _, rest ->
-        error(rest, original, skip + 1, stack, string_decode)
+        throw_error(rest, original, skip + 1, stack, string_decode)
 
       <<_::bits>> ->
-        error(original, skip)
+        throw_error(original, skip)
     end
   end
 
@@ -132,7 +109,7 @@ defmodule :jaserl_decoder do
   end
 
   defp number_minus(<<_rest::bits>>, original, skip, _stack, _string_decode) do
-    error(original, skip + 1)
+    throw_error(original, skip + 1)
   end
 
   defp number(<<byte, rest::bits>>, original, skip, stack, string_decode, len)
@@ -162,7 +139,7 @@ defmodule :jaserl_decoder do
   end
 
   defp number_frac(<<_rest::bits>>, original, skip, _stack, _string_decode, len) do
-    error(original, skip + len)
+    throw_error(original, skip + len)
   end
 
   defp number_frac_cont(
@@ -199,7 +176,7 @@ defmodule :jaserl_decoder do
   end
 
   defp number_exp(<<_rest::bits>>, original, skip, _stack, _string_decode, len) do
-    error(original, skip + len)
+    throw_error(original, skip + len)
   end
 
   defp number_exp_sign(
@@ -215,7 +192,7 @@ defmodule :jaserl_decoder do
   end
 
   defp number_exp_sign(<<_rest::bits>>, original, skip, _stack, _string_decode, len) do
-    error(original, skip + len)
+    throw_error(original, skip + len)
   end
 
   defp number_exp_cont(
@@ -268,7 +245,7 @@ defmodule :jaserl_decoder do
          _string_decode,
          _prefix
        ) do
-    error(original, skip)
+    throw_error(original, skip)
   end
 
   defp number_exp_sign(
@@ -293,7 +270,7 @@ defmodule :jaserl_decoder do
          _prefix,
          len
        ) do
-    error(original, skip + len)
+    throw_error(original, skip + len)
   end
 
   defp number_exp_cont(
@@ -353,7 +330,7 @@ defmodule :jaserl_decoder do
         continue(rest, original, skip, stack, string_decode, [])
 
       _ ->
-        error(original, skip - 1)
+        throw_error(original, skip - 1)
     end
   end
 
@@ -379,7 +356,7 @@ defmodule :jaserl_decoder do
         )
 
       _, _rest ->
-        error(original, skip)
+        throw_error(original, skip)
 
       <<_::bits>> ->
         empty_error(original, skip)
@@ -410,7 +387,7 @@ defmodule :jaserl_decoder do
         key(rest, original, skip, [acc | stack], string_decode)
 
       _, _rest ->
-        error(original, skip)
+        throw_error(original, skip)
 
       <<_::bits>> ->
         empty_error(original, skip)
@@ -428,14 +405,14 @@ defmodule :jaserl_decoder do
             continue(rest, original, skip + 1, stack, string_decode, %{})
 
           _ ->
-            error(original, skip)
+            throw_error(original, skip)
         end
 
       _ in '"', rest ->
         string(rest, original, skip + 1, [@key | stack], string_decode, 0)
 
       _, _rest ->
-        error(original, skip)
+        throw_error(original, skip)
 
       <<_::bits>> ->
         empty_error(original, skip)
@@ -451,7 +428,7 @@ defmodule :jaserl_decoder do
         value(rest, original, skip + 1, [@object, value | stack], string_decode)
 
       _, _rest ->
-        error(original, skip)
+        throw_error(original, skip)
 
       <<_::bits>> ->
         empty_error(original, skip)
@@ -469,7 +446,7 @@ defmodule :jaserl_decoder do
         escape(rest, original, skip + len, stack, string_decode, part)
 
       _ in unquote(0x00..0x1F), _rest ->
-        error(original, skip)
+        throw_error(original, skip)
 
       _, rest ->
         string(rest, original, skip, stack, string_decode, len + 1)
@@ -501,7 +478,7 @@ defmodule :jaserl_decoder do
         escape(rest, original, skip + len, stack, string_decode, [acc | part])
 
       _ in unquote(0x00..0x1F), _rest ->
-        error(original, skip)
+        throw_error(original, skip)
 
       _, rest ->
         string(rest, original, skip, stack, string_decode, acc, len + 1)
@@ -550,7 +527,7 @@ defmodule :jaserl_decoder do
         escapeu(rest, original, skip, stack, string_decode, acc)
 
       _, _rest ->
-        error(original, skip + 1)
+        throw_error(original, skip + 1)
 
       <<_::bits>> ->
         empty_error(original, skip)
@@ -583,8 +560,6 @@ defmodule :jaserl_decoder do
   defp escapeu(<<_rest::bits>>, original, skip, _stack, _string_decode, _acc) do
     empty_error(original, skip)
   end
-
-  # @compile {:inline, escapeu_last: 3}
 
   defp escapeu_last(int, original, skip) do
     require :jaserl_unescape
@@ -625,7 +600,7 @@ defmodule :jaserl_decoder do
          _acc,
          _hi
        ) do
-    error(original, skip + 6)
+    throw_error(original, skip + 6)
   end
 
   defp try_parse_float(string, token, skip) do
@@ -635,7 +610,7 @@ defmodule :jaserl_decoder do
       token_error(token, skip)
   end
 
-  defp error(<<_rest::bits>>, _original, skip, _stack, _string_decode) do
+  defp throw_error(<<_rest::bits>>, _original, skip, _stack, _string_decode) do
     throw({:position, skip - 1})
   end
 
@@ -643,8 +618,8 @@ defmodule :jaserl_decoder do
     throw({:position, skip})
   end
 
-  @compile {:inline, error: 2, token_error: 2, token_error: 3}
-  defp error(_original, skip) do
+  @compile {:inline, throw_error: 2, token_error: 2, token_error: 3}
+  defp throw_error(_original, skip) do
     throw({:position, skip})
   end
 
@@ -683,6 +658,6 @@ defmodule :jaserl_decoder do
   end
 
   defp terminate(<<_rest::bits>>, original, skip, _stack, _string_decode, _value) do
-    error(original, skip)
+    throw_error(original, skip)
   end
 end

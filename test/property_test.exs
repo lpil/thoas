@@ -46,8 +46,15 @@ if Code.ensure_loaded?(ExUnitProperties) do
       end
     end
 
-    defp decode(data, opts \\ []), do: :jaserl.decode!(data, opts)
-    defp encode(data, opts \\ []), do: :jaserl.encode!(data, opts)
+    defp decode(data, opts \\ []) do
+      {:ok, x} = :jaserl.decode(data, opts)
+      x
+    end
+
+    defp encode(data, opts \\ []) do
+      {:ok, x} = :jaserl.encode(data, opts)
+      x
+    end
 
     defp json(keys) do
       simple = one_of([integer(), float(), string(:printable), boolean(), nil])
