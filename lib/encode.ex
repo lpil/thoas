@@ -159,15 +159,15 @@ defmodule :jaserl_encode do
     [?\", escape.(string, string, 0), ?\"]
   end
 
-  slash_escapes = Enum.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
-  surogate_escapes = Enum.zip([0x2028, 0x2029], ["\\u2028", "\\u2029"])
+  slash_escapes = :lists.zip('\b\t\n\f\r\"\\', 'btnfr"\\')
+  surogate_escapes = :lists.zip([0x2028, 0x2029], ["\\u2028", "\\u2029"])
   ranges = [{0x00..0x1F, :unicode} | slash_escapes]
   html_ranges = [{0x00..0x1F, :unicode}, {?/, ?/} | slash_escapes]
   escape_jt = :jaserl_codegen.jump_table(html_ranges, :error)
 
   Enum.each(escape_jt, fn
     {byte, :unicode} ->
-      sequence = List.to_string(:io_lib.format("\\u~4.16.0B", [byte]))
+      sequence = :erlang.list_to_binary(:io_lib.format("\\u~4.16.0B", [byte]))
       defp escape(unquote(byte)), do: unquote(sequence)
 
     {byte, char} when is_integer(char) ->
