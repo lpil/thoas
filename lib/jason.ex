@@ -3,7 +3,7 @@ defmodule :jaserl do
   A blazing fast JSON parser and generator in pure Elixir.
   """
 
-  alias Jaserl.{DecodeError, EncodeError}
+  alias Jaserl.{EncodeError}
 
   @type escape :: :json | :unicode_safe | :html_safe | :javascript_safe
   @type maps :: :naive | :strict
@@ -20,14 +20,6 @@ defmodule :jaserl do
 
   ## Options
 
-    * `:keys` - controls how keys in objects are decoded. Possible values are:
-
-      * `:strings` (default) - decodes keys as binary strings,
-      * `:atoms` - keys are converted to atoms using `String.to_atom/1`,
-      * `:atoms!` - keys are converted to atoms using `String.to_existing_atom/1`,
-      * custom decoder - additionally a function accepting a string and returning a key
-        is accepted.
-
     * `:strings` - controls how strings (including keys) are decoded. Possible values are:
 
       * `:reference` (default) - when possible tries to create a sub-binary into the original
@@ -35,47 +27,10 @@ defmodule :jaserl do
         decoded data will be stored for a long time (in ets or some process) to avoid keeping
         the reference to the original data.
 
-  ## Decoding keys to atoms
-
-  The `:atoms` option uses the `String.to_atom/1` call that can create atoms at runtime.
-  Since the atoms are not garbage collected, this can pose a DoS attack vector when used
-  on user-controlled data.
-
-  ## Examples
-
-      iex> :jaserl.decode("{}")
-      {:ok, %{}}
-
-      iex> :jaserl.decode("invalid")
-      {:error, %Jason.DecodeError{data: "invalid", position: 0, token: nil}}
   """
-  @spec decode(iodata, [decode_opt]) :: {:ok, term} | {:error, DecodeError.t()}
   def decode(input, opts \\ []) do
     input = :erlang.iolist_to_binary(input)
     :jaserl_decoder.parse(input, format_decode_opts(opts))
-  end
-
-  @doc """
-  Parses a JSON value from `input` iodata.
-
-  Similar to `decode/2` except it will unwrap the error tuple and raise
-  in case of errors.
-
-  ## Examples
-
-      iex> :jaserl.decode!("{}")
-      %{}
-
-      iex> :jaserl.decode!("invalid")
-      ** (Jason.DecodeError) unexpected byte at position 0: 0x69 ('i')
-
-  """
-  @spec decode!(iodata, [decode_opt]) :: term | no_return
-  def decode!(input, opts \\ []) do
-    case decode(input, opts) do
-      {:ok, result} -> result
-      {:error, error} -> raise error
-    end
   end
 
   @doc """
@@ -109,14 +64,7 @@ defmodule :jaserl do
       iex> :jaserl.encode(%{a: 1})
       {:ok, ~S|{"a":1}|}
 
-      # TODO: new error
-      # iex> :jaserl.encode("\\xFF")
-      # {:error, %Jason.EncodeError{message: "invalid byte 0xFF in <<255>>"}}
-
   """
-  # TODO
-  @spec encode(term, [encode_opt]) ::
-          {:ok, String.t()} | {:error, EncodeError.t() | Exception.t()}
   def encode(input, opts \\ []) do
     case do_encode(input, format_encode_opts(opts)) do
       # TODO

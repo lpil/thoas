@@ -1,17 +1,15 @@
 defmodule Jason.DecodeTest do
   use ExUnit.Case, async: true
 
-  alias Jason.DecodeError
-
   test "numbers" do
-    assert_fail_with("-", "unexpected end of input at position 1")
-    assert_fail_with("--1", "unexpected byte at position 1: 0x2D ('-')")
-    assert_fail_with("01", "unexpected byte at position 1: 0x31 ('1')")
-    assert_fail_with(".1", "unexpected byte at position 0: 0x2E ('.')")
-    assert_fail_with("1.", "unexpected end of input at position 2")
-    assert_fail_with("1e", "unexpected end of input at position 2")
-    assert_fail_with("1.0e+", "unexpected end of input at position 5")
-    assert_fail_with("1e999", "unexpected sequence at position 0: \"1e999\"")
+    assert_fail_with("-", :unexpected_end_of_input)
+    assert_fail_with("--1", {:unexpected_byte, "0x2D", 1})
+    assert_fail_with("01", {:unexpected_byte, "0x31", 1})
+    assert_fail_with(".1", {:unexpected_byte, "0x2E", 0})
+    assert_fail_with("1.", :unexpected_end_of_input)
+    assert_fail_with("1e", :unexpected_end_of_input)
+    assert_fail_with("1.0e+", :unexpected_end_of_input)
+    assert_fail_with("1e999", {:unexpected_sequence, "1e999", 0})
 
     assert parse!("0") == 0
     assert parse!("1") == 1
@@ -34,27 +32,27 @@ defmodule Jason.DecodeTest do
   end
 
   test "strings" do
-    assert_fail_with(~s("), "unexpected end of input at position 1")
-    assert_fail_with(~s("\\"), "unexpected end of input at position 3")
-    assert_fail_with(~s("\\k"), "unexpected byte at position 2: 0x6B ('k')")
-    assert_fail_with(<<?\", 128, ?\">>, "unexpected byte at position 1: 0x80")
-    assert_fail_with(~s("\\u2603\\"), "unexpected end of input at position 9")
+    assert_fail_with(~s("), :unexpected_end_of_input)
+    assert_fail_with(~s("\\"), :unexpected_end_of_input)
+    assert_fail_with(~s("\\k"), {:unexpected_byte, "0x6B", 2})
+    assert_fail_with(<<?\", 128, ?\">>, {:unexpected_byte, "0x80", 1})
+    assert_fail_with(~s("\\u2603\\"), :unexpected_end_of_input)
 
     assert_fail_with(
       ~s("Here's a snowman for you: ☃. Good day!),
-      "unexpected end of input at position 41"
+      :unexpected_end_of_input
     )
 
-    assert_fail_with(~s("𝄞), "unexpected end of input at position 5")
-    assert_fail_with(~s(\u001F), "unexpected byte at position 0: 0x1F")
-    assert_fail_with(~s("\\ud8aa\\udcxx"), "unexpected sequence at position 7: \"\\\\udcxx\"")
+    assert_fail_with(~s("𝄞), :unexpected_end_of_input)
+    assert_fail_with(~s(\u001F), {:unexpected_byte, "0x1F", 0})
+    assert_fail_with(~s("\\ud8aa\\udcxx"), {:unexpected_sequence, "\\udcxx", 7})
 
     assert_fail_with(
       ~s("\\ud8aa\\uda00"),
-      "unexpected sequence at position 1: \"\\\\ud8aa\\\\uda00\""
+      {:unexpected_sequence, "\\ud8aa\\uda00", 1}
     )
 
-    assert_fail_with(~s("\\uxxxx"), "unexpected sequence at position 1: \"\\\\uxxxx\"")
+    assert_fail_with(~s("\\uxxxx"), {:unexpected_sequence, "\\uxxxx", 1})
 
     assert parse!(~s("\\"\\\\\\/\\b\\f\\n\\r\\t")) == ~s("\\/\b\f\n\r\t)
     assert parse!(~s("\\u2603")) == "☃"
@@ -66,10 +64,10 @@ defmodule Jason.DecodeTest do
   end
 
   test "objects" do
-    assert_fail_with("{", "unexpected end of input at position 1")
-    assert_fail_with("{,", "unexpected byte at position 1: 0x2C (',')")
-    assert_fail_with(~s({"foo"}), "unexpected byte at position 6: 0x7D ('}')")
-    assert_fail_with(~s({"foo": "bar",}), "unexpected byte at position 14: 0x7D ('}')")
+    assert_fail_with("{", :unexpected_end_of_input)
+    assert_fail_with("{,", {:unexpected_byte, "0x2C", 1})
+    assert_fail_with(~s({"foo"}), {:unexpected_byte, "0x7D", 6})
+    assert_fail_with(~s({"foo": "bar",}), {:unexpected_byte, "0x7D", 14})
 
     assert parse!("{}") == %{}
     assert parse!(~s({"foo": "bar"})) == %{"foo" => "bar"}
@@ -103,9 +101,9 @@ defmodule Jason.DecodeTest do
   end
 
   test "arrays" do
-    assert_fail_with("[", "unexpected end of input at position 1")
-    assert_fail_with("[,", "unexpected byte at position 1: 0x2C (',')")
-    assert_fail_with("[1,]", "unexpected byte at position 3: 0x5D (']')")
+    assert_fail_with("[", :unexpected_end_of_input)
+    assert_fail_with("[,", {:unexpected_byte, "0x2C", 1})
+    assert_fail_with("[1,]", {:unexpected_byte, "0x5D", 3})
 
     assert parse!("[]") == []
     assert parse!("[1, 2, 3]") == [1, 2, 3]
@@ -114,8 +112,8 @@ defmodule Jason.DecodeTest do
   end
 
   test "whitespace" do
-    assert_fail_with("", "unexpected end of input at position 0")
-    assert_fail_with("    ", "unexpected end of input at position 4")
+    assert_fail_with("", :unexpected_end_of_input)
+    assert_fail_with("    ", :unexpected_end_of_input)
 
     assert parse!("  [  ]  ") == []
     assert parse!("  {  }  ") == %{}
@@ -133,12 +131,11 @@ defmodule Jason.DecodeTest do
   end
 
   defp parse!(json, opts \\ []) do
-    :jaserl.decode!(json, opts)
+    {:ok, x} = :jaserl.decode(json, opts)
+    x
   end
 
   defp assert_fail_with(string, error) do
-    assert_raise DecodeError, error, fn ->
-      parse!(string)
-    end
+    assert {:error, error} == :jaserl.decode(string, [])
   end
 end
