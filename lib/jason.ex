@@ -8,9 +8,7 @@ defmodule :jaserl do
   @type escape :: :json | :unicode_safe | :html_safe | :javascript_safe
   @type maps :: :naive | :strict
 
-  @type encode_opt ::
-          {:escape, escape} | {:maps, maps} | {:pretty, boolean | :jaserl_formatter.opts()}
-
+  @type encode_opt :: {:escape, escape} | {:maps, maps}
   @type keys :: :atoms | :atoms! | :strings | :copy | (String.t() -> term)
 
   @type strings :: :reference | :copy
@@ -106,11 +104,6 @@ defmodule :jaserl do
         rejected, since both keys would be encoded to the string `"foo"`.
       * `:naive` (default) - does not perform the check.
 
-    * `:pretty` - controls pretty printing of the output. Possible values are:
-
-      * `true` to pretty print with default configuration
-      * a keyword of options as specified by `:jaserl.:jaserl_formatter.pretty_print/2`.
-
   ## Examples
 
       iex> :jaserl.encode(%{a: 1})
@@ -203,22 +196,6 @@ defmodule :jaserl do
     case do_encode(input, format_encode_opts(opts)) do
       {:ok, result} -> result
       {:error, error} -> raise error
-    end
-  end
-
-  defp do_encode(input, %{pretty: true} = opts) do
-    case :jaserl_encode.encode(input, opts) do
-      # TODO
-      {:ok, encoded} -> {:ok, :jaserl_formatter.pretty_print_to_iodata(encoded)}
-      other -> other
-    end
-  end
-
-  defp do_encode(input, %{pretty: pretty} = opts) when pretty !== false do
-    case :jaserl_encode.encode(input, opts) do
-      # TODO
-      {:ok, encoded} -> {:ok, :jaserl_formatter.pretty_print_to_iodata(encoded, pretty)}
-      other -> other
     end
   end
 
