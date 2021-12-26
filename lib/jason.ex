@@ -3,8 +3,6 @@ defmodule :jaserl do
   A blazing fast JSON parser and generator in pure Elixir.
   """
 
-  alias Jaserl.{EncodeError}
-
   @type escape :: :json | :unicode_safe | :html_safe | :javascript_safe
   @type maps :: :naive | :strict
 
@@ -74,31 +72,6 @@ defmodule :jaserl do
   end
 
   @doc """
-  Generates JSON corresponding to `input`.
-
-  Similar to `:jaserl_encode/1` except it will unwrap the error tuple and raise
-  in case of errors.
-
-  ## Examples
-
-      iex> :jaserl.encode!(%{a: 1})
-      ~S|{"a":1}|
-
-      iex> :jaserl.encode!("\\xFF")
-      ** (Jason.EncodeError) invalid byte 0xFF in <<255>>
-
-  """
-  # TODO
-  @spec encode!(term, [encode_opt]) :: String.t() | no_return
-  def encode!(input, opts \\ []) do
-    case do_encode(input, format_encode_opts(opts)) do
-      # TODO
-      {:ok, result} -> :erlang.iolist_to_binary(result)
-      {:error, error} -> raise error
-    end
-  end
-
-  @doc """
   Generates JSON corresponding to `input` and returns iodata.
 
   This function should be preferred to `:jaserl_encode/2`, if the generated
@@ -107,20 +80,8 @@ defmodule :jaserl do
   writes and avoid allocating a continuous buffer for the whole
   resulting string, lowering memory use and increasing performance.
 
-  ## Examples
-
-      iex> {:ok, iodata} = :jaserl.encode_to_iodata(%{a: 1})
-      iex> :erlang.iolist_to_binary(iodata)
-      ~S|{"a":1}|
-
-      # TODO: new error
-      # iex> :jaserl.encode_to_iodata("\\xFF")
-      # {:error, %Jason.EncodeError{message: "invalid byte 0xFF in <<255>>"}}
-
   """
   # TODO
-  @spec encode_to_iodata(term, [encode_opt]) ::
-          {:ok, iodata} | {:error, EncodeError.t() | Exception.t()}
   def encode_to_iodata(input, opts \\ []) do
     do_encode(input, format_encode_opts(opts))
   end
@@ -130,16 +91,6 @@ defmodule :jaserl do
 
   Similar to `encode_to_iodata/1` except it will unwrap the error tuple
   and raise in case of errors.
-
-  ## Examples
-
-      iex> iodata = :jaserl.encode_to_iodata!(%{a: 1})
-      iex> :erlang.iolist_to_binary(iodata)
-      ~S|{"a":1}|
-
-      iex> :jaserl.encode_to_iodata!("\\xFF")
-      ** (Jason.EncodeError) invalid byte 0xFF in <<255>>
-
   """
   @spec encode_to_iodata!(term, [encode_opt]) :: iodata | no_return
   def encode_to_iodata!(input, opts \\ []) do

@@ -1,18 +1,3 @@
-# TODO
-defmodule Jason.EncodeError do
-  defexception [:message]
-
-  @type t :: %__MODULE__{message: String.t()}
-
-  def new({:duplicate_key, key}) do
-    %__MODULE__{message: "duplicate key: #{key}"}
-  end
-
-  def new({:invalid_byte, byte, original}) do
-    %__MODULE__{message: "invalid byte #{inspect(byte, base: :hex)} in #{inspect(original)}"}
-  end
-end
-
 defmodule :jaserl_encode do
   @moduledoc """
   Utilities for encoding elixir values to JSON.
@@ -31,7 +16,7 @@ defmodule :jaserl_encode do
     try do
       {:ok, value(value, escape)}
     catch
-      :throw, %Jason.EncodeError{} = e ->
+      :throw, {:invalid_byte, _, _} = e ->
         {:error, e}
     end
   end
@@ -242,7 +227,7 @@ defmodule :jaserl_encode do
   end
 
   defp escape_json(<<byte, _rest::bits>>, _acc, original, _skip) do
-    error({:invalid_byte, byte, original})
+    throw_invalid_byte_error(byte, original)
   end
 
   Enum.map(json_jt, fn
@@ -281,7 +266,7 @@ defmodule :jaserl_encode do
   end
 
   defp escape_json_chunk(<<byte, _rest::bits>>, _acc, original, _skip, _len) do
-    error({:invalid_byte, byte, original})
+    throw_invalid_byte_error(byte, original)
   end
 
   ## javascript safe JSON escape
@@ -337,7 +322,7 @@ defmodule :jaserl_encode do
   end
 
   defp escape_javascript(<<byte, _rest::bits>>, _acc, original, _skip) do
-    error({:invalid_byte, byte, original})
+    throw_invalid_byte_error(byte, original)
   end
 
   :lists.map(
@@ -390,7 +375,7 @@ defmodule :jaserl_encode do
   end
 
   defp escape_javascript_chunk(<<byte, _rest::bits>>, _acc, original, _skip, _len) do
-    error({:invalid_byte, byte, original})
+    throw_invalid_byte_error(byte, original)
   end
 
   ## HTML safe JSON escape
@@ -442,7 +427,7 @@ defmodule :jaserl_encode do
   end
 
   defp escape_html(<<byte, _rest::bits>>, _acc, original, _skip) do
-    error({:invalid_byte, byte, original})
+    throw_invalid_byte_error(byte, original)
   end
 
   Enum.map(html_jt, fn
@@ -489,7 +474,7 @@ defmodule :jaserl_encode do
   end
 
   defp escape_html_chunk(<<byte, _rest::bits>>, _acc, original, _skip, _len) do
-    error({:invalid_byte, byte, original})
+    throw_invalid_byte_error(byte, original)
   end
 
   ## unicode escape
@@ -555,7 +540,7 @@ defmodule :jaserl_encode do
   end
 
   defp escape_unicode(<<byte, _rest::bits>>, _acc, original, _skip) do
-    error({:invalid_byte, byte, original})
+    throw_invalid_byte_error(byte, original)
   end
 
   Enum.map(json_jt, fn
@@ -623,11 +608,11 @@ defmodule :jaserl_encode do
   end
 
   defp escape_unicode_chunk(<<byte, _rest::bits>>, _acc, original, _skip, _len) do
-    error({:invalid_byte, byte, original})
+    throw_invalid_byte_error(byte, original)
   end
 
-  @compile {:inline, error: 1}
-  defp error(error) do
-    throw(EncodeError.new(error))
+  @compile {:inline, throw_invalid_byte_error: 2}
+  defp throw_invalid_byte_error(byte, original) do
+    throw({:invalid_byte, <<"0x"::utf8, :erlang.integer_to_binary(byte, 16)::binary>>, original})
   end
 end
