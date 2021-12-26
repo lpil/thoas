@@ -6,8 +6,6 @@ defmodule :jaserl_encode do
   # TODO
   import Bitwise
 
-  alias Jason.{EncodeError}
-
   @doc false
   @spec encode(any, map) :: iodata
   def encode(value, opts) do
