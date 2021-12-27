@@ -14,7 +14,7 @@ defmodule :jaserl_decoder do
     string_decode = string_decode_function(opts)
 
     try do
-      value(data, data, 0, [@terminate], string_decode)
+      {:ok, value(data, data, 0, [@terminate], string_decode)}
     catch
       {:position, position} ->
         case position == byte_size(data) do
@@ -29,9 +29,6 @@ defmodule :jaserl_decoder do
 
       {:token, token, position} ->
         {:error, {:unexpected_sequence, token, position}}
-    else
-      value ->
-        {:ok, value}
     end
   end
 
