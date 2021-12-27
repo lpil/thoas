@@ -1,7 +1,7 @@
-defmodule :jaserl_decoder do
+defmodule :thoas_decoder do
   @moduledoc false
 
-  import :jaserl_codegen, only: [bytecase: 2, bytecase: 3]
+  import :thoas_codegen, only: [bytecase: 2, bytecase: 3]
 
   # We use integers instead of atoms to take advantage of the jump table
   # optimization
@@ -539,10 +539,10 @@ defmodule :jaserl_decoder do
          string_decode,
          acc
        ) do
-    require :jaserl_unescape
+    require :thoas_unescape
     last = escapeu_last(int2, original, skip)
 
-    :jaserl_unescape.escapeu_first(
+    :thoas_unescape.escapeu_first(
       int1,
       last,
       rest,
@@ -559,8 +559,8 @@ defmodule :jaserl_decoder do
   end
 
   defp escapeu_last(int, original, skip) do
-    require :jaserl_unescape
-    :jaserl_unescape.escapeu_last(int, original, skip)
+    require :thoas_unescape
+    :thoas_unescape.escapeu_last(int, original, skip)
   end
 
   defp escape_surrogate(
@@ -572,10 +572,10 @@ defmodule :jaserl_decoder do
          acc,
          hi
        ) do
-    require :jaserl_unescape
+    require :thoas_unescape
     last = escapeu_last(int2, original, skip + 6)
 
-    :jaserl_unescape.escapeu_surrogate(
+    :thoas_unescape.escapeu_surrogate(
       int1,
       last,
       rest,

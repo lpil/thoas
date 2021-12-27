@@ -28,7 +28,7 @@ defmodule :thoas do
   """
   def decode(input, opts \\ []) do
     input = :erlang.iolist_to_binary(input)
-    :jaserl_decoder.parse(input, format_decode_opts(opts))
+    :thoas_decoder.parse(input, format_decode_opts(opts))
   end
 
   @doc """
@@ -66,7 +66,7 @@ defmodule :thoas do
   @doc """
   Generates JSON corresponding to `input` and returns iodata.
 
-  This function should be preferred to `:jaserl_encode/2`, if the generated
+  This function should be preferred to `:thoas_encode/2`, if the generated
   JSON will be handed over to one of the IO functions or sent
   over the socket. The Erlang runtime is able to leverage vectorised
   writes and avoid allocating a continuous buffer for the whole
@@ -79,7 +79,7 @@ defmodule :thoas do
   end
 
   defp do_encode(input, opts) do
-    :jaserl_encode.encode(input, opts)
+    :thoas_encode.encode(input, opts)
   end
 
   defp format_encode_opts(opts) do

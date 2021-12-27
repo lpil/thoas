@@ -1,4 +1,4 @@
-defmodule :jaserl_unescape do
+defmodule :thoas_unescape do
   @moduledoc false
 
   # TODO
