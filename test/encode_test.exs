@@ -55,11 +55,11 @@ defmodule Jason.EncoderTest do
   end
 
   test "EncodeError" do
-    catch_throw(:jaserl.encode(<<0x80>>, []))
-    catch_throw(:jaserl.encode(<<?a, 208>>, []))
+    catch_throw(:thoas.encode(<<0x80>>, []))
+    catch_throw(:thoas.encode(<<?a, 208>>, []))
   end
 
   defp to_json(value, opts \\ []) do
-    :jaserl.encode(value, opts)
+    :thoas.encode(value, opts)
   end
 end

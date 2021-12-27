@@ -22,7 +22,7 @@ defmodule JasonBench.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jaserl, "~> 1.0", path: "../", override: true},
+      {:thoas, "~> 1.0", path: "../", override: true},
       {:benchee, "~> 1.0"},
       {:benchee_html, "~> 1.0"},
       {:exjsx, "~> 4.0"},

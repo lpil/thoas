@@ -1,4 +1,4 @@
-defmodule :jaserl do
+defmodule :thoas do
   @moduledoc """
   A blazing fast JSON parser and generator in pure Elixir.
   """

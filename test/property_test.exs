@@ -5,31 +5,31 @@ if Code.ensure_loaded?(ExUnitProperties) do
 
     property "string rountrip" do
       check all(string <- string(:printable)) do
-        assert decode(:jaserl.encode(string, [])) == string
+        assert decode(:thoas.encode(string, [])) == string
       end
     end
 
     property "integer roundtrip" do
       check all(integer <- integer()) do
-        assert decode(:jaserl.encode(integer, [])) == integer
+        assert decode(:thoas.encode(integer, [])) == integer
       end
     end
 
     property "float roundtrip" do
       check all(float <- float()) do
-        assert decode(:jaserl.encode(float, [])) == float
+        assert decode(:thoas.encode(float, [])) == float
       end
     end
 
     property "string-keyed objects roundrtip" do
       check all(json <- json(string(:printable))) do
-        assert decode(:jaserl.encode(json, [])) == json
+        assert decode(:thoas.encode(json, [])) == json
       end
     end
 
     property "html escaping" do
       check all(string <- string(:printable)) do
-        encoded = :jaserl.encode(string, escape: :html)
+        encoded = :thoas.encode(string, escape: :html)
         refute encoded =~ <<0x2028::utf8>>
         refute encoded =~ <<0x2029::utf8>>
         refute encoded =~ ~r"(?<!\\)/"
@@ -39,7 +39,7 @@ if Code.ensure_loaded?(ExUnitProperties) do
 
     property "javascript escaping" do
       check all(string <- string(:printable)) do
-        encoded = :jaserl.encode(string, escape: :javascript)
+        encoded = :thoas.encode(string, escape: :javascript)
         refute encoded =~ <<0x2028::utf8>>
         refute encoded =~ <<0x2029::utf8>>
         assert decode(encoded) == string
@@ -47,7 +47,7 @@ if Code.ensure_loaded?(ExUnitProperties) do
     end
 
     defp decode(data, opts \\ []) do
-      {:ok, x} = :jaserl.decode(data, opts)
+      {:ok, x} = :thoas.decode(data, opts)
       x
     end
 
