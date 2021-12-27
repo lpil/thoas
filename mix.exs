@@ -5,7 +5,7 @@ defmodule :jaserl_mixfile do
 
   def project() do
     [
-      app: :jason,
+      app: :jaserl,
       version: @version,
       elixir: "~> 1.4",
       start_permanent: Mix.env() == :prod,

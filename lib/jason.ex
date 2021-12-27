@@ -78,20 +78,6 @@ defmodule :jaserl do
     do_encode(input, format_encode_opts(opts))
   end
 
-  @doc """
-  Generates JSON corresponding to `input` and returns iodata.
-
-  Similar to `encode_to_iodata/1` except it will unwrap the error tuple
-  and raise in case of errors.
-  """
-  @spec encode_to_iodata!(term, [encode_opt]) :: iodata | no_return
-  def encode_to_iodata!(input, opts \\ []) do
-    case do_encode(input, format_encode_opts(opts)) do
-      {:ok, result} -> result
-      {:error, error} -> raise error
-    end
-  end
-
   defp do_encode(input, opts) do
     :jaserl_encode.encode(input, opts)
   end
