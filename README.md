@@ -12,6 +12,9 @@ Both parser and generator fully conform to
 [ECMA 404](http://www.ecma-international.org/publications/standards/Ecma-404.htm)
 standards. The parser is tested using [JSONTestSuite](https://github.com/nst/JSONTestSuite).
 
+If you like this library thank Michał and the Jason contributors. They did all
+the hard work!
+
 ## Installation
 
 ### Erlang
@@ -55,53 +58,21 @@ A HTML report of the benchmarks (after their execution) can be found in
 
 ## Differences to Jason
 
-Jason has a couple feature differences compared to Poison.
+Thoas has a couple feature differences compared to Jason.
 
-  * Jason follows the JSON spec more strictly, for example it does not allow
-    unescaped newline characters in JSON strings - e.g. `"\"\n\""` will
-    produce a decoding error.
-  * no support for decoding into data structures (the `as:` option).
-  * no built-in encoders for `MapSet`, `Range` and `Stream`.
-  * no support for encoding arbitrary structs - explicit implementation
-    of the `Jason.Encoder` protocol is always required.
-  * different pretty-printing customisation options (default `pretty: true` works the same)
+- Thoas is written in Erlang.
+- Thoas has no support for Elixir protocols.
+- Thoas has no support for pretty-printing JSON.
+- Thoas always uses binary strings when decoding object keys.
 
-If you require encoders for any of the unsupported collection types, I suggest
-adding the needed implementations directly to your project:
+## Why convert Jason to Erlang?
 
-```elixir
-defimpl Jason.Encoder, for: [MapSet, Range, Stream] do
-  def encode(struct, opts) do
-    Jason.Encode.list(Enum.to_list(struct), opts)
-  end
-end
-```
+Jason rocks, but if you're writing Erlang, Gleam, or some other BEAM language
+you probably don't want to pull in the Elixir compiler and their standard
+libraries just to get a really fast JSON parser.
 
-If you need to encode some struct that does not implement the protocol,
-if you own the struct, you can derive the implementation specifying
-which fields should be encoded to JSON:
-
-```elixir
-@derive {Jason.Encoder, only: [....]}
-defstruct # ...
-```
-
-It is also possible to encode all fields, although this should be
-used carefully to avoid accidentally leaking private information
-when new fields are added:
-
-```elixir
-@derive Jason.Encoder
-defstruct # ...
-```
-
-Finally, if you don't own the struct you want to encode to JSON,
-you may use `Protocol.derive/3` placed outside of any module:
-
-```elixir
-Protocol.derive(Jason.Encoder, NameOfTheStruct, only: [...])
-Protocol.derive(Jason.Encoder, NameOfTheStruct)
-```
+Thoas is just Erlang and uses rebar3, so it can be easily added as a dependency
+to projects written in any BEAM language.
 
 ## License
 
