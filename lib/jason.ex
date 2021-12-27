@@ -28,7 +28,7 @@ defmodule :thoas do
   """
   def decode(input, opts \\ []) do
     input = :erlang.iolist_to_binary(input)
-    :thoas_decoder.parse(input, format_decode_opts(opts))
+    :thoas_decode.parse(input, format_decode_opts(opts))
   end
 
   @doc """
