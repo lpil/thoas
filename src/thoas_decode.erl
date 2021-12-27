@@ -74,27 +74,14 @@ escape(Data, Input, Skip, Stack, StringDecode, Acc) ->
             string(Rest, Input, Skip + 2, Stack, StringDecode, [Acc, $\b], 0);
         <<$f/integer,Rest/bitstring>> ->
             string(Rest, Input, Skip + 2, Stack, StringDecode, [Acc, $\f], 0);
-        <<110/integer,_rest@6/bitstring>> ->
-            string(_rest@6, Input,
-                   Skip + 2,
-                   Stack, StringDecode,
-                   [Acc, 10],
-                   0);
-        <<114/integer,_rest@7/bitstring>> ->
-            string(_rest@7, Input,
-                   Skip + 2,
-                   Stack, StringDecode,
-                   [Acc, 13],
-                   0);
-        <<116/integer,_rest@8/bitstring>> ->
-            string(_rest@8, Input,
-                   Skip + 2,
-                   Stack, StringDecode,
-                   [Acc, 9],
-                   0);
-        <<117/integer,_rest@9/bitstring>> ->
-            escapeu(_rest@9, Input, Skip, Stack,
-                    StringDecode, Acc);
+        <<$n/integer,Rest/bitstring>> ->
+            string(Rest, Input, Skip + 2, Stack, StringDecode, [Acc, $\n], 0);
+        <<$r/integer,Rest/bitstring>> ->
+            string(Rest, Input, Skip + 2, Stack, StringDecode, [Acc, $\r], 0);
+        <<$t/integer,Rest/bitstring>> ->
+            string(Rest, Input, Skip + 2, Stack, StringDecode, [Acc, $\t], 0);
+        <<$u/integer,Rest/bitstring>> ->
+            escapeu(Rest, Input, Skip, Stack, StringDecode, Acc);
         <<_/integer,_/bitstring>> ->
             throw_error(Input, Skip + 1);
         <<_/bitstring>> ->
@@ -103,23 +90,23 @@ escape(Data, Input, Skip, Stack, StringDecode, Acc) ->
 
 escape_surrogate(<<92/integer,
                    117/integer,
-                   _int1@1:16/integer,
-                   _int2@1:16/integer,
+                   Int1:16/integer,
+                   Int2:16/integer,
                    Rest/bitstring>>,
                  Input, Skip, Stack, StringDecode,
-                 _acc@1, _hi@1) ->
+                 Acc, Hi) ->
     thoas_unescape,
-    _last@1 = escapeu_last(_int2@1, Input, Skip + 6),
-    case _int1@1 of
+    _last@1 = escapeu_last(Int2, Input, Skip + 6),
+    case Int1 of
         17475 ->
             string(Rest, Input,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@1 = _acc@1,
+                       _@1 = Acc,
                        _@2 = 220,
                        _@3 = _last@1,
-                       _@4 = _hi@1,
+                       _@4 = Hi,
                        begin
                            _@5 = _@2 band 3 bsl 8 + _@3,
                            [_@1 | <<(_@4 + _@5)/utf8>>]
@@ -131,10 +118,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@6 = _acc@1,
+                       _@6 = Acc,
                        _@7 = 221,
                        _@8 = _last@1,
-                       _@9 = _hi@1,
+                       _@9 = Hi,
                        begin
                            _@10 = _@7 band 3 bsl 8 + _@8,
                            [_@6 | <<(_@9 + _@10)/utf8>>]
@@ -146,10 +133,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@11 = _acc@1,
+                       _@11 = Acc,
                        _@12 = 222,
                        _@13 = _last@1,
-                       _@14 = _hi@1,
+                       _@14 = Hi,
                        begin
                            _@15 = _@12 band 3 bsl 8 + _@13,
                            [_@11 | <<(_@14 + _@15)/utf8>>]
@@ -161,10 +148,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@16 = _acc@1,
+                       _@16 = Acc,
                        _@17 = 223,
                        _@18 = _last@1,
-                       _@19 = _hi@1,
+                       _@19 = Hi,
                        begin
                            _@20 = _@17 band 3 bsl 8 + _@18,
                            [_@16 | <<(_@19 + _@20)/utf8>>]
@@ -176,10 +163,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@21 = _acc@1,
+                       _@21 = Acc,
                        _@22 = 220,
                        _@23 = _last@1,
-                       _@24 = _hi@1,
+                       _@24 = Hi,
                        begin
                            _@25 = _@22 band 3 bsl 8 + _@23,
                            [_@21 | <<(_@24 + _@25)/utf8>>]
@@ -191,10 +178,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@26 = _acc@1,
+                       _@26 = Acc,
                        _@27 = 221,
                        _@28 = _last@1,
-                       _@29 = _hi@1,
+                       _@29 = Hi,
                        begin
                            _@30 = _@27 band 3 bsl 8 + _@28,
                            [_@26 | <<(_@29 + _@30)/utf8>>]
@@ -206,10 +193,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@31 = _acc@1,
+                       _@31 = Acc,
                        _@32 = 222,
                        _@33 = _last@1,
-                       _@34 = _hi@1,
+                       _@34 = Hi,
                        begin
                            _@35 = _@32 band 3 bsl 8 + _@33,
                            [_@31 | <<(_@34 + _@35)/utf8>>]
@@ -221,10 +208,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@36 = _acc@1,
+                       _@36 = Acc,
                        _@37 = 223,
                        _@38 = _last@1,
-                       _@39 = _hi@1,
+                       _@39 = Hi,
                        begin
                            _@40 = _@37 band 3 bsl 8 + _@38,
                            [_@36 | <<(_@39 + _@40)/utf8>>]
@@ -236,10 +223,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@41 = _acc@1,
+                       _@41 = Acc,
                        _@42 = 220,
                        _@43 = _last@1,
-                       _@44 = _hi@1,
+                       _@44 = Hi,
                        begin
                            _@45 = _@42 band 3 bsl 8 + _@43,
                            [_@41 | <<(_@44 + _@45)/utf8>>]
@@ -251,10 +238,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@46 = _acc@1,
+                       _@46 = Acc,
                        _@47 = 221,
                        _@48 = _last@1,
-                       _@49 = _hi@1,
+                       _@49 = Hi,
                        begin
                            _@50 = _@47 band 3 bsl 8 + _@48,
                            [_@46 | <<(_@49 + _@50)/utf8>>]
@@ -266,10 +253,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@51 = _acc@1,
+                       _@51 = Acc,
                        _@52 = 222,
                        _@53 = _last@1,
-                       _@54 = _hi@1,
+                       _@54 = Hi,
                        begin
                            _@55 = _@52 band 3 bsl 8 + _@53,
                            [_@51 | <<(_@54 + _@55)/utf8>>]
@@ -281,10 +268,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@56 = _acc@1,
+                       _@56 = Acc,
                        _@57 = 223,
                        _@58 = _last@1,
-                       _@59 = _hi@1,
+                       _@59 = Hi,
                        begin
                            _@60 = _@57 band 3 bsl 8 + _@58,
                            [_@56 | <<(_@59 + _@60)/utf8>>]
@@ -296,10 +283,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@61 = _acc@1,
+                       _@61 = Acc,
                        _@62 = 220,
                        _@63 = _last@1,
-                       _@64 = _hi@1,
+                       _@64 = Hi,
                        begin
                            _@65 = _@62 band 3 bsl 8 + _@63,
                            [_@61 | <<(_@64 + _@65)/utf8>>]
@@ -311,10 +298,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@66 = _acc@1,
+                       _@66 = Acc,
                        _@67 = 221,
                        _@68 = _last@1,
-                       _@69 = _hi@1,
+                       _@69 = Hi,
                        begin
                            _@70 = _@67 band 3 bsl 8 + _@68,
                            [_@66 | <<(_@69 + _@70)/utf8>>]
@@ -326,10 +313,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@71 = _acc@1,
+                       _@71 = Acc,
                        _@72 = 222,
                        _@73 = _last@1,
-                       _@74 = _hi@1,
+                       _@74 = Hi,
                        begin
                            _@75 = _@72 band 3 bsl 8 + _@73,
                            [_@71 | <<(_@74 + _@75)/utf8>>]
@@ -341,10 +328,10 @@ escape_surrogate(<<92/integer,
                    Skip + 12,
                    Stack, StringDecode,
                    begin
-                       _@76 = _acc@1,
+                       _@76 = Acc,
                        _@77 = 223,
                        _@78 = _last@1,
-                       _@79 = _hi@1,
+                       _@79 = Hi,
                        begin
                            _@80 = _@77 band 3 bsl 8 + _@78,
                            [_@76 | <<(_@79 + _@80)/utf8>>]
@@ -356,20 +343,20 @@ escape_surrogate(<<92/integer,
     end;
 escape_surrogate(<<_Rest/bitstring>>,
                  Input, Skip, _Stack, _StringDecode,
-                 __acc@1, __hi@1) ->
+                 _Acc, _Hi) ->
     throw_error(Input, Skip + 6).
 
-escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
-        Input, Skip, Stack, StringDecode, _acc@1) ->
+escapeu(<<Int1:16/integer,Int2:16/integer,Rest/bitstring>>,
+        Input, Skip, Stack, StringDecode, Acc) ->
     thoas_unescape,
-    _last@1 = escapeu_last(_int2@1, Input, Skip),
-    case _int1@1 of
+    _last@1 = escapeu_last(Int2, Input, Skip),
+    case Int1 of
         12336 ->
             string(Rest, Input,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1 = _acc@1,
+                       _@1 = Acc,
                        _@2 = 0,
                        _@3 = _last@1,
                        case _@3 =< 127 of
@@ -387,7 +374,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@6 = _acc@1,
+                       _@6 = Acc,
                        _@7 = 1,
                        _@8 = _last@1,
                        begin
@@ -402,7 +389,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@11 = _acc@1,
+                       _@11 = Acc,
                        _@12 = 2,
                        _@13 = _last@1,
                        begin
@@ -417,7 +404,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@16 = _acc@1,
+                       _@16 = Acc,
                        _@17 = 3,
                        _@18 = _last@1,
                        begin
@@ -432,7 +419,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@21 = _acc@1,
+                       _@21 = Acc,
                        _@22 = 4,
                        _@23 = _last@1,
                        begin
@@ -447,7 +434,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@26 = _acc@1,
+                       _@26 = Acc,
                        _@27 = 5,
                        _@28 = _last@1,
                        begin
@@ -462,7 +449,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@31 = _acc@1,
+                       _@31 = Acc,
                        _@32 = 6,
                        _@33 = _last@1,
                        begin
@@ -477,7 +464,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@36 = _acc@1,
+                       _@36 = Acc,
                        _@37 = 7,
                        _@38 = _last@1,
                        begin
@@ -492,7 +479,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@41 = _acc@1,
+                       _@41 = Acc,
                        _@42 = 8,
                        _@43 = _last@1,
                        begin
@@ -511,7 +498,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@47 = _acc@1,
+                       _@47 = Acc,
                        _@48 = 9,
                        _@49 = _last@1,
                        begin
@@ -530,7 +517,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@53 = _acc@1,
+                       _@53 = Acc,
                        _@54 = 10,
                        _@55 = _last@1,
                        begin
@@ -549,7 +536,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@59 = _acc@1,
+                       _@59 = Acc,
                        _@60 = 11,
                        _@61 = _last@1,
                        begin
@@ -568,7 +555,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@65 = _acc@1,
+                       _@65 = Acc,
                        _@66 = 12,
                        _@67 = _last@1,
                        begin
@@ -587,7 +574,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@71 = _acc@1,
+                       _@71 = Acc,
                        _@72 = 13,
                        _@73 = _last@1,
                        begin
@@ -606,7 +593,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@77 = _acc@1,
+                       _@77 = Acc,
                        _@78 = 14,
                        _@79 = _last@1,
                        begin
@@ -625,7 +612,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@83 = _acc@1,
+                       _@83 = Acc,
                        _@84 = 15,
                        _@85 = _last@1,
                        begin
@@ -644,7 +631,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@89 = _acc@1,
+                       _@89 = Acc,
                        _@90 = 10,
                        _@91 = _last@1,
                        begin
@@ -663,7 +650,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@95 = _acc@1,
+                       _@95 = Acc,
                        _@96 = 11,
                        _@97 = _last@1,
                        begin
@@ -682,7 +669,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@101 = _acc@1,
+                       _@101 = Acc,
                        _@102 = 12,
                        _@103 = _last@1,
                        begin
@@ -701,7 +688,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@107 = _acc@1,
+                       _@107 = Acc,
                        _@108 = 13,
                        _@109 = _last@1,
                        begin
@@ -720,7 +707,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@113 = _acc@1,
+                       _@113 = Acc,
                        _@114 = 14,
                        _@115 = _last@1,
                        begin
@@ -739,7 +726,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@119 = _acc@1,
+                       _@119 = Acc,
                        _@120 = 15,
                        _@121 = _last@1,
                        begin
@@ -758,7 +745,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@125 = _acc@1,
+                       _@125 = Acc,
                        _@126 = 16,
                        _@127 = _last@1,
                        begin
@@ -777,7 +764,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@131 = _acc@1,
+                       _@131 = Acc,
                        _@132 = 17,
                        _@133 = _last@1,
                        begin
@@ -796,7 +783,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@137 = _acc@1,
+                       _@137 = Acc,
                        _@138 = 18,
                        _@139 = _last@1,
                        begin
@@ -815,7 +802,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@143 = _acc@1,
+                       _@143 = Acc,
                        _@144 = 19,
                        _@145 = _last@1,
                        begin
@@ -834,7 +821,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@149 = _acc@1,
+                       _@149 = Acc,
                        _@150 = 20,
                        _@151 = _last@1,
                        begin
@@ -853,7 +840,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@155 = _acc@1,
+                       _@155 = Acc,
                        _@156 = 21,
                        _@157 = _last@1,
                        begin
@@ -872,7 +859,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@161 = _acc@1,
+                       _@161 = Acc,
                        _@162 = 22,
                        _@163 = _last@1,
                        begin
@@ -891,7 +878,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@167 = _acc@1,
+                       _@167 = Acc,
                        _@168 = 23,
                        _@169 = _last@1,
                        begin
@@ -910,7 +897,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@173 = _acc@1,
+                       _@173 = Acc,
                        _@174 = 24,
                        _@175 = _last@1,
                        begin
@@ -929,7 +916,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@179 = _acc@1,
+                       _@179 = Acc,
                        _@180 = 25,
                        _@181 = _last@1,
                        begin
@@ -948,7 +935,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@185 = _acc@1,
+                       _@185 = Acc,
                        _@186 = 26,
                        _@187 = _last@1,
                        begin
@@ -967,7 +954,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@191 = _acc@1,
+                       _@191 = Acc,
                        _@192 = 27,
                        _@193 = _last@1,
                        begin
@@ -986,7 +973,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@197 = _acc@1,
+                       _@197 = Acc,
                        _@198 = 28,
                        _@199 = _last@1,
                        begin
@@ -1005,7 +992,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@203 = _acc@1,
+                       _@203 = Acc,
                        _@204 = 29,
                        _@205 = _last@1,
                        begin
@@ -1024,7 +1011,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@209 = _acc@1,
+                       _@209 = Acc,
                        _@210 = 30,
                        _@211 = _last@1,
                        begin
@@ -1043,7 +1030,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@215 = _acc@1,
+                       _@215 = Acc,
                        _@216 = 31,
                        _@217 = _last@1,
                        begin
@@ -1062,7 +1049,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@221 = _acc@1,
+                       _@221 = Acc,
                        _@222 = 26,
                        _@223 = _last@1,
                        begin
@@ -1081,7 +1068,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@227 = _acc@1,
+                       _@227 = Acc,
                        _@228 = 27,
                        _@229 = _last@1,
                        begin
@@ -1100,7 +1087,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@233 = _acc@1,
+                       _@233 = Acc,
                        _@234 = 28,
                        _@235 = _last@1,
                        begin
@@ -1119,7 +1106,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@239 = _acc@1,
+                       _@239 = Acc,
                        _@240 = 29,
                        _@241 = _last@1,
                        begin
@@ -1138,7 +1125,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@245 = _acc@1,
+                       _@245 = Acc,
                        _@246 = 30,
                        _@247 = _last@1,
                        begin
@@ -1157,7 +1144,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@251 = _acc@1,
+                       _@251 = Acc,
                        _@252 = 31,
                        _@253 = _last@1,
                        begin
@@ -1176,7 +1163,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@257 = _acc@1,
+                       _@257 = Acc,
                        _@258 = 32,
                        _@259 = _last@1,
                        begin
@@ -1195,7 +1182,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@263 = _acc@1,
+                       _@263 = Acc,
                        _@264 = 33,
                        _@265 = _last@1,
                        begin
@@ -1214,7 +1201,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@269 = _acc@1,
+                       _@269 = Acc,
                        _@270 = 34,
                        _@271 = _last@1,
                        begin
@@ -1233,7 +1220,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@275 = _acc@1,
+                       _@275 = Acc,
                        _@276 = 35,
                        _@277 = _last@1,
                        begin
@@ -1252,7 +1239,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@281 = _acc@1,
+                       _@281 = Acc,
                        _@282 = 36,
                        _@283 = _last@1,
                        begin
@@ -1271,7 +1258,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@287 = _acc@1,
+                       _@287 = Acc,
                        _@288 = 37,
                        _@289 = _last@1,
                        begin
@@ -1290,7 +1277,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@293 = _acc@1,
+                       _@293 = Acc,
                        _@294 = 38,
                        _@295 = _last@1,
                        begin
@@ -1309,7 +1296,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@299 = _acc@1,
+                       _@299 = Acc,
                        _@300 = 39,
                        _@301 = _last@1,
                        begin
@@ -1328,7 +1315,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@305 = _acc@1,
+                       _@305 = Acc,
                        _@306 = 40,
                        _@307 = _last@1,
                        begin
@@ -1347,7 +1334,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@311 = _acc@1,
+                       _@311 = Acc,
                        _@312 = 41,
                        _@313 = _last@1,
                        begin
@@ -1366,7 +1353,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@317 = _acc@1,
+                       _@317 = Acc,
                        _@318 = 42,
                        _@319 = _last@1,
                        begin
@@ -1385,7 +1372,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@323 = _acc@1,
+                       _@323 = Acc,
                        _@324 = 43,
                        _@325 = _last@1,
                        begin
@@ -1404,7 +1391,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@329 = _acc@1,
+                       _@329 = Acc,
                        _@330 = 44,
                        _@331 = _last@1,
                        begin
@@ -1423,7 +1410,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@335 = _acc@1,
+                       _@335 = Acc,
                        _@336 = 45,
                        _@337 = _last@1,
                        begin
@@ -1442,7 +1429,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@341 = _acc@1,
+                       _@341 = Acc,
                        _@342 = 46,
                        _@343 = _last@1,
                        begin
@@ -1461,7 +1448,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@347 = _acc@1,
+                       _@347 = Acc,
                        _@348 = 47,
                        _@349 = _last@1,
                        begin
@@ -1480,7 +1467,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@353 = _acc@1,
+                       _@353 = Acc,
                        _@354 = 42,
                        _@355 = _last@1,
                        begin
@@ -1499,7 +1486,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@359 = _acc@1,
+                       _@359 = Acc,
                        _@360 = 43,
                        _@361 = _last@1,
                        begin
@@ -1518,7 +1505,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@365 = _acc@1,
+                       _@365 = Acc,
                        _@366 = 44,
                        _@367 = _last@1,
                        begin
@@ -1537,7 +1524,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@371 = _acc@1,
+                       _@371 = Acc,
                        _@372 = 45,
                        _@373 = _last@1,
                        begin
@@ -1556,7 +1543,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@377 = _acc@1,
+                       _@377 = Acc,
                        _@378 = 46,
                        _@379 = _last@1,
                        begin
@@ -1575,7 +1562,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@383 = _acc@1,
+                       _@383 = Acc,
                        _@384 = 47,
                        _@385 = _last@1,
                        begin
@@ -1594,7 +1581,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@389 = _acc@1,
+                       _@389 = Acc,
                        _@390 = 48,
                        _@391 = _last@1,
                        begin
@@ -1613,7 +1600,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@395 = _acc@1,
+                       _@395 = Acc,
                        _@396 = 49,
                        _@397 = _last@1,
                        begin
@@ -1632,7 +1619,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@401 = _acc@1,
+                       _@401 = Acc,
                        _@402 = 50,
                        _@403 = _last@1,
                        begin
@@ -1651,7 +1638,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@407 = _acc@1,
+                       _@407 = Acc,
                        _@408 = 51,
                        _@409 = _last@1,
                        begin
@@ -1670,7 +1657,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@413 = _acc@1,
+                       _@413 = Acc,
                        _@414 = 52,
                        _@415 = _last@1,
                        begin
@@ -1689,7 +1676,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@419 = _acc@1,
+                       _@419 = Acc,
                        _@420 = 53,
                        _@421 = _last@1,
                        begin
@@ -1708,7 +1695,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@425 = _acc@1,
+                       _@425 = Acc,
                        _@426 = 54,
                        _@427 = _last@1,
                        begin
@@ -1727,7 +1714,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@431 = _acc@1,
+                       _@431 = Acc,
                        _@432 = 55,
                        _@433 = _last@1,
                        begin
@@ -1746,7 +1733,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@437 = _acc@1,
+                       _@437 = Acc,
                        _@438 = 56,
                        _@439 = _last@1,
                        begin
@@ -1765,7 +1752,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@443 = _acc@1,
+                       _@443 = Acc,
                        _@444 = 57,
                        _@445 = _last@1,
                        begin
@@ -1784,7 +1771,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@449 = _acc@1,
+                       _@449 = Acc,
                        _@450 = 58,
                        _@451 = _last@1,
                        begin
@@ -1803,7 +1790,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@455 = _acc@1,
+                       _@455 = Acc,
                        _@456 = 59,
                        _@457 = _last@1,
                        begin
@@ -1822,7 +1809,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@461 = _acc@1,
+                       _@461 = Acc,
                        _@462 = 60,
                        _@463 = _last@1,
                        begin
@@ -1841,7 +1828,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@467 = _acc@1,
+                       _@467 = Acc,
                        _@468 = 61,
                        _@469 = _last@1,
                        begin
@@ -1860,7 +1847,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@473 = _acc@1,
+                       _@473 = Acc,
                        _@474 = 62,
                        _@475 = _last@1,
                        begin
@@ -1879,7 +1866,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@479 = _acc@1,
+                       _@479 = Acc,
                        _@480 = 63,
                        _@481 = _last@1,
                        begin
@@ -1898,7 +1885,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@485 = _acc@1,
+                       _@485 = Acc,
                        _@486 = 58,
                        _@487 = _last@1,
                        begin
@@ -1917,7 +1904,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@491 = _acc@1,
+                       _@491 = Acc,
                        _@492 = 59,
                        _@493 = _last@1,
                        begin
@@ -1936,7 +1923,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@497 = _acc@1,
+                       _@497 = Acc,
                        _@498 = 60,
                        _@499 = _last@1,
                        begin
@@ -1955,7 +1942,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@503 = _acc@1,
+                       _@503 = Acc,
                        _@504 = 61,
                        _@505 = _last@1,
                        begin
@@ -1974,7 +1961,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@509 = _acc@1,
+                       _@509 = Acc,
                        _@510 = 62,
                        _@511 = _last@1,
                        begin
@@ -1993,7 +1980,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@515 = _acc@1,
+                       _@515 = Acc,
                        _@516 = 63,
                        _@517 = _last@1,
                        begin
@@ -2012,7 +1999,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@521 = _acc@1,
+                       _@521 = Acc,
                        _@522 = 64,
                        _@523 = _last@1,
                        begin
@@ -2031,7 +2018,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@527 = _acc@1,
+                       _@527 = Acc,
                        _@528 = 65,
                        _@529 = _last@1,
                        begin
@@ -2050,7 +2037,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@533 = _acc@1,
+                       _@533 = Acc,
                        _@534 = 66,
                        _@535 = _last@1,
                        begin
@@ -2069,7 +2056,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@539 = _acc@1,
+                       _@539 = Acc,
                        _@540 = 67,
                        _@541 = _last@1,
                        begin
@@ -2088,7 +2075,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@545 = _acc@1,
+                       _@545 = Acc,
                        _@546 = 68,
                        _@547 = _last@1,
                        begin
@@ -2107,7 +2094,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@551 = _acc@1,
+                       _@551 = Acc,
                        _@552 = 69,
                        _@553 = _last@1,
                        begin
@@ -2126,7 +2113,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@557 = _acc@1,
+                       _@557 = Acc,
                        _@558 = 70,
                        _@559 = _last@1,
                        begin
@@ -2145,7 +2132,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@563 = _acc@1,
+                       _@563 = Acc,
                        _@564 = 71,
                        _@565 = _last@1,
                        begin
@@ -2164,7 +2151,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@569 = _acc@1,
+                       _@569 = Acc,
                        _@570 = 72,
                        _@571 = _last@1,
                        begin
@@ -2183,7 +2170,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@575 = _acc@1,
+                       _@575 = Acc,
                        _@576 = 73,
                        _@577 = _last@1,
                        begin
@@ -2202,7 +2189,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@581 = _acc@1,
+                       _@581 = Acc,
                        _@582 = 74,
                        _@583 = _last@1,
                        begin
@@ -2221,7 +2208,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@587 = _acc@1,
+                       _@587 = Acc,
                        _@588 = 75,
                        _@589 = _last@1,
                        begin
@@ -2240,7 +2227,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@593 = _acc@1,
+                       _@593 = Acc,
                        _@594 = 76,
                        _@595 = _last@1,
                        begin
@@ -2259,7 +2246,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@599 = _acc@1,
+                       _@599 = Acc,
                        _@600 = 77,
                        _@601 = _last@1,
                        begin
@@ -2278,7 +2265,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@605 = _acc@1,
+                       _@605 = Acc,
                        _@606 = 78,
                        _@607 = _last@1,
                        begin
@@ -2297,7 +2284,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@611 = _acc@1,
+                       _@611 = Acc,
                        _@612 = 79,
                        _@613 = _last@1,
                        begin
@@ -2316,7 +2303,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@617 = _acc@1,
+                       _@617 = Acc,
                        _@618 = 74,
                        _@619 = _last@1,
                        begin
@@ -2335,7 +2322,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@623 = _acc@1,
+                       _@623 = Acc,
                        _@624 = 75,
                        _@625 = _last@1,
                        begin
@@ -2354,7 +2341,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@629 = _acc@1,
+                       _@629 = Acc,
                        _@630 = 76,
                        _@631 = _last@1,
                        begin
@@ -2373,7 +2360,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@635 = _acc@1,
+                       _@635 = Acc,
                        _@636 = 77,
                        _@637 = _last@1,
                        begin
@@ -2392,7 +2379,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@641 = _acc@1,
+                       _@641 = Acc,
                        _@642 = 78,
                        _@643 = _last@1,
                        begin
@@ -2411,7 +2398,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@647 = _acc@1,
+                       _@647 = Acc,
                        _@648 = 79,
                        _@649 = _last@1,
                        begin
@@ -2430,7 +2417,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@653 = _acc@1,
+                       _@653 = Acc,
                        _@654 = 80,
                        _@655 = _last@1,
                        begin
@@ -2449,7 +2436,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@659 = _acc@1,
+                       _@659 = Acc,
                        _@660 = 81,
                        _@661 = _last@1,
                        begin
@@ -2468,7 +2455,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@665 = _acc@1,
+                       _@665 = Acc,
                        _@666 = 82,
                        _@667 = _last@1,
                        begin
@@ -2487,7 +2474,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@671 = _acc@1,
+                       _@671 = Acc,
                        _@672 = 83,
                        _@673 = _last@1,
                        begin
@@ -2506,7 +2493,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@677 = _acc@1,
+                       _@677 = Acc,
                        _@678 = 84,
                        _@679 = _last@1,
                        begin
@@ -2525,7 +2512,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@683 = _acc@1,
+                       _@683 = Acc,
                        _@684 = 85,
                        _@685 = _last@1,
                        begin
@@ -2544,7 +2531,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@689 = _acc@1,
+                       _@689 = Acc,
                        _@690 = 86,
                        _@691 = _last@1,
                        begin
@@ -2563,7 +2550,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@695 = _acc@1,
+                       _@695 = Acc,
                        _@696 = 87,
                        _@697 = _last@1,
                        begin
@@ -2582,7 +2569,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@701 = _acc@1,
+                       _@701 = Acc,
                        _@702 = 88,
                        _@703 = _last@1,
                        begin
@@ -2601,7 +2588,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@707 = _acc@1,
+                       _@707 = Acc,
                        _@708 = 89,
                        _@709 = _last@1,
                        begin
@@ -2620,7 +2607,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@713 = _acc@1,
+                       _@713 = Acc,
                        _@714 = 90,
                        _@715 = _last@1,
                        begin
@@ -2639,7 +2626,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@719 = _acc@1,
+                       _@719 = Acc,
                        _@720 = 91,
                        _@721 = _last@1,
                        begin
@@ -2658,7 +2645,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@725 = _acc@1,
+                       _@725 = Acc,
                        _@726 = 92,
                        _@727 = _last@1,
                        begin
@@ -2677,7 +2664,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@731 = _acc@1,
+                       _@731 = Acc,
                        _@732 = 93,
                        _@733 = _last@1,
                        begin
@@ -2696,7 +2683,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@737 = _acc@1,
+                       _@737 = Acc,
                        _@738 = 94,
                        _@739 = _last@1,
                        begin
@@ -2715,7 +2702,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@743 = _acc@1,
+                       _@743 = Acc,
                        _@744 = 95,
                        _@745 = _last@1,
                        begin
@@ -2734,7 +2721,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@749 = _acc@1,
+                       _@749 = Acc,
                        _@750 = 90,
                        _@751 = _last@1,
                        begin
@@ -2753,7 +2740,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@755 = _acc@1,
+                       _@755 = Acc,
                        _@756 = 91,
                        _@757 = _last@1,
                        begin
@@ -2772,7 +2759,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@761 = _acc@1,
+                       _@761 = Acc,
                        _@762 = 92,
                        _@763 = _last@1,
                        begin
@@ -2791,7 +2778,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@767 = _acc@1,
+                       _@767 = Acc,
                        _@768 = 93,
                        _@769 = _last@1,
                        begin
@@ -2810,7 +2797,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@773 = _acc@1,
+                       _@773 = Acc,
                        _@774 = 94,
                        _@775 = _last@1,
                        begin
@@ -2829,7 +2816,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@779 = _acc@1,
+                       _@779 = Acc,
                        _@780 = 95,
                        _@781 = _last@1,
                        begin
@@ -2848,7 +2835,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@785 = _acc@1,
+                       _@785 = Acc,
                        _@786 = 96,
                        _@787 = _last@1,
                        begin
@@ -2867,7 +2854,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@791 = _acc@1,
+                       _@791 = Acc,
                        _@792 = 97,
                        _@793 = _last@1,
                        begin
@@ -2886,7 +2873,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@797 = _acc@1,
+                       _@797 = Acc,
                        _@798 = 98,
                        _@799 = _last@1,
                        begin
@@ -2905,7 +2892,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@803 = _acc@1,
+                       _@803 = Acc,
                        _@804 = 99,
                        _@805 = _last@1,
                        begin
@@ -2924,7 +2911,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@809 = _acc@1,
+                       _@809 = Acc,
                        _@810 = 100,
                        _@811 = _last@1,
                        begin
@@ -2943,7 +2930,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@815 = _acc@1,
+                       _@815 = Acc,
                        _@816 = 101,
                        _@817 = _last@1,
                        begin
@@ -2962,7 +2949,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@821 = _acc@1,
+                       _@821 = Acc,
                        _@822 = 102,
                        _@823 = _last@1,
                        begin
@@ -2981,7 +2968,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@827 = _acc@1,
+                       _@827 = Acc,
                        _@828 = 103,
                        _@829 = _last@1,
                        begin
@@ -3000,7 +2987,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@833 = _acc@1,
+                       _@833 = Acc,
                        _@834 = 104,
                        _@835 = _last@1,
                        begin
@@ -3019,7 +3006,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@839 = _acc@1,
+                       _@839 = Acc,
                        _@840 = 105,
                        _@841 = _last@1,
                        begin
@@ -3038,7 +3025,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@845 = _acc@1,
+                       _@845 = Acc,
                        _@846 = 106,
                        _@847 = _last@1,
                        begin
@@ -3057,7 +3044,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@851 = _acc@1,
+                       _@851 = Acc,
                        _@852 = 107,
                        _@853 = _last@1,
                        begin
@@ -3076,7 +3063,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@857 = _acc@1,
+                       _@857 = Acc,
                        _@858 = 108,
                        _@859 = _last@1,
                        begin
@@ -3095,7 +3082,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@863 = _acc@1,
+                       _@863 = Acc,
                        _@864 = 109,
                        _@865 = _last@1,
                        begin
@@ -3114,7 +3101,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@869 = _acc@1,
+                       _@869 = Acc,
                        _@870 = 110,
                        _@871 = _last@1,
                        begin
@@ -3133,7 +3120,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@875 = _acc@1,
+                       _@875 = Acc,
                        _@876 = 111,
                        _@877 = _last@1,
                        begin
@@ -3152,7 +3139,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@881 = _acc@1,
+                       _@881 = Acc,
                        _@882 = 106,
                        _@883 = _last@1,
                        begin
@@ -3171,7 +3158,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@887 = _acc@1,
+                       _@887 = Acc,
                        _@888 = 107,
                        _@889 = _last@1,
                        begin
@@ -3190,7 +3177,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@893 = _acc@1,
+                       _@893 = Acc,
                        _@894 = 108,
                        _@895 = _last@1,
                        begin
@@ -3209,7 +3196,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@899 = _acc@1,
+                       _@899 = Acc,
                        _@900 = 109,
                        _@901 = _last@1,
                        begin
@@ -3228,7 +3215,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@905 = _acc@1,
+                       _@905 = Acc,
                        _@906 = 110,
                        _@907 = _last@1,
                        begin
@@ -3247,7 +3234,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@911 = _acc@1,
+                       _@911 = Acc,
                        _@912 = 111,
                        _@913 = _last@1,
                        begin
@@ -3266,7 +3253,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@917 = _acc@1,
+                       _@917 = Acc,
                        _@918 = 112,
                        _@919 = _last@1,
                        begin
@@ -3285,7 +3272,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@923 = _acc@1,
+                       _@923 = Acc,
                        _@924 = 113,
                        _@925 = _last@1,
                        begin
@@ -3304,7 +3291,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@929 = _acc@1,
+                       _@929 = Acc,
                        _@930 = 114,
                        _@931 = _last@1,
                        begin
@@ -3323,7 +3310,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@935 = _acc@1,
+                       _@935 = Acc,
                        _@936 = 115,
                        _@937 = _last@1,
                        begin
@@ -3342,7 +3329,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@941 = _acc@1,
+                       _@941 = Acc,
                        _@942 = 116,
                        _@943 = _last@1,
                        begin
@@ -3361,7 +3348,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@947 = _acc@1,
+                       _@947 = Acc,
                        _@948 = 117,
                        _@949 = _last@1,
                        begin
@@ -3380,7 +3367,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@953 = _acc@1,
+                       _@953 = Acc,
                        _@954 = 118,
                        _@955 = _last@1,
                        begin
@@ -3399,7 +3386,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@959 = _acc@1,
+                       _@959 = Acc,
                        _@960 = 119,
                        _@961 = _last@1,
                        begin
@@ -3418,7 +3405,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@965 = _acc@1,
+                       _@965 = Acc,
                        _@966 = 120,
                        _@967 = _last@1,
                        begin
@@ -3437,7 +3424,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@971 = _acc@1,
+                       _@971 = Acc,
                        _@972 = 121,
                        _@973 = _last@1,
                        begin
@@ -3456,7 +3443,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@977 = _acc@1,
+                       _@977 = Acc,
                        _@978 = 122,
                        _@979 = _last@1,
                        begin
@@ -3475,7 +3462,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@983 = _acc@1,
+                       _@983 = Acc,
                        _@984 = 123,
                        _@985 = _last@1,
                        begin
@@ -3494,7 +3481,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@989 = _acc@1,
+                       _@989 = Acc,
                        _@990 = 124,
                        _@991 = _last@1,
                        begin
@@ -3513,7 +3500,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@995 = _acc@1,
+                       _@995 = Acc,
                        _@996 = 125,
                        _@997 = _last@1,
                        begin
@@ -3532,7 +3519,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1001 = _acc@1,
+                       _@1001 = Acc,
                        _@1002 = 126,
                        _@1003 = _last@1,
                        begin
@@ -3551,7 +3538,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1007 = _acc@1,
+                       _@1007 = Acc,
                        _@1008 = 127,
                        _@1009 = _last@1,
                        begin
@@ -3570,7 +3557,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1013 = _acc@1,
+                       _@1013 = Acc,
                        _@1014 = 122,
                        _@1015 = _last@1,
                        begin
@@ -3589,7 +3576,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1019 = _acc@1,
+                       _@1019 = Acc,
                        _@1020 = 123,
                        _@1021 = _last@1,
                        begin
@@ -3608,7 +3595,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1025 = _acc@1,
+                       _@1025 = Acc,
                        _@1026 = 124,
                        _@1027 = _last@1,
                        begin
@@ -3627,7 +3614,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1031 = _acc@1,
+                       _@1031 = Acc,
                        _@1032 = 125,
                        _@1033 = _last@1,
                        begin
@@ -3646,7 +3633,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1037 = _acc@1,
+                       _@1037 = Acc,
                        _@1038 = 126,
                        _@1039 = _last@1,
                        begin
@@ -3665,7 +3652,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1043 = _acc@1,
+                       _@1043 = Acc,
                        _@1044 = 127,
                        _@1045 = _last@1,
                        begin
@@ -3684,7 +3671,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1049 = _acc@1,
+                       _@1049 = Acc,
                        _@1050 = 128,
                        _@1051 = _last@1,
                        begin
@@ -3703,7 +3690,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1055 = _acc@1,
+                       _@1055 = Acc,
                        _@1056 = 129,
                        _@1057 = _last@1,
                        begin
@@ -3722,7 +3709,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1061 = _acc@1,
+                       _@1061 = Acc,
                        _@1062 = 130,
                        _@1063 = _last@1,
                        begin
@@ -3741,7 +3728,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1067 = _acc@1,
+                       _@1067 = Acc,
                        _@1068 = 131,
                        _@1069 = _last@1,
                        begin
@@ -3760,7 +3747,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1073 = _acc@1,
+                       _@1073 = Acc,
                        _@1074 = 132,
                        _@1075 = _last@1,
                        begin
@@ -3779,7 +3766,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1079 = _acc@1,
+                       _@1079 = Acc,
                        _@1080 = 133,
                        _@1081 = _last@1,
                        begin
@@ -3798,7 +3785,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1085 = _acc@1,
+                       _@1085 = Acc,
                        _@1086 = 134,
                        _@1087 = _last@1,
                        begin
@@ -3817,7 +3804,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1091 = _acc@1,
+                       _@1091 = Acc,
                        _@1092 = 135,
                        _@1093 = _last@1,
                        begin
@@ -3836,7 +3823,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1097 = _acc@1,
+                       _@1097 = Acc,
                        _@1098 = 136,
                        _@1099 = _last@1,
                        begin
@@ -3855,7 +3842,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1103 = _acc@1,
+                       _@1103 = Acc,
                        _@1104 = 137,
                        _@1105 = _last@1,
                        begin
@@ -3874,7 +3861,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1109 = _acc@1,
+                       _@1109 = Acc,
                        _@1110 = 138,
                        _@1111 = _last@1,
                        begin
@@ -3893,7 +3880,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1115 = _acc@1,
+                       _@1115 = Acc,
                        _@1116 = 139,
                        _@1117 = _last@1,
                        begin
@@ -3912,7 +3899,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1121 = _acc@1,
+                       _@1121 = Acc,
                        _@1122 = 140,
                        _@1123 = _last@1,
                        begin
@@ -3931,7 +3918,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1127 = _acc@1,
+                       _@1127 = Acc,
                        _@1128 = 141,
                        _@1129 = _last@1,
                        begin
@@ -3950,7 +3937,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1133 = _acc@1,
+                       _@1133 = Acc,
                        _@1134 = 142,
                        _@1135 = _last@1,
                        begin
@@ -3969,7 +3956,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1139 = _acc@1,
+                       _@1139 = Acc,
                        _@1140 = 143,
                        _@1141 = _last@1,
                        begin
@@ -3988,7 +3975,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1145 = _acc@1,
+                       _@1145 = Acc,
                        _@1146 = 138,
                        _@1147 = _last@1,
                        begin
@@ -4007,7 +3994,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1151 = _acc@1,
+                       _@1151 = Acc,
                        _@1152 = 139,
                        _@1153 = _last@1,
                        begin
@@ -4026,7 +4013,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1157 = _acc@1,
+                       _@1157 = Acc,
                        _@1158 = 140,
                        _@1159 = _last@1,
                        begin
@@ -4045,7 +4032,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1163 = _acc@1,
+                       _@1163 = Acc,
                        _@1164 = 141,
                        _@1165 = _last@1,
                        begin
@@ -4064,7 +4051,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1169 = _acc@1,
+                       _@1169 = Acc,
                        _@1170 = 142,
                        _@1171 = _last@1,
                        begin
@@ -4083,7 +4070,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1175 = _acc@1,
+                       _@1175 = Acc,
                        _@1176 = 143,
                        _@1177 = _last@1,
                        begin
@@ -4102,7 +4089,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1181 = _acc@1,
+                       _@1181 = Acc,
                        _@1182 = 144,
                        _@1183 = _last@1,
                        begin
@@ -4121,7 +4108,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1187 = _acc@1,
+                       _@1187 = Acc,
                        _@1188 = 145,
                        _@1189 = _last@1,
                        begin
@@ -4140,7 +4127,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1193 = _acc@1,
+                       _@1193 = Acc,
                        _@1194 = 146,
                        _@1195 = _last@1,
                        begin
@@ -4159,7 +4146,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1199 = _acc@1,
+                       _@1199 = Acc,
                        _@1200 = 147,
                        _@1201 = _last@1,
                        begin
@@ -4178,7 +4165,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1205 = _acc@1,
+                       _@1205 = Acc,
                        _@1206 = 148,
                        _@1207 = _last@1,
                        begin
@@ -4197,7 +4184,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1211 = _acc@1,
+                       _@1211 = Acc,
                        _@1212 = 149,
                        _@1213 = _last@1,
                        begin
@@ -4216,7 +4203,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1217 = _acc@1,
+                       _@1217 = Acc,
                        _@1218 = 150,
                        _@1219 = _last@1,
                        begin
@@ -4235,7 +4222,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1223 = _acc@1,
+                       _@1223 = Acc,
                        _@1224 = 151,
                        _@1225 = _last@1,
                        begin
@@ -4254,7 +4241,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1229 = _acc@1,
+                       _@1229 = Acc,
                        _@1230 = 152,
                        _@1231 = _last@1,
                        begin
@@ -4273,7 +4260,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1235 = _acc@1,
+                       _@1235 = Acc,
                        _@1236 = 153,
                        _@1237 = _last@1,
                        begin
@@ -4292,7 +4279,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1241 = _acc@1,
+                       _@1241 = Acc,
                        _@1242 = 154,
                        _@1243 = _last@1,
                        begin
@@ -4311,7 +4298,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1247 = _acc@1,
+                       _@1247 = Acc,
                        _@1248 = 155,
                        _@1249 = _last@1,
                        begin
@@ -4330,7 +4317,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1253 = _acc@1,
+                       _@1253 = Acc,
                        _@1254 = 156,
                        _@1255 = _last@1,
                        begin
@@ -4349,7 +4336,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1259 = _acc@1,
+                       _@1259 = Acc,
                        _@1260 = 157,
                        _@1261 = _last@1,
                        begin
@@ -4368,7 +4355,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1265 = _acc@1,
+                       _@1265 = Acc,
                        _@1266 = 158,
                        _@1267 = _last@1,
                        begin
@@ -4387,7 +4374,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1271 = _acc@1,
+                       _@1271 = Acc,
                        _@1272 = 159,
                        _@1273 = _last@1,
                        begin
@@ -4406,7 +4393,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1277 = _acc@1,
+                       _@1277 = Acc,
                        _@1278 = 154,
                        _@1279 = _last@1,
                        begin
@@ -4425,7 +4412,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1283 = _acc@1,
+                       _@1283 = Acc,
                        _@1284 = 155,
                        _@1285 = _last@1,
                        begin
@@ -4444,7 +4431,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1289 = _acc@1,
+                       _@1289 = Acc,
                        _@1290 = 156,
                        _@1291 = _last@1,
                        begin
@@ -4463,7 +4450,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1295 = _acc@1,
+                       _@1295 = Acc,
                        _@1296 = 157,
                        _@1297 = _last@1,
                        begin
@@ -4482,7 +4469,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1301 = _acc@1,
+                       _@1301 = Acc,
                        _@1302 = 158,
                        _@1303 = _last@1,
                        begin
@@ -4501,7 +4488,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1307 = _acc@1,
+                       _@1307 = Acc,
                        _@1308 = 159,
                        _@1309 = _last@1,
                        begin
@@ -4520,7 +4507,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1313 = _acc@1,
+                       _@1313 = Acc,
                        _@1314 = 160,
                        _@1315 = _last@1,
                        begin
@@ -4539,7 +4526,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1319 = _acc@1,
+                       _@1319 = Acc,
                        _@1320 = 161,
                        _@1321 = _last@1,
                        begin
@@ -4558,7 +4545,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1325 = _acc@1,
+                       _@1325 = Acc,
                        _@1326 = 162,
                        _@1327 = _last@1,
                        begin
@@ -4577,7 +4564,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1331 = _acc@1,
+                       _@1331 = Acc,
                        _@1332 = 163,
                        _@1333 = _last@1,
                        begin
@@ -4596,7 +4583,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1337 = _acc@1,
+                       _@1337 = Acc,
                        _@1338 = 164,
                        _@1339 = _last@1,
                        begin
@@ -4615,7 +4602,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1343 = _acc@1,
+                       _@1343 = Acc,
                        _@1344 = 165,
                        _@1345 = _last@1,
                        begin
@@ -4634,7 +4621,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1349 = _acc@1,
+                       _@1349 = Acc,
                        _@1350 = 166,
                        _@1351 = _last@1,
                        begin
@@ -4653,7 +4640,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1355 = _acc@1,
+                       _@1355 = Acc,
                        _@1356 = 167,
                        _@1357 = _last@1,
                        begin
@@ -4672,7 +4659,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1361 = _acc@1,
+                       _@1361 = Acc,
                        _@1362 = 168,
                        _@1363 = _last@1,
                        begin
@@ -4691,7 +4678,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1367 = _acc@1,
+                       _@1367 = Acc,
                        _@1368 = 169,
                        _@1369 = _last@1,
                        begin
@@ -4710,7 +4697,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1373 = _acc@1,
+                       _@1373 = Acc,
                        _@1374 = 170,
                        _@1375 = _last@1,
                        begin
@@ -4729,7 +4716,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1379 = _acc@1,
+                       _@1379 = Acc,
                        _@1380 = 171,
                        _@1381 = _last@1,
                        begin
@@ -4748,7 +4735,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1385 = _acc@1,
+                       _@1385 = Acc,
                        _@1386 = 172,
                        _@1387 = _last@1,
                        begin
@@ -4767,7 +4754,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1391 = _acc@1,
+                       _@1391 = Acc,
                        _@1392 = 173,
                        _@1393 = _last@1,
                        begin
@@ -4786,7 +4773,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1397 = _acc@1,
+                       _@1397 = Acc,
                        _@1398 = 174,
                        _@1399 = _last@1,
                        begin
@@ -4805,7 +4792,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1403 = _acc@1,
+                       _@1403 = Acc,
                        _@1404 = 175,
                        _@1405 = _last@1,
                        begin
@@ -4824,7 +4811,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1409 = _acc@1,
+                       _@1409 = Acc,
                        _@1410 = 170,
                        _@1411 = _last@1,
                        begin
@@ -4843,7 +4830,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1415 = _acc@1,
+                       _@1415 = Acc,
                        _@1416 = 171,
                        _@1417 = _last@1,
                        begin
@@ -4862,7 +4849,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1421 = _acc@1,
+                       _@1421 = Acc,
                        _@1422 = 172,
                        _@1423 = _last@1,
                        begin
@@ -4881,7 +4868,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1427 = _acc@1,
+                       _@1427 = Acc,
                        _@1428 = 173,
                        _@1429 = _last@1,
                        begin
@@ -4900,7 +4887,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1433 = _acc@1,
+                       _@1433 = Acc,
                        _@1434 = 174,
                        _@1435 = _last@1,
                        begin
@@ -4919,7 +4906,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1439 = _acc@1,
+                       _@1439 = Acc,
                        _@1440 = 175,
                        _@1441 = _last@1,
                        begin
@@ -4938,7 +4925,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1445 = _acc@1,
+                       _@1445 = Acc,
                        _@1446 = 176,
                        _@1447 = _last@1,
                        begin
@@ -4957,7 +4944,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1451 = _acc@1,
+                       _@1451 = Acc,
                        _@1452 = 177,
                        _@1453 = _last@1,
                        begin
@@ -4976,7 +4963,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1457 = _acc@1,
+                       _@1457 = Acc,
                        _@1458 = 178,
                        _@1459 = _last@1,
                        begin
@@ -4995,7 +4982,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1463 = _acc@1,
+                       _@1463 = Acc,
                        _@1464 = 179,
                        _@1465 = _last@1,
                        begin
@@ -5014,7 +5001,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1469 = _acc@1,
+                       _@1469 = Acc,
                        _@1470 = 180,
                        _@1471 = _last@1,
                        begin
@@ -5033,7 +5020,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1475 = _acc@1,
+                       _@1475 = Acc,
                        _@1476 = 181,
                        _@1477 = _last@1,
                        begin
@@ -5052,7 +5039,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1481 = _acc@1,
+                       _@1481 = Acc,
                        _@1482 = 182,
                        _@1483 = _last@1,
                        begin
@@ -5071,7 +5058,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1487 = _acc@1,
+                       _@1487 = Acc,
                        _@1488 = 183,
                        _@1489 = _last@1,
                        begin
@@ -5090,7 +5077,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1493 = _acc@1,
+                       _@1493 = Acc,
                        _@1494 = 184,
                        _@1495 = _last@1,
                        begin
@@ -5109,7 +5096,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1499 = _acc@1,
+                       _@1499 = Acc,
                        _@1500 = 185,
                        _@1501 = _last@1,
                        begin
@@ -5128,7 +5115,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1505 = _acc@1,
+                       _@1505 = Acc,
                        _@1506 = 186,
                        _@1507 = _last@1,
                        begin
@@ -5147,7 +5134,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1511 = _acc@1,
+                       _@1511 = Acc,
                        _@1512 = 187,
                        _@1513 = _last@1,
                        begin
@@ -5166,7 +5153,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1517 = _acc@1,
+                       _@1517 = Acc,
                        _@1518 = 188,
                        _@1519 = _last@1,
                        begin
@@ -5185,7 +5172,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1523 = _acc@1,
+                       _@1523 = Acc,
                        _@1524 = 189,
                        _@1525 = _last@1,
                        begin
@@ -5204,7 +5191,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1529 = _acc@1,
+                       _@1529 = Acc,
                        _@1530 = 190,
                        _@1531 = _last@1,
                        begin
@@ -5223,7 +5210,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1535 = _acc@1,
+                       _@1535 = Acc,
                        _@1536 = 191,
                        _@1537 = _last@1,
                        begin
@@ -5242,7 +5229,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1541 = _acc@1,
+                       _@1541 = Acc,
                        _@1542 = 186,
                        _@1543 = _last@1,
                        begin
@@ -5261,7 +5248,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1547 = _acc@1,
+                       _@1547 = Acc,
                        _@1548 = 187,
                        _@1549 = _last@1,
                        begin
@@ -5280,7 +5267,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1553 = _acc@1,
+                       _@1553 = Acc,
                        _@1554 = 188,
                        _@1555 = _last@1,
                        begin
@@ -5299,7 +5286,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1559 = _acc@1,
+                       _@1559 = Acc,
                        _@1560 = 189,
                        _@1561 = _last@1,
                        begin
@@ -5318,7 +5305,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1565 = _acc@1,
+                       _@1565 = Acc,
                        _@1566 = 190,
                        _@1567 = _last@1,
                        begin
@@ -5337,7 +5324,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1571 = _acc@1,
+                       _@1571 = Acc,
                        _@1572 = 191,
                        _@1573 = _last@1,
                        begin
@@ -5356,7 +5343,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1577 = _acc@1,
+                       _@1577 = Acc,
                        _@1578 = 192,
                        _@1579 = _last@1,
                        begin
@@ -5375,7 +5362,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1583 = _acc@1,
+                       _@1583 = Acc,
                        _@1584 = 193,
                        _@1585 = _last@1,
                        begin
@@ -5394,7 +5381,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1589 = _acc@1,
+                       _@1589 = Acc,
                        _@1590 = 194,
                        _@1591 = _last@1,
                        begin
@@ -5413,7 +5400,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1595 = _acc@1,
+                       _@1595 = Acc,
                        _@1596 = 195,
                        _@1597 = _last@1,
                        begin
@@ -5432,7 +5419,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1601 = _acc@1,
+                       _@1601 = Acc,
                        _@1602 = 196,
                        _@1603 = _last@1,
                        begin
@@ -5451,7 +5438,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1607 = _acc@1,
+                       _@1607 = Acc,
                        _@1608 = 197,
                        _@1609 = _last@1,
                        begin
@@ -5470,7 +5457,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1613 = _acc@1,
+                       _@1613 = Acc,
                        _@1614 = 198,
                        _@1615 = _last@1,
                        begin
@@ -5489,7 +5476,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1619 = _acc@1,
+                       _@1619 = Acc,
                        _@1620 = 199,
                        _@1621 = _last@1,
                        begin
@@ -5508,7 +5495,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1625 = _acc@1,
+                       _@1625 = Acc,
                        _@1626 = 200,
                        _@1627 = _last@1,
                        begin
@@ -5527,7 +5514,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1631 = _acc@1,
+                       _@1631 = Acc,
                        _@1632 = 201,
                        _@1633 = _last@1,
                        begin
@@ -5546,7 +5533,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1637 = _acc@1,
+                       _@1637 = Acc,
                        _@1638 = 202,
                        _@1639 = _last@1,
                        begin
@@ -5565,7 +5552,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1643 = _acc@1,
+                       _@1643 = Acc,
                        _@1644 = 203,
                        _@1645 = _last@1,
                        begin
@@ -5584,7 +5571,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1649 = _acc@1,
+                       _@1649 = Acc,
                        _@1650 = 204,
                        _@1651 = _last@1,
                        begin
@@ -5603,7 +5590,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1655 = _acc@1,
+                       _@1655 = Acc,
                        _@1656 = 205,
                        _@1657 = _last@1,
                        begin
@@ -5622,7 +5609,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1661 = _acc@1,
+                       _@1661 = Acc,
                        _@1662 = 206,
                        _@1663 = _last@1,
                        begin
@@ -5641,7 +5628,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1667 = _acc@1,
+                       _@1667 = Acc,
                        _@1668 = 207,
                        _@1669 = _last@1,
                        begin
@@ -5660,7 +5647,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1673 = _acc@1,
+                       _@1673 = Acc,
                        _@1674 = 202,
                        _@1675 = _last@1,
                        begin
@@ -5679,7 +5666,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1679 = _acc@1,
+                       _@1679 = Acc,
                        _@1680 = 203,
                        _@1681 = _last@1,
                        begin
@@ -5698,7 +5685,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1685 = _acc@1,
+                       _@1685 = Acc,
                        _@1686 = 204,
                        _@1687 = _last@1,
                        begin
@@ -5717,7 +5704,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1691 = _acc@1,
+                       _@1691 = Acc,
                        _@1692 = 205,
                        _@1693 = _last@1,
                        begin
@@ -5736,7 +5723,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1697 = _acc@1,
+                       _@1697 = Acc,
                        _@1698 = 206,
                        _@1699 = _last@1,
                        begin
@@ -5755,7 +5742,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1703 = _acc@1,
+                       _@1703 = Acc,
                        _@1704 = 207,
                        _@1705 = _last@1,
                        begin
@@ -5774,7 +5761,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1709 = _acc@1,
+                       _@1709 = Acc,
                        _@1710 = 208,
                        _@1711 = _last@1,
                        begin
@@ -5793,7 +5780,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1715 = _acc@1,
+                       _@1715 = Acc,
                        _@1716 = 209,
                        _@1717 = _last@1,
                        begin
@@ -5812,7 +5799,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1721 = _acc@1,
+                       _@1721 = Acc,
                        _@1722 = 210,
                        _@1723 = _last@1,
                        begin
@@ -5831,7 +5818,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1727 = _acc@1,
+                       _@1727 = Acc,
                        _@1728 = 211,
                        _@1729 = _last@1,
                        begin
@@ -5850,7 +5837,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1733 = _acc@1,
+                       _@1733 = Acc,
                        _@1734 = 212,
                        _@1735 = _last@1,
                        begin
@@ -5869,7 +5856,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1739 = _acc@1,
+                       _@1739 = Acc,
                        _@1740 = 213,
                        _@1741 = _last@1,
                        begin
@@ -5888,7 +5875,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1745 = _acc@1,
+                       _@1745 = Acc,
                        _@1746 = 214,
                        _@1747 = _last@1,
                        begin
@@ -5907,7 +5894,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1751 = _acc@1,
+                       _@1751 = Acc,
                        _@1752 = 215,
                        _@1753 = _last@1,
                        begin
@@ -5923,7 +5910,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    0);
         17464 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@1757 = 216,
                                  _@1758 = _last@1,
@@ -5933,7 +5920,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         17465 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@1759 = 217,
                                  _@1760 = _last@1,
@@ -5943,7 +5930,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         17473 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@1761 = 218,
                                  _@1762 = _last@1,
@@ -5953,7 +5940,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         17474 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@1763 = 219,
                                  _@1764 = _last@1,
@@ -5963,7 +5950,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         17505 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@1765 = 218,
                                  _@1766 = _last@1,
@@ -5973,7 +5960,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         17506 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@1767 = 219,
                                  _@1768 = _last@1,
@@ -5986,7 +5973,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1769 = _acc@1,
+                       _@1769 = Acc,
                        _@1770 = 224,
                        _@1771 = _last@1,
                        begin
@@ -6005,7 +5992,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1775 = _acc@1,
+                       _@1775 = Acc,
                        _@1776 = 225,
                        _@1777 = _last@1,
                        begin
@@ -6024,7 +6011,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1781 = _acc@1,
+                       _@1781 = Acc,
                        _@1782 = 226,
                        _@1783 = _last@1,
                        begin
@@ -6043,7 +6030,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1787 = _acc@1,
+                       _@1787 = Acc,
                        _@1788 = 227,
                        _@1789 = _last@1,
                        begin
@@ -6062,7 +6049,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1793 = _acc@1,
+                       _@1793 = Acc,
                        _@1794 = 228,
                        _@1795 = _last@1,
                        begin
@@ -6081,7 +6068,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1799 = _acc@1,
+                       _@1799 = Acc,
                        _@1800 = 229,
                        _@1801 = _last@1,
                        begin
@@ -6100,7 +6087,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1805 = _acc@1,
+                       _@1805 = Acc,
                        _@1806 = 230,
                        _@1807 = _last@1,
                        begin
@@ -6119,7 +6106,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1811 = _acc@1,
+                       _@1811 = Acc,
                        _@1812 = 231,
                        _@1813 = _last@1,
                        begin
@@ -6138,7 +6125,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1817 = _acc@1,
+                       _@1817 = Acc,
                        _@1818 = 232,
                        _@1819 = _last@1,
                        begin
@@ -6157,7 +6144,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1823 = _acc@1,
+                       _@1823 = Acc,
                        _@1824 = 233,
                        _@1825 = _last@1,
                        begin
@@ -6176,7 +6163,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1829 = _acc@1,
+                       _@1829 = Acc,
                        _@1830 = 234,
                        _@1831 = _last@1,
                        begin
@@ -6195,7 +6182,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1835 = _acc@1,
+                       _@1835 = Acc,
                        _@1836 = 235,
                        _@1837 = _last@1,
                        begin
@@ -6214,7 +6201,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1841 = _acc@1,
+                       _@1841 = Acc,
                        _@1842 = 236,
                        _@1843 = _last@1,
                        begin
@@ -6233,7 +6220,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1847 = _acc@1,
+                       _@1847 = Acc,
                        _@1848 = 237,
                        _@1849 = _last@1,
                        begin
@@ -6252,7 +6239,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1853 = _acc@1,
+                       _@1853 = Acc,
                        _@1854 = 238,
                        _@1855 = _last@1,
                        begin
@@ -6271,7 +6258,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1859 = _acc@1,
+                       _@1859 = Acc,
                        _@1860 = 239,
                        _@1861 = _last@1,
                        begin
@@ -6290,7 +6277,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1865 = _acc@1,
+                       _@1865 = Acc,
                        _@1866 = 234,
                        _@1867 = _last@1,
                        begin
@@ -6309,7 +6296,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1871 = _acc@1,
+                       _@1871 = Acc,
                        _@1872 = 235,
                        _@1873 = _last@1,
                        begin
@@ -6328,7 +6315,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1877 = _acc@1,
+                       _@1877 = Acc,
                        _@1878 = 236,
                        _@1879 = _last@1,
                        begin
@@ -6347,7 +6334,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1883 = _acc@1,
+                       _@1883 = Acc,
                        _@1884 = 237,
                        _@1885 = _last@1,
                        begin
@@ -6366,7 +6353,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1889 = _acc@1,
+                       _@1889 = Acc,
                        _@1890 = 238,
                        _@1891 = _last@1,
                        begin
@@ -6385,7 +6372,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1895 = _acc@1,
+                       _@1895 = Acc,
                        _@1896 = 239,
                        _@1897 = _last@1,
                        begin
@@ -6404,7 +6391,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1901 = _acc@1,
+                       _@1901 = Acc,
                        _@1902 = 240,
                        _@1903 = _last@1,
                        begin
@@ -6423,7 +6410,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1907 = _acc@1,
+                       _@1907 = Acc,
                        _@1908 = 241,
                        _@1909 = _last@1,
                        begin
@@ -6442,7 +6429,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1913 = _acc@1,
+                       _@1913 = Acc,
                        _@1914 = 242,
                        _@1915 = _last@1,
                        begin
@@ -6461,7 +6448,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1919 = _acc@1,
+                       _@1919 = Acc,
                        _@1920 = 243,
                        _@1921 = _last@1,
                        begin
@@ -6480,7 +6467,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1925 = _acc@1,
+                       _@1925 = Acc,
                        _@1926 = 244,
                        _@1927 = _last@1,
                        begin
@@ -6499,7 +6486,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1931 = _acc@1,
+                       _@1931 = Acc,
                        _@1932 = 245,
                        _@1933 = _last@1,
                        begin
@@ -6518,7 +6505,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1937 = _acc@1,
+                       _@1937 = Acc,
                        _@1938 = 246,
                        _@1939 = _last@1,
                        begin
@@ -6537,7 +6524,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1943 = _acc@1,
+                       _@1943 = Acc,
                        _@1944 = 247,
                        _@1945 = _last@1,
                        begin
@@ -6556,7 +6543,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1949 = _acc@1,
+                       _@1949 = Acc,
                        _@1950 = 248,
                        _@1951 = _last@1,
                        begin
@@ -6575,7 +6562,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1955 = _acc@1,
+                       _@1955 = Acc,
                        _@1956 = 249,
                        _@1957 = _last@1,
                        begin
@@ -6594,7 +6581,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1961 = _acc@1,
+                       _@1961 = Acc,
                        _@1962 = 250,
                        _@1963 = _last@1,
                        begin
@@ -6613,7 +6600,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1967 = _acc@1,
+                       _@1967 = Acc,
                        _@1968 = 251,
                        _@1969 = _last@1,
                        begin
@@ -6632,7 +6619,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1973 = _acc@1,
+                       _@1973 = Acc,
                        _@1974 = 252,
                        _@1975 = _last@1,
                        begin
@@ -6651,7 +6638,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1979 = _acc@1,
+                       _@1979 = Acc,
                        _@1980 = 253,
                        _@1981 = _last@1,
                        begin
@@ -6670,7 +6657,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1985 = _acc@1,
+                       _@1985 = Acc,
                        _@1986 = 254,
                        _@1987 = _last@1,
                        begin
@@ -6689,7 +6676,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1991 = _acc@1,
+                       _@1991 = Acc,
                        _@1992 = 255,
                        _@1993 = _last@1,
                        begin
@@ -6708,7 +6695,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@1997 = _acc@1,
+                       _@1997 = Acc,
                        _@1998 = 250,
                        _@1999 = _last@1,
                        begin
@@ -6727,7 +6714,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2003 = _acc@1,
+                       _@2003 = Acc,
                        _@2004 = 251,
                        _@2005 = _last@1,
                        begin
@@ -6746,7 +6733,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2009 = _acc@1,
+                       _@2009 = Acc,
                        _@2010 = 252,
                        _@2011 = _last@1,
                        begin
@@ -6765,7 +6752,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2015 = _acc@1,
+                       _@2015 = Acc,
                        _@2016 = 253,
                        _@2017 = _last@1,
                        begin
@@ -6784,7 +6771,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2021 = _acc@1,
+                       _@2021 = Acc,
                        _@2022 = 254,
                        _@2023 = _last@1,
                        begin
@@ -6803,7 +6790,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2027 = _acc@1,
+                       _@2027 = Acc,
                        _@2028 = 255,
                        _@2029 = _last@1,
                        begin
@@ -6822,7 +6809,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2033 = _acc@1,
+                       _@2033 = Acc,
                        _@2034 = 160,
                        _@2035 = _last@1,
                        begin
@@ -6841,7 +6828,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2039 = _acc@1,
+                       _@2039 = Acc,
                        _@2040 = 161,
                        _@2041 = _last@1,
                        begin
@@ -6860,7 +6847,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2045 = _acc@1,
+                       _@2045 = Acc,
                        _@2046 = 162,
                        _@2047 = _last@1,
                        begin
@@ -6879,7 +6866,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2051 = _acc@1,
+                       _@2051 = Acc,
                        _@2052 = 163,
                        _@2053 = _last@1,
                        begin
@@ -6898,7 +6885,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2057 = _acc@1,
+                       _@2057 = Acc,
                        _@2058 = 164,
                        _@2059 = _last@1,
                        begin
@@ -6917,7 +6904,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2063 = _acc@1,
+                       _@2063 = Acc,
                        _@2064 = 165,
                        _@2065 = _last@1,
                        begin
@@ -6936,7 +6923,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2069 = _acc@1,
+                       _@2069 = Acc,
                        _@2070 = 166,
                        _@2071 = _last@1,
                        begin
@@ -6955,7 +6942,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2075 = _acc@1,
+                       _@2075 = Acc,
                        _@2076 = 167,
                        _@2077 = _last@1,
                        begin
@@ -6974,7 +6961,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2081 = _acc@1,
+                       _@2081 = Acc,
                        _@2082 = 168,
                        _@2083 = _last@1,
                        begin
@@ -6993,7 +6980,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2087 = _acc@1,
+                       _@2087 = Acc,
                        _@2088 = 169,
                        _@2089 = _last@1,
                        begin
@@ -7012,7 +6999,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2093 = _acc@1,
+                       _@2093 = Acc,
                        _@2094 = 170,
                        _@2095 = _last@1,
                        begin
@@ -7031,7 +7018,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2099 = _acc@1,
+                       _@2099 = Acc,
                        _@2100 = 171,
                        _@2101 = _last@1,
                        begin
@@ -7050,7 +7037,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2105 = _acc@1,
+                       _@2105 = Acc,
                        _@2106 = 172,
                        _@2107 = _last@1,
                        begin
@@ -7069,7 +7056,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2111 = _acc@1,
+                       _@2111 = Acc,
                        _@2112 = 173,
                        _@2113 = _last@1,
                        begin
@@ -7088,7 +7075,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2117 = _acc@1,
+                       _@2117 = Acc,
                        _@2118 = 174,
                        _@2119 = _last@1,
                        begin
@@ -7107,7 +7094,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2123 = _acc@1,
+                       _@2123 = Acc,
                        _@2124 = 175,
                        _@2125 = _last@1,
                        begin
@@ -7126,7 +7113,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2129 = _acc@1,
+                       _@2129 = Acc,
                        _@2130 = 170,
                        _@2131 = _last@1,
                        begin
@@ -7145,7 +7132,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2135 = _acc@1,
+                       _@2135 = Acc,
                        _@2136 = 171,
                        _@2137 = _last@1,
                        begin
@@ -7164,7 +7151,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2141 = _acc@1,
+                       _@2141 = Acc,
                        _@2142 = 172,
                        _@2143 = _last@1,
                        begin
@@ -7183,7 +7170,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2147 = _acc@1,
+                       _@2147 = Acc,
                        _@2148 = 173,
                        _@2149 = _last@1,
                        begin
@@ -7202,7 +7189,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2153 = _acc@1,
+                       _@2153 = Acc,
                        _@2154 = 174,
                        _@2155 = _last@1,
                        begin
@@ -7221,7 +7208,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2159 = _acc@1,
+                       _@2159 = Acc,
                        _@2160 = 175,
                        _@2161 = _last@1,
                        begin
@@ -7240,7 +7227,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2165 = _acc@1,
+                       _@2165 = Acc,
                        _@2166 = 176,
                        _@2167 = _last@1,
                        begin
@@ -7259,7 +7246,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2171 = _acc@1,
+                       _@2171 = Acc,
                        _@2172 = 177,
                        _@2173 = _last@1,
                        begin
@@ -7278,7 +7265,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2177 = _acc@1,
+                       _@2177 = Acc,
                        _@2178 = 178,
                        _@2179 = _last@1,
                        begin
@@ -7297,7 +7284,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2183 = _acc@1,
+                       _@2183 = Acc,
                        _@2184 = 179,
                        _@2185 = _last@1,
                        begin
@@ -7316,7 +7303,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2189 = _acc@1,
+                       _@2189 = Acc,
                        _@2190 = 180,
                        _@2191 = _last@1,
                        begin
@@ -7335,7 +7322,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2195 = _acc@1,
+                       _@2195 = Acc,
                        _@2196 = 181,
                        _@2197 = _last@1,
                        begin
@@ -7354,7 +7341,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2201 = _acc@1,
+                       _@2201 = Acc,
                        _@2202 = 182,
                        _@2203 = _last@1,
                        begin
@@ -7373,7 +7360,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2207 = _acc@1,
+                       _@2207 = Acc,
                        _@2208 = 183,
                        _@2209 = _last@1,
                        begin
@@ -7392,7 +7379,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2213 = _acc@1,
+                       _@2213 = Acc,
                        _@2214 = 184,
                        _@2215 = _last@1,
                        begin
@@ -7411,7 +7398,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2219 = _acc@1,
+                       _@2219 = Acc,
                        _@2220 = 185,
                        _@2221 = _last@1,
                        begin
@@ -7430,7 +7417,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2225 = _acc@1,
+                       _@2225 = Acc,
                        _@2226 = 186,
                        _@2227 = _last@1,
                        begin
@@ -7449,7 +7436,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2231 = _acc@1,
+                       _@2231 = Acc,
                        _@2232 = 187,
                        _@2233 = _last@1,
                        begin
@@ -7468,7 +7455,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2237 = _acc@1,
+                       _@2237 = Acc,
                        _@2238 = 188,
                        _@2239 = _last@1,
                        begin
@@ -7487,7 +7474,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2243 = _acc@1,
+                       _@2243 = Acc,
                        _@2244 = 189,
                        _@2245 = _last@1,
                        begin
@@ -7506,7 +7493,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2249 = _acc@1,
+                       _@2249 = Acc,
                        _@2250 = 190,
                        _@2251 = _last@1,
                        begin
@@ -7525,7 +7512,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2255 = _acc@1,
+                       _@2255 = Acc,
                        _@2256 = 191,
                        _@2257 = _last@1,
                        begin
@@ -7544,7 +7531,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2261 = _acc@1,
+                       _@2261 = Acc,
                        _@2262 = 186,
                        _@2263 = _last@1,
                        begin
@@ -7563,7 +7550,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2267 = _acc@1,
+                       _@2267 = Acc,
                        _@2268 = 187,
                        _@2269 = _last@1,
                        begin
@@ -7582,7 +7569,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2273 = _acc@1,
+                       _@2273 = Acc,
                        _@2274 = 188,
                        _@2275 = _last@1,
                        begin
@@ -7601,7 +7588,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2279 = _acc@1,
+                       _@2279 = Acc,
                        _@2280 = 189,
                        _@2281 = _last@1,
                        begin
@@ -7620,7 +7607,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2285 = _acc@1,
+                       _@2285 = Acc,
                        _@2286 = 190,
                        _@2287 = _last@1,
                        begin
@@ -7639,7 +7626,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2291 = _acc@1,
+                       _@2291 = Acc,
                        _@2292 = 191,
                        _@2293 = _last@1,
                        begin
@@ -7658,7 +7645,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2297 = _acc@1,
+                       _@2297 = Acc,
                        _@2298 = 192,
                        _@2299 = _last@1,
                        begin
@@ -7677,7 +7664,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2303 = _acc@1,
+                       _@2303 = Acc,
                        _@2304 = 193,
                        _@2305 = _last@1,
                        begin
@@ -7696,7 +7683,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2309 = _acc@1,
+                       _@2309 = Acc,
                        _@2310 = 194,
                        _@2311 = _last@1,
                        begin
@@ -7715,7 +7702,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2315 = _acc@1,
+                       _@2315 = Acc,
                        _@2316 = 195,
                        _@2317 = _last@1,
                        begin
@@ -7734,7 +7721,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2321 = _acc@1,
+                       _@2321 = Acc,
                        _@2322 = 196,
                        _@2323 = _last@1,
                        begin
@@ -7753,7 +7740,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2327 = _acc@1,
+                       _@2327 = Acc,
                        _@2328 = 197,
                        _@2329 = _last@1,
                        begin
@@ -7772,7 +7759,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2333 = _acc@1,
+                       _@2333 = Acc,
                        _@2334 = 198,
                        _@2335 = _last@1,
                        begin
@@ -7791,7 +7778,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2339 = _acc@1,
+                       _@2339 = Acc,
                        _@2340 = 199,
                        _@2341 = _last@1,
                        begin
@@ -7810,7 +7797,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2345 = _acc@1,
+                       _@2345 = Acc,
                        _@2346 = 200,
                        _@2347 = _last@1,
                        begin
@@ -7829,7 +7816,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2351 = _acc@1,
+                       _@2351 = Acc,
                        _@2352 = 201,
                        _@2353 = _last@1,
                        begin
@@ -7848,7 +7835,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2357 = _acc@1,
+                       _@2357 = Acc,
                        _@2358 = 202,
                        _@2359 = _last@1,
                        begin
@@ -7867,7 +7854,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2363 = _acc@1,
+                       _@2363 = Acc,
                        _@2364 = 203,
                        _@2365 = _last@1,
                        begin
@@ -7886,7 +7873,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2369 = _acc@1,
+                       _@2369 = Acc,
                        _@2370 = 204,
                        _@2371 = _last@1,
                        begin
@@ -7905,7 +7892,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2375 = _acc@1,
+                       _@2375 = Acc,
                        _@2376 = 205,
                        _@2377 = _last@1,
                        begin
@@ -7924,7 +7911,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2381 = _acc@1,
+                       _@2381 = Acc,
                        _@2382 = 206,
                        _@2383 = _last@1,
                        begin
@@ -7943,7 +7930,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2387 = _acc@1,
+                       _@2387 = Acc,
                        _@2388 = 207,
                        _@2389 = _last@1,
                        begin
@@ -7962,7 +7949,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2393 = _acc@1,
+                       _@2393 = Acc,
                        _@2394 = 202,
                        _@2395 = _last@1,
                        begin
@@ -7981,7 +7968,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2399 = _acc@1,
+                       _@2399 = Acc,
                        _@2400 = 203,
                        _@2401 = _last@1,
                        begin
@@ -8000,7 +7987,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2405 = _acc@1,
+                       _@2405 = Acc,
                        _@2406 = 204,
                        _@2407 = _last@1,
                        begin
@@ -8019,7 +8006,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2411 = _acc@1,
+                       _@2411 = Acc,
                        _@2412 = 205,
                        _@2413 = _last@1,
                        begin
@@ -8038,7 +8025,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2417 = _acc@1,
+                       _@2417 = Acc,
                        _@2418 = 206,
                        _@2419 = _last@1,
                        begin
@@ -8057,7 +8044,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2423 = _acc@1,
+                       _@2423 = Acc,
                        _@2424 = 207,
                        _@2425 = _last@1,
                        begin
@@ -8076,7 +8063,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2429 = _acc@1,
+                       _@2429 = Acc,
                        _@2430 = 208,
                        _@2431 = _last@1,
                        begin
@@ -8095,7 +8082,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2435 = _acc@1,
+                       _@2435 = Acc,
                        _@2436 = 209,
                        _@2437 = _last@1,
                        begin
@@ -8114,7 +8101,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2441 = _acc@1,
+                       _@2441 = Acc,
                        _@2442 = 210,
                        _@2443 = _last@1,
                        begin
@@ -8133,7 +8120,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2447 = _acc@1,
+                       _@2447 = Acc,
                        _@2448 = 211,
                        _@2449 = _last@1,
                        begin
@@ -8152,7 +8139,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2453 = _acc@1,
+                       _@2453 = Acc,
                        _@2454 = 212,
                        _@2455 = _last@1,
                        begin
@@ -8171,7 +8158,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2459 = _acc@1,
+                       _@2459 = Acc,
                        _@2460 = 213,
                        _@2461 = _last@1,
                        begin
@@ -8190,7 +8177,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2465 = _acc@1,
+                       _@2465 = Acc,
                        _@2466 = 214,
                        _@2467 = _last@1,
                        begin
@@ -8209,7 +8196,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2471 = _acc@1,
+                       _@2471 = Acc,
                        _@2472 = 215,
                        _@2473 = _last@1,
                        begin
@@ -8225,7 +8212,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    0);
         25656 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@2477 = 216,
                                  _@2478 = _last@1,
@@ -8235,7 +8222,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         25657 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@2479 = 217,
                                  _@2480 = _last@1,
@@ -8245,7 +8232,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         25665 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@2481 = 218,
                                  _@2482 = _last@1,
@@ -8255,7 +8242,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         25666 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@2483 = 219,
                                  _@2484 = _last@1,
@@ -8265,7 +8252,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         25697 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@2485 = 218,
                                  _@2486 = _last@1,
@@ -8275,7 +8262,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                              end);
         25698 ->
             escape_surrogate(Rest, Input, Skip, Stack,
-                             StringDecode, _acc@1,
+                             StringDecode, Acc,
                              begin
                                  _@2487 = 219,
                                  _@2488 = _last@1,
@@ -8288,7 +8275,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2489 = _acc@1,
+                       _@2489 = Acc,
                        _@2490 = 224,
                        _@2491 = _last@1,
                        begin
@@ -8307,7 +8294,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2495 = _acc@1,
+                       _@2495 = Acc,
                        _@2496 = 225,
                        _@2497 = _last@1,
                        begin
@@ -8326,7 +8313,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2501 = _acc@1,
+                       _@2501 = Acc,
                        _@2502 = 226,
                        _@2503 = _last@1,
                        begin
@@ -8345,7 +8332,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2507 = _acc@1,
+                       _@2507 = Acc,
                        _@2508 = 227,
                        _@2509 = _last@1,
                        begin
@@ -8364,7 +8351,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2513 = _acc@1,
+                       _@2513 = Acc,
                        _@2514 = 228,
                        _@2515 = _last@1,
                        begin
@@ -8383,7 +8370,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2519 = _acc@1,
+                       _@2519 = Acc,
                        _@2520 = 229,
                        _@2521 = _last@1,
                        begin
@@ -8402,7 +8389,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2525 = _acc@1,
+                       _@2525 = Acc,
                        _@2526 = 230,
                        _@2527 = _last@1,
                        begin
@@ -8421,7 +8408,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2531 = _acc@1,
+                       _@2531 = Acc,
                        _@2532 = 231,
                        _@2533 = _last@1,
                        begin
@@ -8440,7 +8427,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2537 = _acc@1,
+                       _@2537 = Acc,
                        _@2538 = 232,
                        _@2539 = _last@1,
                        begin
@@ -8459,7 +8446,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2543 = _acc@1,
+                       _@2543 = Acc,
                        _@2544 = 233,
                        _@2545 = _last@1,
                        begin
@@ -8478,7 +8465,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2549 = _acc@1,
+                       _@2549 = Acc,
                        _@2550 = 234,
                        _@2551 = _last@1,
                        begin
@@ -8497,7 +8484,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2555 = _acc@1,
+                       _@2555 = Acc,
                        _@2556 = 235,
                        _@2557 = _last@1,
                        begin
@@ -8516,7 +8503,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2561 = _acc@1,
+                       _@2561 = Acc,
                        _@2562 = 236,
                        _@2563 = _last@1,
                        begin
@@ -8535,7 +8522,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2567 = _acc@1,
+                       _@2567 = Acc,
                        _@2568 = 237,
                        _@2569 = _last@1,
                        begin
@@ -8554,7 +8541,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2573 = _acc@1,
+                       _@2573 = Acc,
                        _@2574 = 238,
                        _@2575 = _last@1,
                        begin
@@ -8573,7 +8560,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2579 = _acc@1,
+                       _@2579 = Acc,
                        _@2580 = 239,
                        _@2581 = _last@1,
                        begin
@@ -8592,7 +8579,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2585 = _acc@1,
+                       _@2585 = Acc,
                        _@2586 = 234,
                        _@2587 = _last@1,
                        begin
@@ -8611,7 +8598,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2591 = _acc@1,
+                       _@2591 = Acc,
                        _@2592 = 235,
                        _@2593 = _last@1,
                        begin
@@ -8630,7 +8617,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2597 = _acc@1,
+                       _@2597 = Acc,
                        _@2598 = 236,
                        _@2599 = _last@1,
                        begin
@@ -8649,7 +8636,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2603 = _acc@1,
+                       _@2603 = Acc,
                        _@2604 = 237,
                        _@2605 = _last@1,
                        begin
@@ -8668,7 +8655,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2609 = _acc@1,
+                       _@2609 = Acc,
                        _@2610 = 238,
                        _@2611 = _last@1,
                        begin
@@ -8687,7 +8674,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2615 = _acc@1,
+                       _@2615 = Acc,
                        _@2616 = 239,
                        _@2617 = _last@1,
                        begin
@@ -8706,7 +8693,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2621 = _acc@1,
+                       _@2621 = Acc,
                        _@2622 = 240,
                        _@2623 = _last@1,
                        begin
@@ -8725,7 +8712,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2627 = _acc@1,
+                       _@2627 = Acc,
                        _@2628 = 241,
                        _@2629 = _last@1,
                        begin
@@ -8744,7 +8731,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2633 = _acc@1,
+                       _@2633 = Acc,
                        _@2634 = 242,
                        _@2635 = _last@1,
                        begin
@@ -8763,7 +8750,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2639 = _acc@1,
+                       _@2639 = Acc,
                        _@2640 = 243,
                        _@2641 = _last@1,
                        begin
@@ -8782,7 +8769,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2645 = _acc@1,
+                       _@2645 = Acc,
                        _@2646 = 244,
                        _@2647 = _last@1,
                        begin
@@ -8801,7 +8788,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2651 = _acc@1,
+                       _@2651 = Acc,
                        _@2652 = 245,
                        _@2653 = _last@1,
                        begin
@@ -8820,7 +8807,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2657 = _acc@1,
+                       _@2657 = Acc,
                        _@2658 = 246,
                        _@2659 = _last@1,
                        begin
@@ -8839,7 +8826,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2663 = _acc@1,
+                       _@2663 = Acc,
                        _@2664 = 247,
                        _@2665 = _last@1,
                        begin
@@ -8858,7 +8845,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2669 = _acc@1,
+                       _@2669 = Acc,
                        _@2670 = 248,
                        _@2671 = _last@1,
                        begin
@@ -8877,7 +8864,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2675 = _acc@1,
+                       _@2675 = Acc,
                        _@2676 = 249,
                        _@2677 = _last@1,
                        begin
@@ -8896,7 +8883,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2681 = _acc@1,
+                       _@2681 = Acc,
                        _@2682 = 250,
                        _@2683 = _last@1,
                        begin
@@ -8915,7 +8902,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2687 = _acc@1,
+                       _@2687 = Acc,
                        _@2688 = 251,
                        _@2689 = _last@1,
                        begin
@@ -8934,7 +8921,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2693 = _acc@1,
+                       _@2693 = Acc,
                        _@2694 = 252,
                        _@2695 = _last@1,
                        begin
@@ -8953,7 +8940,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2699 = _acc@1,
+                       _@2699 = Acc,
                        _@2700 = 253,
                        _@2701 = _last@1,
                        begin
@@ -8972,7 +8959,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2705 = _acc@1,
+                       _@2705 = Acc,
                        _@2706 = 254,
                        _@2707 = _last@1,
                        begin
@@ -8991,7 +8978,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2711 = _acc@1,
+                       _@2711 = Acc,
                        _@2712 = 255,
                        _@2713 = _last@1,
                        begin
@@ -9010,7 +8997,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2717 = _acc@1,
+                       _@2717 = Acc,
                        _@2718 = 250,
                        _@2719 = _last@1,
                        begin
@@ -9029,7 +9016,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2723 = _acc@1,
+                       _@2723 = Acc,
                        _@2724 = 251,
                        _@2725 = _last@1,
                        begin
@@ -9048,7 +9035,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2729 = _acc@1,
+                       _@2729 = Acc,
                        _@2730 = 252,
                        _@2731 = _last@1,
                        begin
@@ -9067,7 +9054,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2735 = _acc@1,
+                       _@2735 = Acc,
                        _@2736 = 253,
                        _@2737 = _last@1,
                        begin
@@ -9086,7 +9073,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2741 = _acc@1,
+                       _@2741 = Acc,
                        _@2742 = 254,
                        _@2743 = _last@1,
                        begin
@@ -9105,7 +9092,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
                    Skip + 6,
                    Stack, StringDecode,
                    begin
-                       _@2747 = _acc@1,
+                       _@2747 = Acc,
                        _@2748 = 255,
                        _@2749 = _last@1,
                        begin
@@ -9123,7 +9110,7 @@ escapeu(<<_int1@1:16/integer,_int2@1:16/integer,Rest/bitstring>>,
             token_error(Input, Skip, 6)
     end;
 escapeu(<<_Rest/bitstring>>,
-        Input, Skip, _Stack, _StringDecode, __acc@1) ->
+        Input, Skip, _Stack, _StringDecode, _Acc) ->
     empty_error(Input, Skip).
 
 escapeu_last(Int, Input, Skip) ->
@@ -10516,8 +10503,8 @@ object(Data, Input, Skip, Stack, StringDecode,
             throw_error(Input, Skip);
         <<44/integer,_rest@5/bitstring>> ->
             _skip@2 = Skip + 1,
-            [_key@1, _acc@1 | _stack@2] = Stack,
-            _acc@2 = [{_key@1, Value} | _acc@1],
+            [_key@1, Acc | _stack@2] = Stack,
+            _acc@2 = [{_key@1, Value} | Acc],
             key(_rest@5, Input, _skip@2,
                 [_acc@2 | _stack@2],
                 StringDecode);
@@ -11185,7 +11172,7 @@ string(Data, Input, Skip, Stack, StringDecode,
     end.
 
 string(Data, Input, Skip, Stack, StringDecode,
-       _acc@1, _len@1) ->
+       Acc, _len@1) ->
     case Data of
         <<0/integer,_Rest/bitstring>> ->
             throw_error(Input, Skip);
@@ -11253,403 +11240,403 @@ string(Data, Input, Skip, Stack, StringDecode,
             throw_error(Input, Skip);
         <<32/integer,Rest/bitstring>> ->
             string(Rest, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<33/integer,_rest@2/bitstring>> ->
             string(_rest@2, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<34/integer,_rest@3/bitstring>> ->
             _last@1 = binary_part(Input, Skip, _len@1),
-            _string@1 = iolist_to_binary([_acc@1 | _last@1]),
+            _string@1 = iolist_to_binary([Acc | _last@1]),
             continue(_rest@3, Input,
                      Skip + _len@1 + 1,
                      Stack, StringDecode, _string@1);
         <<35/integer,_rest@4/bitstring>> ->
             string(_rest@4, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<36/integer,_rest@5/bitstring>> ->
             string(_rest@5, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<37/integer,_rest@6/bitstring>> ->
             string(_rest@6, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<38/integer,_rest@7/bitstring>> ->
             string(_rest@7, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<39/integer,_rest@8/bitstring>> ->
             string(_rest@8, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<40/integer,_rest@9/bitstring>> ->
             string(_rest@9, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<41/integer,Rest0/bitstring>> ->
             string(Rest0, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<42/integer,Rest1/bitstring>> ->
             string(Rest1, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<43/integer,Rest2/bitstring>> ->
             string(Rest2, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<44/integer,Rest3/bitstring>> ->
             string(Rest3, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<45/integer,Rest4/bitstring>> ->
             string(Rest4, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<46/integer,Rest5/bitstring>> ->
             string(Rest5, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<47/integer,Rest6/bitstring>> ->
             string(Rest6, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<48/integer,Rest7/bitstring>> ->
             string(Rest7, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<49/integer,Rest8/bitstring>> ->
             string(Rest8, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<50/integer,Rest9/bitstring>> ->
             string(Rest9, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<51/integer,_rest@20/bitstring>> ->
             string(_rest@20, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<52/integer,_rest@21/bitstring>> ->
             string(_rest@21, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<53/integer,_rest@22/bitstring>> ->
             string(_rest@22, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<54/integer,_rest@23/bitstring>> ->
             string(_rest@23, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<55/integer,_rest@24/bitstring>> ->
             string(_rest@24, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<56/integer,_rest@25/bitstring>> ->
             string(_rest@25, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<57/integer,_rest@26/bitstring>> ->
             string(_rest@26, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<58/integer,_rest@27/bitstring>> ->
             string(_rest@27, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<59/integer,_rest@28/bitstring>> ->
             string(_rest@28, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<60/integer,_rest@29/bitstring>> ->
             string(_rest@29, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<61/integer,_rest@30/bitstring>> ->
             string(_rest@30, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<62/integer,_rest@31/bitstring>> ->
             string(_rest@31, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<63/integer,_rest@32/bitstring>> ->
             string(_rest@32, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<64/integer,_rest@33/bitstring>> ->
             string(_rest@33, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<65/integer,_rest@34/bitstring>> ->
             string(_rest@34, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<66/integer,_rest@35/bitstring>> ->
             string(_rest@35, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<67/integer,_rest@36/bitstring>> ->
             string(_rest@36, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<68/integer,_rest@37/bitstring>> ->
             string(_rest@37, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<69/integer,_rest@38/bitstring>> ->
             string(_rest@38, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<70/integer,_rest@39/bitstring>> ->
             string(_rest@39, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<71/integer,_rest@40/bitstring>> ->
             string(_rest@40, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<72/integer,_rest@41/bitstring>> ->
             string(_rest@41, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<73/integer,_rest@42/bitstring>> ->
             string(_rest@42, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<74/integer,_rest@43/bitstring>> ->
             string(_rest@43, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<75/integer,_rest@44/bitstring>> ->
             string(_rest@44, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<76/integer,_rest@45/bitstring>> ->
             string(_rest@45, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<77/integer,_rest@46/bitstring>> ->
             string(_rest@46, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<78/integer,_rest@47/bitstring>> ->
             string(_rest@47, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<79/integer,_rest@48/bitstring>> ->
             string(_rest@48, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<80/integer,_rest@49/bitstring>> ->
             string(_rest@49, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<81/integer,_rest@50/bitstring>> ->
             string(_rest@50, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<82/integer,_rest@51/bitstring>> ->
             string(_rest@51, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<83/integer,_rest@52/bitstring>> ->
             string(_rest@52, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<84/integer,_rest@53/bitstring>> ->
             string(_rest@53, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<85/integer,_rest@54/bitstring>> ->
             string(_rest@54, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<86/integer,_rest@55/bitstring>> ->
             string(_rest@55, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<87/integer,_rest@56/bitstring>> ->
             string(_rest@56, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<88/integer,_rest@57/bitstring>> ->
             string(_rest@57, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<89/integer,_rest@58/bitstring>> ->
             string(_rest@58, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<90/integer,_rest@59/bitstring>> ->
             string(_rest@59, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<91/integer,_rest@60/bitstring>> ->
             string(_rest@60, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<92/integer,_rest@61/bitstring>> ->
             _part@1 = binary_part(Input, Skip, _len@1),
             escape(_rest@61, Input,
                    Skip + _len@1,
                    Stack, StringDecode,
-                   [_acc@1 | _part@1]);
+                   [Acc | _part@1]);
         <<93/integer,_rest@62/bitstring>> ->
             string(_rest@62, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<94/integer,_rest@63/bitstring>> ->
             string(_rest@63, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<95/integer,_rest@64/bitstring>> ->
             string(_rest@64, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<96/integer,_rest@65/bitstring>> ->
             string(_rest@65, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<97/integer,_rest@66/bitstring>> ->
             string(_rest@66, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<98/integer,_rest@67/bitstring>> ->
             string(_rest@67, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<99/integer,_rest@68/bitstring>> ->
             string(_rest@68, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<100/integer,_rest@69/bitstring>> ->
             string(_rest@69, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<101/integer,_rest@70/bitstring>> ->
             string(_rest@70, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<102/integer,_rest@71/bitstring>> ->
             string(_rest@71, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<103/integer,_rest@72/bitstring>> ->
             string(_rest@72, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<104/integer,_rest@73/bitstring>> ->
             string(_rest@73, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<105/integer,_rest@74/bitstring>> ->
             string(_rest@74, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<106/integer,_rest@75/bitstring>> ->
             string(_rest@75, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<107/integer,_rest@76/bitstring>> ->
             string(_rest@76, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<108/integer,_rest@77/bitstring>> ->
             string(_rest@77, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<109/integer,_rest@78/bitstring>> ->
             string(_rest@78, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<110/integer,_rest@79/bitstring>> ->
             string(_rest@79, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<111/integer,_rest@80/bitstring>> ->
             string(_rest@80, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<112/integer,_rest@81/bitstring>> ->
             string(_rest@81, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<113/integer,_rest@82/bitstring>> ->
             string(_rest@82, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<114/integer,_rest@83/bitstring>> ->
             string(_rest@83, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<115/integer,_rest@84/bitstring>> ->
             string(_rest@84, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<116/integer,_rest@85/bitstring>> ->
             string(_rest@85, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<117/integer,_rest@86/bitstring>> ->
             string(_rest@86, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<118/integer,_rest@87/bitstring>> ->
             string(_rest@87, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<119/integer,_rest@88/bitstring>> ->
             string(_rest@88, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<120/integer,_rest@89/bitstring>> ->
             string(_rest@89, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<121/integer,_rest@90/bitstring>> ->
             string(_rest@90, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<122/integer,_rest@91/bitstring>> ->
             string(_rest@91, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<123/integer,_rest@92/bitstring>> ->
             string(_rest@92, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<124/integer,_rest@93/bitstring>> ->
             string(_rest@93, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<125/integer,_rest@94/bitstring>> ->
             string(_rest@94, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<126/integer,_rest@95/bitstring>> ->
             string(_rest@95, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<127/integer,_rest@96/bitstring>> ->
             string(_rest@96, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 1);
         <<_char@1/utf8,_rest@97/bitstring>> when _char@1 =< 2047 ->
             string(_rest@97, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 2);
         <<_char@2/utf8,_rest@98/bitstring>> when _char@2 =< 65535 ->
             string(_rest@98, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 3);
         <<__char@1/utf8,_rest@99/bitstring>> ->
             string(_rest@99, Input, Skip, Stack,
-                   StringDecode, _acc@1,
+                   StringDecode, Acc,
                    _len@1 + 4);
         <<_/bitstring>> ->
             empty_error(Input, Skip + _len@1)
