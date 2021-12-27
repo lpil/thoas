@@ -2,8 +2,9 @@
 
 A blazing fast JSON parser and generator in pure Erlang.
 
-Thoas is an Erlang conversion of the Elixir based [Jason library][jason], and as
-such the parser and generator are at least twice as fast as other Elixir/Erlang
+Thoas is an Erlang conversion of the Elixir based [Jason library][jason]. 
+
+The parser and generator are at least twice as fast as other Elixir/Erlang
 libraries. The performance is comparable to `jiffy`, which is implemented in C
 as a NIF. Thoas and Jason are usually only twice as slow.
 
@@ -63,6 +64,7 @@ Thoas has a couple feature differences compared to Jason.
 - Thoas is written in Erlang.
 - Thoas has no support for Elixir protocols.
 - Thoas has no support for pretty-printing JSON.
+- Thoas has no support for detecting duplicate object keys.
 - Thoas always uses binary strings when decoding object keys.
 
 ## Why convert Jason to Erlang?

@@ -1,25 +1,25 @@
 encode_jobs = %{
   "thoas" => &:thoas.encode_to_iodata/1,
   "Jason" => &Jason.encode_to_iodata!/1,
-  # "Jason strict" => &Jason.encode_to_iodata!(&1, maps: :strict),
+  "Jason strict" => &Jason.encode_to_iodata!(&1, maps: :strict),
   "Poison" => &Poison.encode_to_iodata!/1,
   "JSX" => &JSX.encode!/1,
   "Tiny" => &Tiny.encode!/1,
   "jsone" => &:jsone.encode/1
   # "jiffy" => &:jiffy.encode/1,
-  # "JSON" => &JSON.encode!/1
+  "JSON" => &JSON.encode!/1
   # "term_to_binary" => &:erlang.term_to_binary/1,
 }
 
 encode_inputs = [
   "GitHub"
-  # "Giphy",
-  # "GovTrack",
-  # "Blockchain",
-  # "Pokedex"
-  # "JSON Generator",
-  # "UTF-8 unescaped",
-  # "Issue 90"
+  "Giphy",
+  "GovTrack",
+  "Blockchain",
+  "Pokedex"
+  "JSON Generator",
+  "UTF-8 unescaped",
+  "Issue 90"
 ]
 
 read_data = fn name ->

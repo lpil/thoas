@@ -6,21 +6,21 @@ decode_jobs = %{
   "Tiny" => fn {json, _} -> Tiny.decode!(json) end,
   "jsone" => fn {json, _} -> :jsone.decode(json) end
   # "jiffy" => fn {json, _} -> :jiffy.decode(json, [:return_maps, :use_nil]) end,
-  # "JSON" => fn {json, _} -> JSON.decode!(json) end
+  "JSON" => fn {json, _} -> JSON.decode!(json) end
   # "binary_to_term/1" => fn {_, etf} -> :erlang.binary_to_term(etf) end,
 }
 
 decode_inputs = [
   "GitHub"
-  # "Giphy",
-  # "GovTrack",
-  # "Blockchain",
-  # "Pokedex"
-  # "JSON Generator",
-  # "JSON Generator (Pretty)",
-  # "UTF-8 escaped",
-  # "UTF-8 unescaped",
-  # "Issue 90"
+  "Giphy",
+  "GovTrack",
+  "Blockchain",
+  "Pokedex"
+  "JSON Generator",
+  "JSON Generator (Pretty)",
+  "UTF-8 escaped",
+  "UTF-8 unescaped",
+  "Issue 90"
 ]
 
 read_data = fn name ->
