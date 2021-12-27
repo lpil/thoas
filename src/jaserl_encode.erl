@@ -470,9 +470,9 @@ escape_html(<<Byte/integer,Rest/bitstring>>,
             Acc, Original, Skip)
     when Byte =:= 127 ->
     escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<_char@1/utf8,Rest/bitstring>>,
+escape_html(<<Char/utf8,Rest/bitstring>>,
             Acc, Original, Skip)
-    when _char@1 =< 2047 ->
+    when Char =< 2047 ->
     escape_html_chunk(Rest, Acc, Original, Skip, 2);
 escape_html(<<8232/utf8,Rest/bitstring>>,
             Acc, Original, Skip) ->
@@ -482,11 +482,11 @@ escape_html(<<8233/utf8,Rest/bitstring>>,
             Acc, Original, Skip) ->
     Acc2 = [Acc | <<"\\u2029">>],
     escape_html(Rest, Acc2, Original, Skip + 3);
-escape_html(<<_char@1/utf8,Rest/bitstring>>,
+escape_html(<<Char/utf8,Rest/bitstring>>,
             Acc, Original, Skip)
-    when _char@1 =< 65535 ->
+    when Char =< 65535 ->
     escape_html_chunk(Rest, Acc, Original, Skip, 3);
-escape_html(<<__char@1/utf8,Rest/bitstring>>,
+escape_html(<<_Char/utf8,Rest/bitstring>>,
             Acc, Original, Skip) ->
     escape_html_chunk(Rest, Acc, Original, Skip, 4);
 escape_html(<<>>, Acc, _Original, _Skip) ->
@@ -1077,9 +1077,9 @@ escape_html_chunk(<<Byte/integer,Rest/bitstring>>,
                   Acc, Original, Skip, Len)
     when Byte =:= 127 ->
     escape_html_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_html_chunk(<<_char@1/utf8,Rest/bitstring>>,
+escape_html_chunk(<<Char/utf8,Rest/bitstring>>,
                   Acc, Original, Skip, Len)
-    when _char@1 =< 2047 ->
+    when Char =< 2047 ->
     escape_html_chunk(Rest, Acc, Original, Skip, Len + 2);
 escape_html_chunk(<<8232/utf8,Rest/bitstring>>,
                   Acc, Original, Skip, Len) ->
@@ -1091,11 +1091,11 @@ escape_html_chunk(<<8233/utf8,Rest/bitstring>>,
     Part = binary_part(Original, Skip, Len),
     Acc2 = [Acc, Part | <<"\\u2029">>],
     escape_html(Rest, Acc2, Original, Skip + Len + 3);
-escape_html_chunk(<<_char@1/utf8,Rest/bitstring>>,
+escape_html_chunk(<<Char/utf8,Rest/bitstring>>,
                   Acc, Original, Skip, Len)
-    when _char@1 =< 65535 ->
+    when Char =< 65535 ->
     escape_html_chunk(Rest, Acc, Original, Skip, Len + 3);
-escape_html_chunk(<<__char@1/utf8,Rest/bitstring>>,
+escape_html_chunk(<<_Char/utf8,Rest/bitstring>>,
                   Acc, Original, Skip, Len) ->
     escape_html_chunk(Rest, Acc, Original, Skip, Len + 4);
 escape_html_chunk(<<>>, Acc, Original, Skip, Len) ->
@@ -1654,9 +1654,9 @@ escape_javascript(<<Byte/integer,Rest/bitstring>>,
                   Acc, Original, Skip)
     when Byte =:= 127 ->
     escape_javascript_chunk(Rest, Acc, Original, Skip, 1);
-escape_javascript(<<_char@1/utf8,Rest/bitstring>>,
+escape_javascript(<<Char/utf8,Rest/bitstring>>,
                   Acc, Original, Skip)
-    when _char@1 =< 2047 ->
+    when Char =< 2047 ->
     escape_javascript_chunk(Rest, Acc, Original, Skip, 2);
 escape_javascript(<<8232/utf8,Rest/bitstring>>,
                   Acc, Original, Skip) ->
@@ -1666,11 +1666,11 @@ escape_javascript(<<8233/utf8,Rest/bitstring>>,
                   Acc, Original, Skip) ->
     Acc2 = [Acc | <<"\\u2029">>],
     escape_javascript(Rest, Acc2, Original, Skip + 3);
-escape_javascript(<<_char@1/utf8,Rest/bitstring>>,
+escape_javascript(<<Char/utf8,Rest/bitstring>>,
                   Acc, Original, Skip)
-    when _char@1 =< 65535 ->
+    when Char =< 65535 ->
     escape_javascript_chunk(Rest, Acc, Original, Skip, 3);
-escape_javascript(<<__char@1/utf8,Rest/bitstring>>,
+escape_javascript(<<_Char/utf8,Rest/bitstring>>,
                   Acc, Original, Skip) ->
     escape_javascript_chunk(Rest, Acc, Original, Skip, 4);
 escape_javascript(<<>>, Acc, _Original, _Skip) ->
@@ -2387,9 +2387,9 @@ escape_javascript_chunk(<<Byte/integer,Rest/bitstring>>,
     when Byte =:= 127 ->
     escape_javascript_chunk(Rest, Acc, Original, Skip,
                             Len + 1);
-escape_javascript_chunk(<<_char@1/utf8,Rest/bitstring>>,
+escape_javascript_chunk(<<Char/utf8,Rest/bitstring>>,
                         Acc, Original, Skip, Len)
-    when _char@1 =< 2047 ->
+    when Char =< 2047 ->
     escape_javascript_chunk(Rest, Acc, Original, Skip,
                             Len + 2);
 escape_javascript_chunk(<<8232/utf8,Rest/bitstring>>,
@@ -2404,12 +2404,12 @@ escape_javascript_chunk(<<8233/utf8,Rest/bitstring>>,
     Acc2 = [Acc, Part | <<"\\u2029">>],
     escape_javascript(Rest, Acc2, Original,
                       Skip + Len + 3);
-escape_javascript_chunk(<<_char@1/utf8,Rest/bitstring>>,
+escape_javascript_chunk(<<Char/utf8,Rest/bitstring>>,
                         Acc, Original, Skip, Len)
-    when _char@1 =< 65535 ->
+    when Char =< 65535 ->
     escape_javascript_chunk(Rest, Acc, Original, Skip,
                             Len + 3);
-escape_javascript_chunk(<<__char@1/utf8,Rest/bitstring>>,
+escape_javascript_chunk(<<_Char/utf8,Rest/bitstring>>,
                         Acc, Original, Skip, Len) ->
     escape_javascript_chunk(Rest, Acc, Original, Skip,
                             Len + 4);
@@ -2453,419 +2453,30 @@ escape_json_chunk(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip, Len) whe
     Part = binary_part(Original, Skip, Len),
     Acc2 = [Acc, Part | escape(Byte)],
     escape_json(Rest, Acc2, Original, Skip + Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 32 ->
+escape_json_chunk(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip, Len) when Byte < 34 ->
     escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 33 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 34 ->
-    Part = binary_part(Original, Skip, Len),
-
-    Acc2 = [Acc, Part | escape(Byte)],
-    escape_json(Rest, Acc2, Original, Skip + Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 35 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 36 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-
-    when Byte =:= 37 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 38 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 39 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-
-    when Byte =:= 40 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 41 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 42 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-
-    when Byte =:= 43 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 44 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 45 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-
-    when Byte =:= 46 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 47 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 48 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 49 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 50 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 51 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 52 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 53 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 54 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 55 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 56 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 57 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 58 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 59 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 60 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 61 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 62 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 63 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 64 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 65 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 66 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 67 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 68 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 69 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 70 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 71 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 72 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 73 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 74 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 75 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 76 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 77 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 78 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 79 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 80 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 81 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 82 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 83 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 84 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 85 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 86 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 87 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 88 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 89 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 90 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 91 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 92 ->
+escape_json_chunk(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip, Len) when Byte =:= 34 ->
     Part = binary_part(Original, Skip, Len),
     Acc2 = [Acc, Part | escape(Byte)],
     escape_json(Rest, Acc2, Original, Skip + Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 93 ->
+escape_json_chunk(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip, Len) when Byte < 92 ->
     escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 94 ->
+escape_json_chunk(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip, Len) when Byte =:= 92 ->
+    Part = binary_part(Original, Skip, Len),
+    Acc2 = [Acc, Part | escape(Byte)],
+    escape_json(Rest, Acc2, Original, Skip + Len + 1);
+escape_json_chunk(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip, Len) when Byte < 128 ->
     escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 95 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 96 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 97 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 98 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 99 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 100 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 101 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 102 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 103 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 104 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 105 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 106 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 107 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 108 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 109 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 110 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 111 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 112 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 113 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 114 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 115 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 116 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 117 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 118 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 119 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 120 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 121 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 122 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 123 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 124 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 125 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 126 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<Byte/integer,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when Byte =:= 127 ->
-    escape_json_chunk(Rest, Acc, Original, Skip, Len + 1);
-escape_json_chunk(<<_char@1/utf8,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when _char@1 =< 2047 ->
+escape_json_chunk(<<Char/utf8,Rest/bitstring>>, Acc, Original, Skip, Len) when Char =< 2047 ->
     escape_json_chunk(Rest, Acc, Original, Skip, Len + 2);
-escape_json_chunk(<<_char@1/utf8,Rest/bitstring>>,
-                  Acc, Original, Skip, Len)
-    when _char@1 =< 65535 ->
+escape_json_chunk(<<Char/utf8,Rest/bitstring>>, Acc, Original, Skip, Len) when Char =< 65535 ->
     escape_json_chunk(Rest, Acc, Original, Skip, Len + 3);
-escape_json_chunk(<<__char@1/utf8,Rest/bitstring>>,
-                  Acc, Original, Skip, Len) ->
+escape_json_chunk(<<_Char/utf8,Rest/bitstring>>, Acc, Original, Skip, Len) ->
     escape_json_chunk(Rest, Acc, Original, Skip, Len + 4);
 escape_json_chunk(<<>>, Acc, Original, Skip, Len) ->
     Part = binary_part(Original, Skip, Len),
     [Acc | Part];
-escape_json_chunk(<<Byte/integer,_Rest/bitstring>>,
-                  _Acc, Original, _Skip, _Len) ->
+escape_json_chunk(<<Byte/integer,_Rest/bitstring>>, _Acc, Original, _Skip, _Len) ->
     throw_invalid_byte_error(Byte, Original).
 
 escape_unicode(_data@1, Original, Skip) ->
@@ -3417,29 +3028,29 @@ escape_unicode(<<Byte/integer,Rest/bitstring>>,
                Acc, Original, Skip)
     when Byte =:= 127 ->
     escape_unicode_chunk(Rest, Acc, Original, Skip, 1);
-escape_unicode(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode(<<Char/utf8,Rest/bitstring>>,
                Acc, Original, Skip)
-    when _char@1 =< 255 ->
-    Acc2 = [Acc, <<"\\u00">> | integer_to_list(_char@1, 16)],
+    when Char =< 255 ->
+    Acc2 = [Acc, <<"\\u00">> | integer_to_list(Char, 16)],
     escape_unicode(Rest, Acc2, Original, Skip + 2);
-escape_unicode(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode(<<Char/utf8,Rest/bitstring>>,
                Acc, Original, Skip)
-    when _char@1 =< 2047 ->
-    Acc2 = [Acc, <<"\\u0">> | integer_to_list(_char@1, 16)],
+    when Char =< 2047 ->
+    Acc2 = [Acc, <<"\\u0">> | integer_to_list(Char, 16)],
     escape_unicode(Rest, Acc2, Original, Skip + 2);
-escape_unicode(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode(<<Char/utf8,Rest/bitstring>>,
                Acc, Original, Skip)
-    when _char@1 =< 4095 ->
-    Acc2 = [Acc, <<"\\u0">> | integer_to_list(_char@1, 16)],
+    when Char =< 4095 ->
+    Acc2 = [Acc, <<"\\u0">> | integer_to_list(Char, 16)],
     escape_unicode(Rest, Acc2, Original, Skip + 3);
-escape_unicode(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode(<<Char/utf8,Rest/bitstring>>,
                Acc, Original, Skip)
-    when _char@1 =< 65535 ->
-    Acc2 = [Acc, <<"\\u">> | integer_to_list(_char@1, 16)],
+    when Char =< 65535 ->
+    Acc2 = [Acc, <<"\\u">> | integer_to_list(Char, 16)],
     escape_unicode(Rest, Acc2, Original, Skip + 3);
-escape_unicode(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode(<<Char/utf8,Rest/bitstring>>,
                Acc, Original, Skip) ->
-    _char@2 = _char@1 - 65536,
+    _char@2 = Char - 65536,
     Acc2 =
         [Acc,
          <<"\\uD">>,
@@ -4127,36 +3738,36 @@ escape_unicode_chunk(<<Byte/integer,Rest/bitstring>>,
     when Byte =:= 127 ->
     escape_unicode_chunk(Rest, Acc, Original, Skip,
                          Len + 1);
-escape_unicode_chunk(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode_chunk(<<Char/utf8,Rest/bitstring>>,
                      Acc, Original, Skip, Len)
-    when _char@1 =< 255 ->
+    when Char =< 255 ->
     Part = binary_part(Original, Skip, Len),
     Acc2 =
-        [Acc, Part, <<"\\u00">> | integer_to_list(_char@1, 16)],
+        [Acc, Part, <<"\\u00">> | integer_to_list(Char, 16)],
     escape_unicode(Rest, Acc2, Original, Skip + Len + 2);
-escape_unicode_chunk(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode_chunk(<<Char/utf8,Rest/bitstring>>,
                      Acc, Original, Skip, Len)
-    when _char@1 =< 2047 ->
+    when Char =< 2047 ->
     Part = binary_part(Original, Skip, Len),
     Acc2 =
-        [Acc, Part, <<"\\u0">> | integer_to_list(_char@1, 16)],
+        [Acc, Part, <<"\\u0">> | integer_to_list(Char, 16)],
     escape_unicode(Rest, Acc2, Original, Skip + Len + 2);
-escape_unicode_chunk(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode_chunk(<<Char/utf8,Rest/bitstring>>,
                      Acc, Original, Skip, Len)
-    when _char@1 =< 4095 ->
+    when Char =< 4095 ->
     Part = binary_part(Original, Skip, Len),
     Acc2 =
-        [Acc, Part, <<"\\u0">> | integer_to_list(_char@1, 16)],
+        [Acc, Part, <<"\\u0">> | integer_to_list(Char, 16)],
     escape_unicode(Rest, Acc2, Original, Skip + Len + 3);
-escape_unicode_chunk(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode_chunk(<<Char/utf8,Rest/bitstring>>,
                      Acc, Original, Skip, Len)
-    when _char@1 =< 65535 ->
+    when Char =< 65535 ->
     Part = binary_part(Original, Skip, Len),
-    Acc2 = [Acc, Part, <<"\\u">> | integer_to_list(_char@1, 16)],
+    Acc2 = [Acc, Part, <<"\\u">> | integer_to_list(Char, 16)],
     escape_unicode(Rest, Acc2, Original, Skip + Len + 3);
-escape_unicode_chunk(<<_char@1/utf8,Rest/bitstring>>,
+escape_unicode_chunk(<<Char/utf8,Rest/bitstring>>,
                      Acc, Original, Skip, Len) ->
-    _char@2 = _char@1 - 65536,
+    _char@2 = Char - 65536,
     Part = binary_part(Original, Skip, Len),
     Acc2 =
         [Acc, Part,
