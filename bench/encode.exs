@@ -1,22 +1,22 @@
 encode_jobs = %{
   "thoas" => &:thoas.encode_to_iodata/1,
-  "Jason" => &Jason.encode_to_iodata!/1
+  "Jason" => &Jason.encode_to_iodata!/1,
   # "Jason strict" => &Jason.encode_to_iodata!(&1, maps: :strict),
-  # "Poison" => &Poison.encode_to_iodata!/1,
-  # "JSX" => &JSX.encode!/1,
-  # "Tiny" => &Tiny.encode!/1,
-  # "jsone" => &:jsone.encode/1
+  "Poison" => &Poison.encode_to_iodata!/1,
+  "JSX" => &JSX.encode!/1,
+  "Tiny" => &Tiny.encode!/1,
+  "jsone" => &:jsone.encode/1
   # "jiffy" => &:jiffy.encode/1,
   # "JSON" => &JSON.encode!/1
   # "term_to_binary" => &:erlang.term_to_binary/1,
 }
 
 encode_inputs = [
-  # "GitHub",
+  "GitHub"
   # "Giphy",
   # "GovTrack",
   # "Blockchain",
-  "Pokedex"
+  # "Pokedex"
   # "JSON Generator",
   # "UTF-8 unescaped",
   # "Issue 90"
