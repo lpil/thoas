@@ -1,11 +1,11 @@
-# Jason
+# Thoas
 
-A blazing fast JSON parser and generator in pure Elixir.
+A blazing fast JSON parser and generator in pure Erlang.
 
-The parser and generator are at least twice as fast as other Elixir/Erlang libraries
-(most notably `Poison`).
-The performance is comparable to `jiffy`, which is implemented in C as a NIF.
-Jason is usually only twice as slow.
+Thoas is an Erlang conversion of the Elixir based [Jason library][jason], and as
+such the parser and generator are at least twice as fast as other Elixir/Erlang
+libraries. The performance is comparable to `jiffy`, which is implemented in C
+as a NIF. Thoas and Jason are usually only twice as slow.
 
 Both parser and generator fully conform to
 [RFC 8259](https://tools.ietf.org/html/rfc8259) and
@@ -14,76 +14,46 @@ standards. The parser is tested using [JSONTestSuite](https://github.com/nst/JSO
 
 ## Installation
 
-The package can be installed by adding `jason` to your list of dependencies
-in `mix.exs`:
+### Erlang
+
+```erlang
+% rebar.config
+{deps, [thoas]}
+```
+
+### Gleam
+
+```shell
+gleam add thoas
+```
+
+### Elixir
 
 ```elixir
+# mix.exs
 def deps do
-  [{:jason, "~> 1.1"}]
+  [{:thoas, "~> 0.1"}]
 end
 ```
 
 ## Basic Usage
 
-``` elixir
-iex(1)> Jason.encode!(%{"age" => 44, "name" => "Steve Irwin", "nationality" => "Australian"})
-"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\"}"
+```erlang
+> thoas:encode(#{"age" => 44, "name" => "Steve Irwin", "nationality" => "Australian"}).
+<<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\"}">>
 
-iex(2)> Jason.decode!(~s({"age":44,"name":"Steve Irwin","nationality":"Australian"}))
-%{"age" => 44, "name" => "Steve Irwin", "nationality" => "Australian"}
-```
-
-Full documentation can be found at [https://hexdocs.pm/jason](https://hexdocs.pm/jason).
-
-## Use with other libraries
-
-### Postgrex
-
-Versions starting at 0.14.0 use `Jason` by default. For earlier versions, please refer to
-[previous versions of this document](https://github.com/michalmuskala/jason/tree/v1.1.2#postgrex).
-
-### Ecto
-
-Versions starting at 3.0.0 use `Jason` by default. For earlier versions, please refer to
-[previous versions of this document](https://github.com/michalmuskala/jason/tree/v1.1.2#ecto).
-
-### Plug (and Phoenix)
-
-Phoenix starting at 1.4.0 uses `Jason` by default. For earlier versions, please refer to
-[previous versions of this document](https://github.com/michalmuskala/jason/tree/v1.1.2#plug-and-phoenix).
-
-### Absinthe
-
-You need to pass the `:json_codec` option to `Absinthe.Plug`
-
-```elixir
-# When called directly:
-plug Absinthe.Plug,
-  schema: MyApp.Schema,
-  json_codec: Jason
-
-# When used in phoenix router:
-forward "/api",
-  to: Absinthe.Plug,
-  init_opts: [schema: MyApp.Schema, json_codec: Jason]
+> thoas:decode(<<"{\"age"\:44,"\name"\:\"Steve Irwin\",\"nationality\":\"Australian\"}">>).
+{ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>}}
 ```
 
 ## Benchmarks
-
-Detailed benchmarks (including memory measurements):
-https://gist.github.com/michalmuskala/4d64a5a7696ca84ac7c169a0206640d5
-
-HTML reports for the benchmark (only performance measurements):
-http://michal.muskala.eu/jason/decode.html and http://michal.muskala.eu/jason/encode.html
-
-### Running
 
 Benchmarks against most popular Elixir & Erlang json libraries can be executed after
 going into the `bench/` folder and then executing `mix bench.encode` and `mix bench.decode`.
 A HTML report of the benchmarks (after their execution) can be found in
 `bench/output/encode.html` and `bench/output/decode.html` respectively.
 
-## Differences to Poison
+## Differences to Jason
 
 Jason has a couple feature differences compared to Poison.
 
@@ -135,7 +105,11 @@ Protocol.derive(Jason.Encoder, NameOfTheStruct)
 
 ## License
 
-Jason is released under the Apache License 2.0 - see the [LICENSE](LICENSE) file.
+Thoas is released under the Apache License 2.0 - see the [LICENSE](LICENSE) file.
+
+Thoas is based off of [Jason][jason], which is also Apache 2.0 lienced.
 
 Some elements of tests and benchmarks have their origins in the
 [Poison library](https://github.com/devinus/poison) and were initially licensed under [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+[jason]: https://github.com/michalmuskala/jason
