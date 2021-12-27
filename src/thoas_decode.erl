@@ -969,9 +969,7 @@ object(Rest, Input, Skip, Stack, StringDecode) ->
 object(Data, Input, Skip, Stack, StringDecode, Value) ->
     case Data of
         <<9/integer,Rest/bitstring>> ->
-            object(Rest, Input,
-                   Skip + 1,
-                   Stack, StringDecode, Value);
+            object(Rest, Input, Skip + 1, Stack, StringDecode, Value);
         <<10/integer,Rest/bitstring>> ->
             object(Rest, Input, Skip + 1, Stack, StringDecode, Value);
         <<13/integer,Rest/bitstring>> ->
