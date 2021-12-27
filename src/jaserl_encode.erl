@@ -25,84 +25,45 @@ encode_atom(Atom, Escape) ->
 encode_string(String, Escape) ->
     [34, Escape(String, String, 0), 34].
 
-escape(0) ->
-    <<"\\u0000">>;
-escape(1) ->
-    <<"\\u0001">>;
-escape(2) ->
-    <<"\\u0002">>;
-escape(3) ->
-    <<"\\u0003">>;
-escape(4) ->
-    <<"\\u0004">>;
-escape(5) ->
-    <<"\\u0005">>;
-escape(6) ->
-    <<"\\u0006">>;
-escape(7) ->
-    <<"\\u0007">>;
-escape(8) ->
-    <<"\\b">>;
-escape(9) ->
-    <<"\\t">>;
-escape(10) ->
-    <<"\\n">>;
-escape(11) ->
-    <<"\\u000B">>;
-escape(12) ->
-    <<"\\f">>;
-escape(13) ->
-    <<"\\r">>;
-escape(14) ->
-    <<"\\u000E">>;
-escape(15) ->
-    <<"\\u000F">>;
-escape(16) ->
-    <<"\\u0010">>;
-escape(17) ->
-    <<"\\u0011">>;
-escape(18) ->
-    <<"\\u0012">>;
-escape(19) ->
-    <<"\\u0013">>;
-escape(20) ->
-    <<"\\u0014">>;
-escape(21) ->
-    <<"\\u0015">>;
-escape(22) ->
-    <<"\\u0016">>;
-escape(23) ->
-    <<"\\u0017">>;
-escape(24) ->
-    <<"\\u0018">>;
-escape(25) ->
-    <<"\\u0019">>;
-escape(26) ->
-    <<"\\u001A">>;
-escape(27) ->
-    <<"\\u001B">>;
-escape(28) ->
-    <<"\\u001C">>;
-escape(29) ->
-    <<"\\u001D">>;
-escape(30) ->
-    <<"\\u001E">>;
-escape(31) ->
-    <<"\\u001F">>;
-escape(32) ->
-    throw(error);
-escape(33) ->
-    throw(error);
-escape(34) ->
-    <<"\\\"">>;
-escape(X) when X < 47 andalso X > 34 ->
-    throw(error);
-escape(47) ->
-    <<"\\/">>;
-escape(X) when X < 92 andalso X > 47 ->
-    throw(error);
-escape(92) ->
-    <<"\\\\">>.
+escape(0) -> <<"\\u0000">>;
+escape(1) -> <<"\\u0001">>;
+escape(2) -> <<"\\u0002">>;
+escape(3) -> <<"\\u0003">>;
+escape(4) -> <<"\\u0004">>;
+escape(5) -> <<"\\u0005">>;
+escape(6) -> <<"\\u0006">>;
+escape(7) -> <<"\\u0007">>;
+escape(8) -> <<"\\b">>;
+escape(9) -> <<"\\t">>;
+escape(10) -> <<"\\n">>;
+escape(11) -> <<"\\u000B">>;
+escape(12) -> <<"\\f">>;
+escape(13) -> <<"\\r">>;
+escape(14) -> <<"\\u000E">>;
+escape(15) -> <<"\\u000F">>;
+escape(16) -> <<"\\u0010">>;
+escape(17) -> <<"\\u0011">>;
+escape(18) -> <<"\\u0012">>;
+escape(19) -> <<"\\u0013">>;
+escape(20) -> <<"\\u0014">>;
+escape(21) -> <<"\\u0015">>;
+escape(22) -> <<"\\u0016">>;
+escape(23) -> <<"\\u0017">>;
+escape(24) -> <<"\\u0018">>;
+escape(25) -> <<"\\u0019">>;
+escape(26) -> <<"\\u001A">>;
+escape(27) -> <<"\\u001B">>;
+escape(28) -> <<"\\u001C">>;
+escape(29) -> <<"\\u001D">>;
+escape(30) -> <<"\\u001E">>;
+escape(31) -> <<"\\u001F">>;
+escape(32) -> throw(error);
+escape(33) -> throw(error);
+escape(34) -> <<"\\\"">>;
+escape(X) when X < 47 andalso X > 34 -> throw(error);
+escape(47) -> <<"\\/">>;
+escape(X) when X < 92 andalso X > 47 -> throw(error);
+escape(92) -> <<"\\\\">>.
 
 escape_function(#{escape := Escape}) ->
     case Escape of
@@ -2861,12 +2822,11 @@ escape_unicode_chunk(<<Char/utf8,Rest/bitstring>>,
                      Acc, Input, Skip, Len) ->
     _char@2 = Char - 65536,
     Part = binary_part(Input, Skip, Len),
-    Acc2 =
-        [Acc, Part,
-         <<"\\uD">>,
-         integer_to_list(2048 bor (_char@2 bsr 10), 16),
-         <<"\\uD">> |
-         integer_to_list(3072 bor _char@2 band 1023, 16)],
+    Acc2 = [Acc, Part, <<"\\uD">>,
+        integer_to_list(2048 bor (_char@2 bsr 10), 16),
+        <<"\\uD">> 
+        | integer_to_list(3072 bor _char@2 band 1023, 16)
+    ],
     escape_unicode(Rest, Acc2, Input, Skip + Len + 4);
 escape_unicode_chunk(<<>>, Acc, Input, Skip, Len) ->
     Part = binary_part(Input, Skip, Len),
@@ -2897,37 +2857,37 @@ keyword(_list@1, Escape) when is_list(_list@1) ->
 
 list([], _Escape) ->
     <<"[]">>;
-list([_head@1 | _tail@1], Escape) ->
-    [91, value(_head@1, Escape) | list_loop(_tail@1, Escape)].
+list([_head@1 | Tail], Escape) ->
+    [91, value(_head@1, Escape) | list_loop(Tail, Escape)].
 
 list_loop([], _Escape) ->
     [93];
-list_loop([_head@1 | _tail@1], Escape) ->
-    [44, value(_head@1, Escape) | list_loop(_tail@1, Escape)].
+list_loop([_head@1 | Tail], Escape) ->
+    [44, value(_head@1, Escape) | list_loop(Tail, Escape)].
 
 map(Value, Escape) ->
     case maps:to_list(Value) of
         [] ->
             <<"{}">>;
-        _keyword@1 ->
-            map_naive(_keyword@1, Escape)
+        Keyword ->
+            map_naive(Keyword, Escape)
     end.
 
-map_naive([{_key@1, Value} | _tail@1], Escape) ->
+map_naive([{Key, Value} | Tail], Escape) ->
     [<<"{\"">>,
-     key(_key@1, Escape),
+     key(Key, Escape),
      <<"\":">>,
      value(Value, Escape) |
-     map_naive_loop(_tail@1, Escape)].
+     map_naive_loop(Tail, Escape)].
 
 map_naive_loop([], _Escape) ->
     [125];
-map_naive_loop([{_key@1, Value} | _tail@1], Escape) ->
+map_naive_loop([{Key, Value} | Tail], Escape) ->
     [<<",\"">>,
-     key(_key@1, Escape),
+     key(Key, Escape),
      <<"\":">>,
      value(Value, Escape) |
-     map_naive_loop(_tail@1, Escape)].
+     map_naive_loop(Tail, Escape)].
 
 string(String, Escape) ->
     encode_string(String, Escape).
@@ -2951,7 +2911,7 @@ value(Value, Escape) when is_map(Value) ->
     case maps:to_list(Value) of
         [] ->
             <<"{}">>;
-        _keyword@1 ->
-            map_naive(_keyword@1, Escape)
+        Keyword ->
+            map_naive(Keyword, Escape)
     end.
 
