@@ -1,4 +1,4 @@
-defmodule :thoas_decoder do
+defmodule :thoas_decoder_bak do
   @moduledoc false
 
   import :thoas_codegen, only: [bytecase: 2, bytecase: 3]
