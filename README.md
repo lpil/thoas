@@ -78,7 +78,7 @@ to projects written in any BEAM language.
 
 Thoas is released under the Apache License 2.0 - see the [LICENSE](LICENSE) file.
 
-Thoas is based off of [Jason][jason], which is also Apache 2.0 lienced.
+Thoas is based off of [Jason][jason], which is also Apache 2.0 licenced.
 
 Some elements of tests and benchmarks have their origins in the
 [Poison library](https://github.com/devinus/poison) and were initially licensed under [CC0-1.0](https://creativecommons.org/publicdomain/zero/1.0/).
