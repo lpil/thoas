@@ -1,4 +1,4 @@
--module(jaserl_encode).
+-module(thoas_encode).
 
 -compile([{inline, [{float_, 1}, {integer, 1}]},
           {inline, [{throw_invalid_byte_error, 2}]}]).

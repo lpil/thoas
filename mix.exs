@@ -1,4 +1,4 @@
-defmodule :jaserl_mixfile do
+defmodule :thoas_mixfile do
   use Mix.Project
 
   @version "1.1.2"

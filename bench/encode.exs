@@ -12,10 +12,10 @@ encode_jobs = %{
 }
 
 encode_inputs = [
-  "GitHub",
-  "Giphy",
-  "GovTrack",
-  "Blockchain",
+  # "GitHub",
+  # "Giphy",
+  # "GovTrack",
+  # "Blockchain",
   "Pokedex"
   # "JSON Generator",
   # "UTF-8 unescaped",

@@ -1,4 +1,4 @@
-defmodule :jaserl_codegen do
+defmodule :thoas_codegen do
   @moduledoc false
 
   def jump_table(ranges, default) do
