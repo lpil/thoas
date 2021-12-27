@@ -22,15 +22,16 @@ defmodule JasonBench.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:jason, "~> 1.0", path: "../", override: true},
+      {:jaserl, "~> 1.0", path: "../", override: true},
       {:benchee, "~> 1.0"},
       {:benchee_html, "~> 1.0"},
-      {:poison, "~> 3.0"},
       {:exjsx, "~> 4.0"},
-      {:tiny, "~> 1.0"},
-      {:jsone, "~> 1.4"},
-      {:jiffy, "~> 0.14"},
+      {:jason, "~> 1.0"},
+      # {:jiffy, "~> 0.14"},
       {:json, "~> 1.0"},
+      {:jsone, "~> 1.4"},
+      {:poison, "~> 3.0"},
+      {:tiny, "~> 1.0"}
     ]
   end
 end
