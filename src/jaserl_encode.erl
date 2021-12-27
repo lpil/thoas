@@ -3,41 +3,27 @@
 -compile([{inline, [{float_, 1}, {integer, 1}]},
           {inline, [{throw_invalid_byte_error, 2}]}]).
 
--spec integer(integer()) -> iodata().
+-export([atom/2, encode/2, float_/1, integer/1, key/2, keyword/2, map/2,
+         string/2, value/2]).
 
--spec float_(float()) -> iodata().
+atom(Atom, Escape) ->
+    encode_atom(Atom, Escape).
 
--spec encode(any(), map()) -> iodata().
+encode(Value, Opts) ->
+    Escape = escape_function(Opts),
+    value(Value, Escape).
 
--export([atom/2,
-         encode/2,
-         float_/1,
-         integer/1,
-         key/2,
-         keyword/2,
-         map/2,
-         string/2,
-         value/2]).
-
-
-atom(_atom@1, _escape@1) ->
-    encode_atom(_atom@1, _escape@1).
-
-encode(_value@1, _opts@1) ->
-    _escape@1 = escape_function(_opts@1),
-    value(_value@1, _escape@1).
-
-encode_atom(nil, __escape@1) ->
+encode_atom(nil, _Escape) ->
     <<"null">>;
-encode_atom(true, __escape@1) ->
+encode_atom(true, _Escape) ->
     <<"true">>;
-encode_atom(false, __escape@1) ->
+encode_atom(false, _Escape) ->
     <<"false">>;
-encode_atom(_atom@1, _escape@1) ->
-    encode_string(atom_to_binary(_atom@1, utf8), _escape@1).
+encode_atom(Atom, Escape) ->
+    encode_string(atom_to_binary(Atom, utf8), Escape).
 
-encode_string(_string@1, _escape@1) ->
-    [34, _escape@1(_string@1, _string@1, 0), 34].
+encode_string(String, Escape) ->
+    [34, Escape(String, String, 0), 34].
 
 escape(0) ->
     <<"\\u0000">>;
@@ -118,16 +104,12 @@ escape(X) when X < 92 andalso X > 47 ->
 escape(92) ->
     <<"\\\\">>.
 
-escape_function(#{escape := _escape@1}) ->
-    case _escape@1 of
-        json ->
-            fun escape_json/3;
-        html ->
-            fun escape_html/3;
-        unicode ->
-            fun escape_unicode/3;
-        javascript ->
-            fun escape_javascript/3
+escape_function(#{escape := Escape}) ->
+    case Escape of
+        json -> fun escape_json/3;
+        html -> fun escape_html/3;
+        unicode -> fun escape_unicode/3;
+        javascript -> fun escape_javascript/3
     end.
 
 escape_html(_data@1, Original, Skip) ->
@@ -143,356 +125,32 @@ escape_html(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip) when Byte =:= 
     escape_html(Rest, Acc2, Original, Skip + 1);
 escape_html(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip) when Byte < 47 ->
     escape_html_chunk(Rest, Acc, Original, Skip, 1);
-
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 47 ->
+escape_html(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip) when Byte =:= 47 ->
     Acc2 = [Acc | escape(Byte)],
     escape_html(Rest, Acc2, Original, Skip + 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 48 ->
+escape_html(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip) when Byte < 92 ->
     escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 49 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 50 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 51 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 52 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 53 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 54 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 55 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 56 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 57 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 58 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 59 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 60 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 61 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 62 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 63 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 64 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 65 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 66 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 67 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 68 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 69 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 70 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 71 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 72 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 73 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 74 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 75 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 76 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 77 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 78 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 79 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 80 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 81 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 82 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 83 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 84 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 85 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 86 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 87 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 88 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 89 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 90 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 91 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 92 ->
+escape_html(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip) when Byte =:= 92 ->
     Acc2 = [Acc | escape(Byte)],
     escape_html(Rest, Acc2, Original, Skip + 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 93 ->
+escape_html(<<Byte/integer,Rest/bitstring>>, Acc, Original, Skip) when Byte < 128 ->
     escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 94 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 95 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 96 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 97 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 98 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 99 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 100 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 101 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 102 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 103 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 104 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 105 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 106 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 107 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 108 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 109 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 110 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 111 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 112 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 113 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 114 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 115 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 116 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 117 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 118 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 119 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 120 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 121 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 122 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 123 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 124 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 125 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 126 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Byte/integer,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Byte =:= 127 ->
-    escape_html_chunk(Rest, Acc, Original, Skip, 1);
-escape_html(<<Char/utf8,Rest/bitstring>>,
-            Acc, Original, Skip)
-    when Char =< 2047 ->
+escape_html(<<Char/utf8,Rest/bitstring>>, Acc, Original, Skip) when Char =< 2047 ->
     escape_html_chunk(Rest, Acc, Original, Skip, 2);
-escape_html(<<8232/utf8,Rest/bitstring>>,
-            Acc, Original, Skip) ->
+escape_html(<<8232/utf8,Rest/bitstring>>, Acc, Original, Skip) ->
     Acc2 = [Acc | <<"\\u2028">>],
     escape_html(Rest, Acc2, Original, Skip + 3);
-escape_html(<<8233/utf8,Rest/bitstring>>,
-            Acc, Original, Skip) ->
+escape_html(<<8233/utf8,Rest/bitstring>>, Acc, Original, Skip) ->
     Acc2 = [Acc | <<"\\u2029">>],
     escape_html(Rest, Acc2, Original, Skip + 3);
-escape_html(<<Char/utf8,Rest/bitstring>>,
-            Acc, Original, Skip)
+escape_html(<<Char/utf8,Rest/bitstring>>, Acc, Original, Skip)
     when Char =< 65535 ->
     escape_html_chunk(Rest, Acc, Original, Skip, 3);
-escape_html(<<_Char/utf8,Rest/bitstring>>,
-            Acc, Original, Skip) ->
+escape_html(<<_Char/utf8,Rest/bitstring>>, Acc, Original, Skip) ->
     escape_html_chunk(Rest, Acc, Original, Skip, 4);
 escape_html(<<>>, Acc, _Original, _Skip) ->
     Acc;
-escape_html(<<Byte/integer,_Rest/bitstring>>,
-            _Acc, Original, _Skip) ->
+escape_html(<<Byte/integer,_Rest/bitstring>>, _Acc, Original, _Skip) ->
     throw_invalid_byte_error(Byte, Original).
 
 escape_html_chunk(<<Byte/integer,Rest/bitstring>>,
@@ -3789,77 +3447,77 @@ float_(_float@1) ->
 integer(_integer@1) ->
     integer_to_list(_integer@1).
 
-key(_string@1, _escape@1) when is_binary(_string@1) ->
-    _escape@1(_string@1, _string@1, 0);
-key(_atom@1, _escape@1) when is_atom(_atom@1) ->
-    _string@1 = atom_to_binary(_atom@1, utf8),
-    _escape@1(_string@1, _string@1, 0);
-key(_charlist@1, _escape@1) when is_list(_charlist@1) ->
-    _string@1 = list_to_binary(_charlist@1),
-    _escape@1(_string@1, _string@1, 0).
+key(String, Escape) when is_binary(String) ->
+    Escape(String, String, 0);
+key(Atom, Escape) when is_atom(Atom) ->
+    String = atom_to_binary(Atom, utf8),
+    Escape(String, String, 0);
+key(_charlist@1, Escape) when is_list(_charlist@1) ->
+    String = list_to_binary(_charlist@1),
+    Escape(String, String, 0).
 
 keyword(_list@1, _) when _list@1 == [] ->
     <<"{}">>;
-keyword(_list@1, _escape@1) when is_list(_list@1) ->
-    map_naive(_list@1, _escape@1).
+keyword(_list@1, Escape) when is_list(_list@1) ->
+    map_naive(_list@1, Escape).
 
-list([], __escape@1) ->
+list([], _Escape) ->
     <<"[]">>;
-list([_head@1 | _tail@1], _escape@1) ->
-    [91, value(_head@1, _escape@1) | list_loop(_tail@1, _escape@1)].
+list([_head@1 | _tail@1], Escape) ->
+    [91, value(_head@1, Escape) | list_loop(_tail@1, Escape)].
 
-list_loop([], __escape@1) ->
+list_loop([], _Escape) ->
     [93];
-list_loop([_head@1 | _tail@1], _escape@1) ->
-    [44, value(_head@1, _escape@1) | list_loop(_tail@1, _escape@1)].
+list_loop([_head@1 | _tail@1], Escape) ->
+    [44, value(_head@1, Escape) | list_loop(_tail@1, Escape)].
 
-map(_value@1, _escape@1) ->
-    case maps:to_list(_value@1) of
+map(Value, Escape) ->
+    case maps:to_list(Value) of
         [] ->
             <<"{}">>;
         _keyword@1 ->
-            map_naive(_keyword@1, _escape@1)
+            map_naive(_keyword@1, Escape)
     end.
 
-map_naive([{_key@1, _value@1} | _tail@1], _escape@1) ->
+map_naive([{_key@1, Value} | _tail@1], Escape) ->
     [<<"{\"">>,
-     key(_key@1, _escape@1),
+     key(_key@1, Escape),
      <<"\":">>,
-     value(_value@1, _escape@1) |
-     map_naive_loop(_tail@1, _escape@1)].
+     value(Value, Escape) |
+     map_naive_loop(_tail@1, Escape)].
 
-map_naive_loop([], __escape@1) ->
+map_naive_loop([], _Escape) ->
     [125];
-map_naive_loop([{_key@1, _value@1} | _tail@1], _escape@1) ->
+map_naive_loop([{_key@1, Value} | _tail@1], Escape) ->
     [<<",\"">>,
-     key(_key@1, _escape@1),
+     key(_key@1, Escape),
      <<"\":">>,
-     value(_value@1, _escape@1) |
-     map_naive_loop(_tail@1, _escape@1)].
+     value(Value, Escape) |
+     map_naive_loop(_tail@1, Escape)].
 
-string(_string@1, _escape@1) ->
-    encode_string(_string@1, _escape@1).
+string(String, Escape) ->
+    encode_string(String, Escape).
 
 throw_invalid_byte_error(Byte, Original) ->
     throw({invalid_byte,
            <<"0x"/utf8,(integer_to_binary(Byte, 16))/binary>>,
            Original}).
 
-value(_value@1, _escape@1) when is_atom(_value@1) ->
-    encode_atom(_value@1, _escape@1);
-value(_value@1, _escape@1) when is_binary(_value@1) ->
-    encode_string(_value@1, _escape@1);
-value(_value@1, __escape@1) when is_integer(_value@1) ->
-    integer(_value@1);
-value(_value@1, __escape@1) when is_float(_value@1) ->
-    float_(_value@1);
-value(_value@1, _escape@1) when is_list(_value@1) ->
-    list(_value@1, _escape@1);
-value(_value@1, _escape@1) when is_map(_value@1) ->
-    case maps:to_list(_value@1) of
+value(Value, Escape) when is_atom(Value) ->
+    encode_atom(Value, Escape);
+value(Value, Escape) when is_binary(Value) ->
+    encode_string(Value, Escape);
+value(Value, _Escape) when is_integer(Value) ->
+    integer(Value);
+value(Value, _Escape) when is_float(Value) ->
+    float_(Value);
+value(Value, Escape) when is_list(Value) ->
+    list(Value, Escape);
+value(Value, Escape) when is_map(Value) ->
+    case maps:to_list(Value) of
         [] ->
             <<"{}">>;
         _keyword@1 ->
-            map_naive(_keyword@1, _escape@1)
+            map_naive(_keyword@1, Escape)
     end.
 
