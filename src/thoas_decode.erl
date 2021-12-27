@@ -91,250 +91,33 @@ escape(Data, Input, Skip, Stack, StringDecode, Acc) ->
 escape_surrogate(<<92/integer, 117/integer, Int1:16/integer, Int2:16/integer, Rest/bitstring>>,
                  Input, Skip, Stack, StringDecode, Acc, Hi) ->
     Last = escapeu_last(Int2, Input, Skip + 6),
-    case Int1 of
-        17475 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@1 = Acc,
-                       _@2 = 220,
-                       _@3 = Last,
-                       _@4 = Hi,
-                       begin
-                           _@5 = _@2 band 3 bsl 8 + _@3,
-                           [_@1 | <<(_@4 + _@5)/utf8>>]
-                       end
-                   end,
-                   0);
-        17476 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@6 = Acc,
-                       _@7 = 221,
-                       _@8 = Last,
-                       _@9 = Hi,
-                       begin
-                           _@10 = _@7 band 3 bsl 8 + _@8,
-                           [_@6 | <<(_@9 + _@10)/utf8>>]
-                       end
-                   end,
-                   0);
-        17477 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@11 = Acc,
-                       _@12 = 222,
-                       _@13 = Last,
-                       _@14 = Hi,
-                       begin
-                           _@15 = _@12 band 3 bsl 8 + _@13,
-                           [_@11 | <<(_@14 + _@15)/utf8>>]
-                       end
-                   end,
-                   0);
-        17478 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@16 = Acc,
-                       _@17 = 223,
-                       _@18 = Last,
-                       _@19 = Hi,
-                       begin
-                           _@20 = _@17 band 3 bsl 8 + _@18,
-                           [_@16 | <<(_@19 + _@20)/utf8>>]
-                       end
-                   end,
-                   0);
-        17507 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@21 = Acc,
-                       _@22 = 220,
-                       _@23 = Last,
-                       _@24 = Hi,
-                       begin
-                           _@25 = _@22 band 3 bsl 8 + _@23,
-                           [_@21 | <<(_@24 + _@25)/utf8>>]
-                       end
-                   end,
-                   0);
-        17508 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@26 = Acc,
-                       _@27 = 221,
-                       _@28 = Last,
-                       _@29 = Hi,
-                       begin
-                           _@30 = _@27 band 3 bsl 8 + _@28,
-                           [_@26 | <<(_@29 + _@30)/utf8>>]
-                       end
-                   end,
-                   0);
-        17509 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@31 = Acc,
-                       _@32 = 222,
-                       _@33 = Last,
-                       _@34 = Hi,
-                       begin
-                           _@35 = _@32 band 3 bsl 8 + _@33,
-                           [_@31 | <<(_@34 + _@35)/utf8>>]
-                       end
-                   end,
-                   0);
-        17510 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@36 = Acc,
-                       _@37 = 223,
-                       _@38 = Last,
-                       _@39 = Hi,
-                       begin
-                           _@40 = _@37 band 3 bsl 8 + _@38,
-                           [_@36 | <<(_@39 + _@40)/utf8>>]
-                       end
-                   end,
-                   0);
-        25667 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@41 = Acc,
-                       _@42 = 220,
-                       _@43 = Last,
-                       _@44 = Hi,
-                       begin
-                           _@45 = _@42 band 3 bsl 8 + _@43,
-                           [_@41 | <<(_@44 + _@45)/utf8>>]
-                       end
-                   end,
-                   0);
-        25668 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@46 = Acc,
-                       _@47 = 221,
-                       _@48 = Last,
-                       _@49 = Hi,
-                       begin
-                           _@50 = _@47 band 3 bsl 8 + _@48,
-                           [_@46 | <<(_@49 + _@50)/utf8>>]
-                       end
-                   end,
-                   0);
-        25669 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@51 = Acc,
-                       _@52 = 222,
-                       _@53 = Last,
-                       _@54 = Hi,
-                       begin
-                           _@55 = _@52 band 3 bsl 8 + _@53,
-                           [_@51 | <<(_@54 + _@55)/utf8>>]
-                       end
-                   end,
-                   0);
-        25670 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@56 = Acc,
-                       _@57 = 223,
-                       _@58 = Last,
-                       _@59 = Hi,
-                       begin
-                           _@60 = _@57 band 3 bsl 8 + _@58,
-                           [_@56 | <<(_@59 + _@60)/utf8>>]
-                       end
-                   end,
-                   0);
-        25699 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@61 = Acc,
-                       _@62 = 220,
-                       _@63 = Last,
-                       _@64 = Hi,
-                       begin
-                           _@65 = _@62 band 3 bsl 8 + _@63,
-                           [_@61 | <<(_@64 + _@65)/utf8>>]
-                       end
-                   end,
-                   0);
-        25700 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@66 = Acc,
-                       _@67 = 221,
-                       _@68 = Last,
-                       _@69 = Hi,
-                       begin
-                           _@70 = _@67 band 3 bsl 8 + _@68,
-                           [_@66 | <<(_@69 + _@70)/utf8>>]
-                       end
-                   end,
-                   0);
-        25701 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@71 = Acc,
-                       _@72 = 222,
-                       _@73 = Last,
-                       _@74 = Hi,
-                       begin
-                           _@75 = _@72 band 3 bsl 8 + _@73,
-                           [_@71 | <<(_@74 + _@75)/utf8>>]
-                       end
-                   end,
-                   0);
-        25702 ->
-            string(Rest, Input,
-                   Skip + 12,
-                   Stack, StringDecode,
-                   begin
-                       _@76 = Acc,
-                       _@77 = 223,
-                       _@78 = Last,
-                       _@79 = Hi,
-                       begin
-                           _@80 = _@77 band 3 bsl 8 + _@78,
-                           [_@76 | <<(_@79 + _@80)/utf8>>]
-                       end
-                   end,
-                   0);
-        _ ->
-            token_error(Input, Skip, 12)
-    end;
+    X = case Int1 of
+        17475 -> 220;
+        17476 -> 221;
+        17477 -> 222;
+        17478 -> 223;
+        17507 -> 220;
+        17508 -> 221;
+        17509 -> 222;
+        17510 -> 223;
+        25667 -> 220;
+        25668 -> 221;
+        25669 -> 222;
+        25670 -> 223;
+        25699 -> 220;
+        25700 -> 221;
+        25701 -> 222;
+        25702 -> 223;
+        _ -> token_error(Input, Skip, 12)
+    end,
+    string(Rest, Input,
+            Skip + 12,
+            Stack, StringDecode,
+            begin
+                Y = X band 3 bsl 8 + Last,
+                [Acc | <<(Hi + Y)/utf8>>]
+            end,
+        0);
 escape_surrogate(<<_Rest/bitstring>>, Input, Skip, _Stack, _StringDecode, _Acc, _Hi) ->
     throw_error(Input, Skip + 6).
 
@@ -9959,470 +9742,29 @@ string(Data, Input, Skip, Stack, StringDecode, Len) ->
 
 string(Data, Input, Skip, Stack, StringDecode, Acc, Len) ->
     case Data of
-        <<0/integer,_Rest/bitstring>> ->
+        <<X/integer,_Rest/bitstring>> when X < 32 ->
             throw_error(Input, Skip);
-        <<1/integer,__rest@2/bitstring>> ->
-            throw_error(Input, Skip);
-        <<2/integer,__rest@3/bitstring>> ->
-            throw_error(Input, Skip);
-        <<3/integer,__rest@4/bitstring>> ->
-            throw_error(Input, Skip);
-        <<4/integer,__rest@5/bitstring>> ->
-            throw_error(Input, Skip);
-        <<5/integer,__rest@6/bitstring>> ->
-            throw_error(Input, Skip);
-        <<6/integer,__rest@7/bitstring>> ->
-            throw_error(Input, Skip);
-        <<7/integer,__rest@8/bitstring>> ->
-            throw_error(Input, Skip);
-        <<8/integer,__rest@9/bitstring>> ->
-            throw_error(Input, Skip);
-        <<9/integer,_Rest0/bitstring>> ->
-            throw_error(Input, Skip);
-        <<10/integer,_Rest1/bitstring>> ->
-            throw_error(Input, Skip);
-        <<11/integer,_Rest2/bitstring>> ->
-            throw_error(Input, Skip);
-        <<12/integer,_Rest3/bitstring>> ->
-            throw_error(Input, Skip);
-        <<13/integer,_Rest4/bitstring>> ->
-            throw_error(Input, Skip);
-        <<14/integer,_Rest5/bitstring>> ->
-            throw_error(Input, Skip);
-        <<15/integer,_Rest6/bitstring>> ->
-            throw_error(Input, Skip);
-        <<16/integer,_Rest7/bitstring>> ->
-            throw_error(Input, Skip);
-        <<17/integer,_Rest8/bitstring>> ->
-            throw_error(Input, Skip);
-        <<18/integer,_Rest9/bitstring>> ->
-            throw_error(Input, Skip);
-        <<19/integer,__rest@20/bitstring>> ->
-            throw_error(Input, Skip);
-        <<20/integer,__rest@21/bitstring>> ->
-            throw_error(Input, Skip);
-        <<21/integer,__rest@22/bitstring>> ->
-            throw_error(Input, Skip);
-        <<22/integer,__rest@23/bitstring>> ->
-            throw_error(Input, Skip);
-        <<23/integer,__rest@24/bitstring>> ->
-            throw_error(Input, Skip);
-        <<24/integer,__rest@25/bitstring>> ->
-            throw_error(Input, Skip);
-        <<25/integer,__rest@26/bitstring>> ->
-            throw_error(Input, Skip);
-        <<26/integer,__rest@27/bitstring>> ->
-            throw_error(Input, Skip);
-        <<27/integer,__rest@28/bitstring>> ->
-            throw_error(Input, Skip);
-        <<28/integer,__rest@29/bitstring>> ->
-            throw_error(Input, Skip);
-        <<29/integer,__rest@30/bitstring>> ->
-            throw_error(Input, Skip);
-        <<30/integer,__rest@31/bitstring>> ->
-            throw_error(Input, Skip);
-        <<31/integer,__rest@32/bitstring>> ->
-            throw_error(Input, Skip);
-        <<32/integer,Rest/bitstring>> ->
-            string(Rest, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<33/integer,_rest@2/bitstring>> ->
-            string(_rest@2, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<34/integer,_rest@3/bitstring>> ->
+        <<X/integer,Rest/bitstring>> when X < 34 ->
+            string(Rest, Input, Skip, Stack, StringDecode, Acc, Len + 1);
+        <<34/integer,Rest/bitstring>> ->
             Last = binary_part(Input, Skip, Len),
-            _string@1 = iolist_to_binary([Acc | Last]),
-            continue(_rest@3, Input,
-                     Skip + Len + 1,
-                     Stack, StringDecode, _string@1);
-        <<35/integer,_rest@4/bitstring>> ->
-            string(_rest@4, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<36/integer,_rest@5/bitstring>> ->
-            string(_rest@5, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<37/integer,_rest@6/bitstring>> ->
-            string(_rest@6, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<38/integer,_rest@7/bitstring>> ->
-            string(_rest@7, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<39/integer,_rest@8/bitstring>> ->
-            string(_rest@8, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<40/integer,_rest@9/bitstring>> ->
-            string(_rest@9, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<41/integer,Rest0/bitstring>> ->
-            string(Rest0, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<42/integer,Rest1/bitstring>> ->
-            string(Rest1, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<43/integer,Rest2/bitstring>> ->
-            string(Rest2, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<44/integer,Rest3/bitstring>> ->
-            string(Rest3, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<45/integer,Rest4/bitstring>> ->
-            string(Rest4, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<46/integer,Rest5/bitstring>> ->
-            string(Rest5, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<47/integer,Rest6/bitstring>> ->
-            string(Rest6, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<48/integer,Rest7/bitstring>> ->
-            string(Rest7, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<49/integer,Rest8/bitstring>> ->
-            string(Rest8, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<50/integer,Rest9/bitstring>> ->
-            string(Rest9, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<51/integer,_rest@20/bitstring>> ->
-            string(_rest@20, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<52/integer,_rest@21/bitstring>> ->
-            string(_rest@21, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<53/integer,_rest@22/bitstring>> ->
-            string(_rest@22, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<54/integer,_rest@23/bitstring>> ->
-            string(_rest@23, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<55/integer,_rest@24/bitstring>> ->
-            string(_rest@24, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<56/integer,_rest@25/bitstring>> ->
-            string(_rest@25, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<57/integer,_rest@26/bitstring>> ->
-            string(_rest@26, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<58/integer,_rest@27/bitstring>> ->
-            string(_rest@27, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<59/integer,_rest@28/bitstring>> ->
-            string(_rest@28, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<60/integer,_rest@29/bitstring>> ->
-            string(_rest@29, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<61/integer,_rest@30/bitstring>> ->
-            string(_rest@30, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<62/integer,_rest@31/bitstring>> ->
-            string(_rest@31, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<63/integer,_rest@32/bitstring>> ->
-            string(_rest@32, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<64/integer,_rest@33/bitstring>> ->
-            string(_rest@33, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<65/integer,_rest@34/bitstring>> ->
-            string(_rest@34, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<66/integer,_rest@35/bitstring>> ->
-            string(_rest@35, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<67/integer,_rest@36/bitstring>> ->
-            string(_rest@36, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<68/integer,_rest@37/bitstring>> ->
-            string(_rest@37, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<69/integer,_rest@38/bitstring>> ->
-            string(_rest@38, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<70/integer,_rest@39/bitstring>> ->
-            string(_rest@39, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<71/integer,_rest@40/bitstring>> ->
-            string(_rest@40, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<72/integer,_rest@41/bitstring>> ->
-            string(_rest@41, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<73/integer,_rest@42/bitstring>> ->
-            string(_rest@42, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<74/integer,_rest@43/bitstring>> ->
-            string(_rest@43, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<75/integer,_rest@44/bitstring>> ->
-            string(_rest@44, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<76/integer,_rest@45/bitstring>> ->
-            string(_rest@45, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<77/integer,_rest@46/bitstring>> ->
-            string(_rest@46, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<78/integer,_rest@47/bitstring>> ->
-            string(_rest@47, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<79/integer,_rest@48/bitstring>> ->
-            string(_rest@48, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<80/integer,_rest@49/bitstring>> ->
-            string(_rest@49, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<81/integer,_rest@50/bitstring>> ->
-            string(_rest@50, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<82/integer,_rest@51/bitstring>> ->
-            string(_rest@51, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<83/integer,_rest@52/bitstring>> ->
-            string(_rest@52, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<84/integer,_rest@53/bitstring>> ->
-            string(_rest@53, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<85/integer,_rest@54/bitstring>> ->
-            string(_rest@54, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<86/integer,_rest@55/bitstring>> ->
-            string(_rest@55, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<87/integer,_rest@56/bitstring>> ->
-            string(_rest@56, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<88/integer,_rest@57/bitstring>> ->
-            string(_rest@57, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<89/integer,_rest@58/bitstring>> ->
-            string(_rest@58, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<90/integer,_rest@59/bitstring>> ->
-            string(_rest@59, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<91/integer,_rest@60/bitstring>> ->
-            string(_rest@60, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<92/integer,_rest@61/bitstring>> ->
-            _part@1 = binary_part(Input, Skip, Len),
-            escape(_rest@61, Input,
-                   Skip + Len,
-                   Stack, StringDecode,
-                   [Acc | _part@1]);
-        <<93/integer,_rest@62/bitstring>> ->
-            string(_rest@62, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<94/integer,_rest@63/bitstring>> ->
-            string(_rest@63, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<95/integer,_rest@64/bitstring>> ->
-            string(_rest@64, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<96/integer,_rest@65/bitstring>> ->
-            string(_rest@65, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<97/integer,_rest@66/bitstring>> ->
-            string(_rest@66, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<98/integer,_rest@67/bitstring>> ->
-            string(_rest@67, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<99/integer,_rest@68/bitstring>> ->
-            string(_rest@68, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<100/integer,_rest@69/bitstring>> ->
-            string(_rest@69, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<101/integer,_rest@70/bitstring>> ->
-            string(_rest@70, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<102/integer,_rest@71/bitstring>> ->
-            string(_rest@71, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<103/integer,_rest@72/bitstring>> ->
-            string(_rest@72, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<104/integer,_rest@73/bitstring>> ->
-            string(_rest@73, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<105/integer,_rest@74/bitstring>> ->
-            string(_rest@74, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<106/integer,_rest@75/bitstring>> ->
-            string(_rest@75, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<107/integer,_rest@76/bitstring>> ->
-            string(_rest@76, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<108/integer,_rest@77/bitstring>> ->
-            string(_rest@77, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<109/integer,_rest@78/bitstring>> ->
-            string(_rest@78, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<110/integer,_rest@79/bitstring>> ->
-            string(_rest@79, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<111/integer,_rest@80/bitstring>> ->
-            string(_rest@80, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<112/integer,_rest@81/bitstring>> ->
-            string(_rest@81, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<113/integer,_rest@82/bitstring>> ->
-            string(_rest@82, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<114/integer,_rest@83/bitstring>> ->
-            string(_rest@83, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<115/integer,_rest@84/bitstring>> ->
-            string(_rest@84, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<116/integer,_rest@85/bitstring>> ->
-            string(_rest@85, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<117/integer,_rest@86/bitstring>> ->
-            string(_rest@86, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<118/integer,_rest@87/bitstring>> ->
-            string(_rest@87, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<119/integer,_rest@88/bitstring>> ->
-            string(_rest@88, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<120/integer,_rest@89/bitstring>> ->
-            string(_rest@89, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<121/integer,_rest@90/bitstring>> ->
-            string(_rest@90, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<122/integer,_rest@91/bitstring>> ->
-            string(_rest@91, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<123/integer,_rest@92/bitstring>> ->
-            string(_rest@92, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<124/integer,_rest@93/bitstring>> ->
-            string(_rest@93, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<125/integer,_rest@94/bitstring>> ->
-            string(_rest@94, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<126/integer,_rest@95/bitstring>> ->
-            string(_rest@95, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<127/integer,_rest@96/bitstring>> ->
-            string(_rest@96, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 1);
-        <<_char@1/utf8,_rest@97/bitstring>> when _char@1 =< 2047 ->
-            string(_rest@97, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 2);
-        <<_char@2/utf8,_rest@98/bitstring>> when _char@2 =< 65535 ->
-            string(_rest@98, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 3);
-        <<__char@1/utf8,_rest@99/bitstring>> ->
-            string(_rest@99, Input, Skip, Stack,
-                   StringDecode, Acc,
-                   Len + 4);
+            String = iolist_to_binary([Acc | Last]),
+            continue(Rest, Input, Skip + Len + 1, Stack, StringDecode, String);
+        <<X/integer,Rest/bitstring>> when X < 92 ->
+            string(Rest, Input, Skip, Stack, StringDecode, Acc, Len + 1);
+        <<92/integer,Rest/bitstring>> ->
+            Part = binary_part(Input, Skip, Len),
+            escape(Rest, Input, Skip + Len, Stack, StringDecode, [Acc | Part]);
+        <<X/integer,Rest/bitstring>> when X < 128 ->
+            string(Rest, Input, Skip, Stack, StringDecode, Acc, Len + 1);
+        <<Char/utf8,Rest/bitstring>> when Char =< 2047 ->
+            string(Rest, Input, Skip, Stack, StringDecode, Acc, Len + 2);
+        <<Char/utf8,Rest/bitstring>> when Char =< 65535 ->
+            string(Rest, Input, Skip, Stack, StringDecode, Acc, Len + 3);
+        <<_Char/utf8,Rest/bitstring>> ->
+            string(Rest, Input, Skip, Stack, StringDecode, Acc, Len + 4);
+        <<_/integer,_/bitstring>> ->
+            throw_error(Input, Skip);
         <<_/bitstring>> ->
             empty_error(Input, Skip + Len)
     end.
@@ -10430,555 +9772,86 @@ string(Data, Input, Skip, Stack, StringDecode, Acc, Len) ->
 string_decode_function(#{strings := copy}) ->
     fun binary:copy/1;
 string_decode_function(#{strings := reference}) ->
-    fun(_@1) ->
-           _@1
-    end.
+    fun(X) -> X end.
 
-terminate(<<_byte@1/integer,Rest/bitstring>>,
-          Input, Skip, Stack, StringDecode, Value)
-    when
-        ((_byte@1 =:= 32
-          orelse
-          _byte@1 =:= 10)
-         orelse
-         _byte@1 =:= 13)
-        orelse
-        _byte@1 =:= 9 ->
-    terminate(Rest, Input,
-              Skip + 1,
-              Stack, StringDecode, Value);
-terminate(<<>>, _Input, _Skip, _Stack, _StringDecode,
-          Value) ->
+terminate(<<32/integer,Rest/bitstring>>, Input, Skip, Stack, StringDecode, Value) ->
+    terminate(Rest, Input, Skip + 1, Stack, StringDecode, Value);
+terminate(<<13/integer,Rest/bitstring>>, Input, Skip, Stack, StringDecode, Value) ->
+    terminate(Rest, Input, Skip + 1, Stack, StringDecode, Value);
+terminate(<<10/integer,Rest/bitstring>>, Input, Skip, Stack, StringDecode, Value) ->
+    terminate(Rest, Input, Skip + 1, Stack, StringDecode, Value);
+terminate(<<9/integer,Rest/bitstring>>, Input, Skip, Stack, StringDecode, Value) ->
+    terminate(Rest, Input, Skip + 1, Stack, StringDecode, Value);
+terminate(<<>>, _Input, _Skip, _Stack, _StringDecode, Value) ->
     Value;
-terminate(<<_Rest/bitstring>>,
-          Input, Skip, _Stack, _StringDecode, _Value) ->
+terminate(<<_Rest/bitstring>>, Input, Skip, _Stack, _StringDecode, _Value) ->
     throw_error(Input, Skip).
 
 throw_error(_Input, Skip) ->
     throw({position, Skip}).
 
-throw_error(<<_Rest/bitstring>>,
-            _Input, Skip, _Stack, _StringDecode) ->
+throw_error(<<_Rest/bitstring>>, _Input, Skip, _Stack, _StringDecode) ->
     throw({position, Skip - 1}).
 
-token_error(_token@1, _position@1) ->
-    throw({token, _token@1, _position@1}).
+token_error(Token, Position) ->
+    throw({token, Token, Position}).
 
-token_error(_token@1, _position@1, Len) ->
-    throw({token,
-           binary_part(_token@1, _position@1, Len),
-           _position@1}).
+token_error(Token, Position, Len) ->
+    throw({token, binary_part(Token, Position, Len), Position}).
 
-try_parse_float(_string@1, _token@1, Skip) ->
+try_parse_float(_string@1, Token, Skip) ->
     try
         binary_to_float(_string@1)
     catch
-        error:badarg:___STACKTRACE__@1 ->
-            token_error(_token@1, Skip)
+        error:badarg:_ ->
+            token_error(Token, Skip)
     end.
 
 value(Data, Input, Skip, Stack, StringDecode) ->
     case Data of
-        <<0/integer,Rest/bitstring>> ->
-            throw_error(Rest, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<1/integer,_rest@2/bitstring>> ->
-            throw_error(_rest@2, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<2/integer,_rest@3/bitstring>> ->
-            throw_error(_rest@3, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<3/integer,_rest@4/bitstring>> ->
-            throw_error(_rest@4, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<4/integer,_rest@5/bitstring>> ->
-            throw_error(_rest@5, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<5/integer,_rest@6/bitstring>> ->
-            throw_error(_rest@6, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<6/integer,_rest@7/bitstring>> ->
-            throw_error(_rest@7, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<7/integer,_rest@8/bitstring>> ->
-            throw_error(_rest@8, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<8/integer,_rest@9/bitstring>> ->
-            throw_error(_rest@9, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<9/integer,Rest0/bitstring>> ->
-            value(Rest0, Input,
-                  Skip + 1,
-                  Stack, StringDecode);
-        <<10/integer,Rest1/bitstring>> ->
-            value(Rest1, Input,
-                  Skip + 1,
-                  Stack, StringDecode);
-        <<11/integer,Rest2/bitstring>> ->
-            throw_error(Rest2, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<12/integer,Rest3/bitstring>> ->
-            throw_error(Rest3, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<13/integer,Rest4/bitstring>> ->
-            value(Rest4, Input,
-                  Skip + 1,
-                  Stack, StringDecode);
-        <<14/integer,Rest5/bitstring>> ->
-            throw_error(Rest5, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<15/integer,Rest6/bitstring>> ->
-            throw_error(Rest6, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<16/integer,Rest7/bitstring>> ->
-            throw_error(Rest7, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<17/integer,Rest8/bitstring>> ->
-            throw_error(Rest8, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<18/integer,Rest9/bitstring>> ->
-            throw_error(Rest9, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<19/integer,_rest@20/bitstring>> ->
-            throw_error(_rest@20, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<20/integer,_rest@21/bitstring>> ->
-            throw_error(_rest@21, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<21/integer,_rest@22/bitstring>> ->
-            throw_error(_rest@22, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<22/integer,_rest@23/bitstring>> ->
-            throw_error(_rest@23, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<23/integer,_rest@24/bitstring>> ->
-            throw_error(_rest@24, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<24/integer,_rest@25/bitstring>> ->
-            throw_error(_rest@25, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<25/integer,_rest@26/bitstring>> ->
-            throw_error(_rest@26, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<26/integer,_rest@27/bitstring>> ->
-            throw_error(_rest@27, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<27/integer,_rest@28/bitstring>> ->
-            throw_error(_rest@28, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<28/integer,_rest@29/bitstring>> ->
-            throw_error(_rest@29, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<29/integer,_rest@30/bitstring>> ->
-            throw_error(_rest@30, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<30/integer,_rest@31/bitstring>> ->
-            throw_error(_rest@31, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<31/integer,_rest@32/bitstring>> ->
-            throw_error(_rest@32, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<32/integer,_rest@33/bitstring>> ->
-            value(_rest@33, Input,
-                  Skip + 1,
-                  Stack, StringDecode);
-        <<33/integer,_rest@34/bitstring>> ->
-            throw_error(_rest@34, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<34/integer,_rest@35/bitstring>> ->
-            string(_rest@35, Input,
-                   Skip + 1,
-                   Stack, StringDecode, 0);
-        <<35/integer,_rest@36/bitstring>> ->
-            throw_error(_rest@36, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<36/integer,_rest@37/bitstring>> ->
-            throw_error(_rest@37, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<37/integer,_rest@38/bitstring>> ->
-            throw_error(_rest@38, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<38/integer,_rest@39/bitstring>> ->
-            throw_error(_rest@39, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<39/integer,_rest@40/bitstring>> ->
-            throw_error(_rest@40, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<40/integer,_rest@41/bitstring>> ->
-            throw_error(_rest@41, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<41/integer,_rest@42/bitstring>> ->
-            throw_error(_rest@42, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<42/integer,_rest@43/bitstring>> ->
-            throw_error(_rest@43, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<43/integer,_rest@44/bitstring>> ->
-            throw_error(_rest@44, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<44/integer,_rest@45/bitstring>> ->
-            throw_error(_rest@45, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<45/integer,_rest@46/bitstring>> ->
-            number_minus(_rest@46, Input, Skip, Stack,
-                         StringDecode);
-        <<46/integer,_rest@47/bitstring>> ->
-            throw_error(_rest@47, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<47/integer,_rest@48/bitstring>> ->
-            throw_error(_rest@48, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<48/integer,_rest@49/bitstring>> ->
-            number_zero(_rest@49, Input, Skip, Stack,
-                        StringDecode, 1);
-        <<49/integer,_rest@50/bitstring>> ->
-            number(_rest@50, Input, Skip, Stack,
-                   StringDecode, 1);
-        <<50/integer,_rest@51/bitstring>> ->
-            number(_rest@51, Input, Skip, Stack,
-                   StringDecode, 1);
-        <<51/integer,_rest@52/bitstring>> ->
-            number(_rest@52, Input, Skip, Stack,
-                   StringDecode, 1);
-        <<52/integer,_rest@53/bitstring>> ->
-            number(_rest@53, Input, Skip, Stack,
-                   StringDecode, 1);
-        <<53/integer,_rest@54/bitstring>> ->
-            number(_rest@54, Input, Skip, Stack,
-                   StringDecode, 1);
-        <<54/integer,_rest@55/bitstring>> ->
-            number(_rest@55, Input, Skip, Stack,
-                   StringDecode, 1);
-        <<55/integer,_rest@56/bitstring>> ->
-            number(_rest@56, Input, Skip, Stack,
-                   StringDecode, 1);
-        <<56/integer,_rest@57/bitstring>> ->
-            number(_rest@57, Input, Skip, Stack,
-                   StringDecode, 1);
-        <<57/integer,_rest@58/bitstring>> ->
-            number(_rest@58, Input, Skip, Stack,
-                   StringDecode, 1);
-        <<58/integer,_rest@59/bitstring>> ->
-            throw_error(_rest@59, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<59/integer,_rest@60/bitstring>> ->
-            throw_error(_rest@60, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<60/integer,_rest@61/bitstring>> ->
-            throw_error(_rest@61, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<61/integer,_rest@62/bitstring>> ->
-            throw_error(_rest@62, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<62/integer,_rest@63/bitstring>> ->
-            throw_error(_rest@63, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<63/integer,_rest@64/bitstring>> ->
-            throw_error(_rest@64, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<64/integer,_rest@65/bitstring>> ->
-            throw_error(_rest@65, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<65/integer,_rest@66/bitstring>> ->
-            throw_error(_rest@66, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<66/integer,_rest@67/bitstring>> ->
-            throw_error(_rest@67, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<67/integer,_rest@68/bitstring>> ->
-            throw_error(_rest@68, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<68/integer,_rest@69/bitstring>> ->
-            throw_error(_rest@69, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<69/integer,_rest@70/bitstring>> ->
-            throw_error(_rest@70, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<70/integer,_rest@71/bitstring>> ->
-            throw_error(_rest@71, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<71/integer,_rest@72/bitstring>> ->
-            throw_error(_rest@72, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<72/integer,_rest@73/bitstring>> ->
-            throw_error(_rest@73, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<73/integer,_rest@74/bitstring>> ->
-            throw_error(_rest@74, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<74/integer,_rest@75/bitstring>> ->
-            throw_error(_rest@75, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<75/integer,_rest@76/bitstring>> ->
-            throw_error(_rest@76, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<76/integer,_rest@77/bitstring>> ->
-            throw_error(_rest@77, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<77/integer,_rest@78/bitstring>> ->
-            throw_error(_rest@78, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<78/integer,_rest@79/bitstring>> ->
-            throw_error(_rest@79, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<79/integer,_rest@80/bitstring>> ->
-            throw_error(_rest@80, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<80/integer,_rest@81/bitstring>> ->
-            throw_error(_rest@81, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<81/integer,_rest@82/bitstring>> ->
-            throw_error(_rest@82, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<82/integer,_rest@83/bitstring>> ->
-            throw_error(_rest@83, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<83/integer,_rest@84/bitstring>> ->
-            throw_error(_rest@84, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<84/integer,_rest@85/bitstring>> ->
-            throw_error(_rest@85, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<85/integer,_rest@86/bitstring>> ->
-            throw_error(_rest@86, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<86/integer,_rest@87/bitstring>> ->
-            throw_error(_rest@87, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<87/integer,_rest@88/bitstring>> ->
-            throw_error(_rest@88, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<88/integer,_rest@89/bitstring>> ->
-            throw_error(_rest@89, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<89/integer,_rest@90/bitstring>> ->
-            throw_error(_rest@90, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<90/integer,_rest@91/bitstring>> ->
-            throw_error(_rest@91, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<91/integer,_rest@92/bitstring>> ->
-            array(_rest@92, Input,
-                  Skip + 1,
-                  Stack, StringDecode);
-        <<92/integer,_rest@93/bitstring>> ->
-            throw_error(_rest@93, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<93/integer,_rest@94/bitstring>> ->
-            empty_array(_rest@94, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<94/integer,_rest@95/bitstring>> ->
-            throw_error(_rest@95, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<95/integer,_rest@96/bitstring>> ->
-            throw_error(_rest@96, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<96/integer,_rest@97/bitstring>> ->
-            throw_error(_rest@97, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<97/integer,_rest@98/bitstring>> ->
-            throw_error(_rest@98, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<98/integer,_rest@99/bitstring>> ->
-            throw_error(_rest@99, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<99/integer,Rest00/bitstring>> ->
-            throw_error(Rest00, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<100/integer,Rest01/bitstring>> ->
-            throw_error(Rest01, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<101/integer,Rest02/bitstring>> ->
-            throw_error(Rest02, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<102/integer,Rest03/bitstring>> ->
-            case Rest03 of
-                <<"alse",Rest04/bitstring>> ->
-                    continue(Rest04, Input,
-                             Skip + 5,
-                             Stack, StringDecode, false);
+        <<X/integer,Rest/bitstring>> when X =:= 9 orelse X =:= 10 ->
+            value(Rest, Input, Skip + 1, Stack, StringDecode);
+        <<13/integer,Rest/bitstring>> ->
+            value(Rest, Input, Skip + 1, Stack, StringDecode);
+        <<32/integer,Rest/bitstring>> ->
+            value(Rest, Input, Skip + 1, Stack, StringDecode);
+        <<34/integer,Rest/bitstring>> ->
+            string(Rest, Input, Skip + 1, Stack, StringDecode, 0);
+        <<45/integer,Rest/bitstring>> ->
+            number_minus(Rest, Input, Skip, Stack, StringDecode);
+        <<48/integer,Rest/bitstring>> ->
+            number_zero(Rest, Input, Skip, Stack, StringDecode, 1);
+        <<X/integer,Rest/bitstring>> when X >= 49 andalso X =< 57 ->
+            number(Rest, Input, Skip, Stack, StringDecode, 1);
+        <<91/integer,Rest/bitstring>> ->
+            array(Rest, Input, Skip + 1, Stack, StringDecode);
+        <<93/integer,Rest/bitstring>> ->
+            empty_array(Rest, Input, Skip + 1, Stack, StringDecode);
+        <<102/integer,Rest/bitstring>> ->
+            case Rest of
+                <<"alse",Rest1/bitstring>> ->
+                    continue(Rest1, Input, Skip + 5, Stack, StringDecode, false);
                 <<_/bitstring>> ->
                     throw_error(Input, Skip)
             end;
-        <<103/integer,Rest05/bitstring>> ->
-            throw_error(Rest05, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<104/integer,Rest06/bitstring>> ->
-            throw_error(Rest06, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<105/integer,Rest07/bitstring>> ->
-            throw_error(Rest07, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<106/integer,Rest08/bitstring>> ->
-            throw_error(Rest08, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<107/integer,Rest09/bitstring>> ->
-            throw_error(Rest09, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<108/integer,Rest10/bitstring>> ->
-            throw_error(Rest10, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<109/integer,Rest11/bitstring>> ->
-            throw_error(Rest11, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<110/integer,Rest12/bitstring>> ->
-            case Rest12 of
-                <<"ull",Rest13/bitstring>> ->
-                    continue(Rest13, Input,
-                             Skip + 4,
-                             Stack, StringDecode, nil);
+        <<110/integer,Rest/bitstring>> ->
+            case Rest of
+                <<"ull",Rest1/bitstring>> ->
+                    continue(Rest1, Input, Skip + 4, Stack, StringDecode, nil);
                 <<_/bitstring>> ->
                     throw_error(Input, Skip)
             end;
-        <<111/integer,Rest14/bitstring>> ->
-            throw_error(Rest14, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<112/integer,Rest15/bitstring>> ->
-            throw_error(Rest15, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<113/integer,Rest16/bitstring>> ->
-            throw_error(Rest16, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<114/integer,Rest17/bitstring>> ->
-            throw_error(Rest17, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<115/integer,Rest18/bitstring>> ->
-            throw_error(Rest18, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<116/integer,Rest19/bitstring>> ->
-            case Rest19 of
-                <<"rue",Rest20/bitstring>> ->
-                    continue(Rest20, Input,
-                             Skip + 4,
-                             Stack, StringDecode, true);
+        <<116/integer,Rest/bitstring>> ->
+            case Rest of
+                <<"rue",Rest1/bitstring>> ->
+                    continue(Rest1, Input, Skip + 4, Stack, StringDecode, true);
                 <<_/bitstring>> ->
                     throw_error(Input, Skip)
             end;
-        <<117/integer,Rest21/bitstring>> ->
-            throw_error(Rest21, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<118/integer,Rest22/bitstring>> ->
-            throw_error(Rest22, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<119/integer,Rest23/bitstring>> ->
-            throw_error(Rest23, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<120/integer,Rest24/bitstring>> ->
-            throw_error(Rest24, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<121/integer,Rest25/bitstring>> ->
-            throw_error(Rest25, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<122/integer,Rest26/bitstring>> ->
-            throw_error(Rest26, Input,
-                        Skip + 1,
-                        Stack, StringDecode);
-        <<123/integer,Rest27/bitstring>> ->
-            object(Rest27, Input,
-                   Skip + 1,
-                   Stack, StringDecode);
+        <<123/integer,Rest/bitstring>> ->
+            object(Rest, Input, Skip + 1, Stack, StringDecode);
+        <<_/integer,Rest/bitstring>> ->
+            throw_error(Rest, Input, Skip + 1, Stack, StringDecode);
         <<_/bitstring>> ->
             throw_error(Input, Skip)
     end.
