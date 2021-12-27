@@ -47,24 +47,24 @@ defmodule Jason.JsonTestSuite do
     case Path.basename(path) do
       "y_" <> name ->
         test name do
-          {:ok, _} = :jaserl.decode(File.read!(unquote(path)))
+          {:ok, _} = :thoas.decode(File.read!(unquote(path)))
         end
 
       "n_" <> name ->
         test name do
-          {:error, _} = :jaserl.decode(File.read!(unquote(path)))
+          {:error, _} = :thoas.decode(File.read!(unquote(path)))
         end
 
       "i_" <> name ->
         cond do
           name in i_fails ->
             test name do
-              {:error, _} = :jaserl.decode(File.read!(unquote(path)))
+              {:error, _} = :thoas.decode(File.read!(unquote(path)))
             end
 
           name in i_succeeds ->
             test name do
-              {:ok, _} = :jaserl.decode(File.read!(unquote(path)))
+              {:ok, _} = :thoas.decode(File.read!(unquote(path)))
             end
         end
     end

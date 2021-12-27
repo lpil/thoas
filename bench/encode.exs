@@ -1,5 +1,5 @@
 encode_jobs = %{
-  "jaserl" => &:jaserl.encode_to_iodata/1,
+  "thoas" => &:thoas.encode_to_iodata/1,
   "Jason" => &Jason.encode_to_iodata!/1
   # "Jason strict" => &Jason.encode_to_iodata!(&1, maps: :strict),
   # "Poison" => &Poison.encode_to_iodata!/1,
@@ -12,10 +12,10 @@ encode_jobs = %{
 }
 
 encode_inputs = [
-  # "GitHub",
-  # "Giphy",
-  # "GovTrack",
-  # "Blockchain",
+  "GitHub",
+  "Giphy",
+  "GovTrack",
+  "Blockchain",
   "Pokedex"
   # "JSON Generator",
   # "UTF-8 unescaped",

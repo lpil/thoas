@@ -1,5 +1,5 @@
 decode_jobs = %{
-  "Jaserl" => fn {json, _} -> :jaserl.decode(json) end,
+  "thoas" => fn {json, _} -> :thoas.decode(json) end,
   "Jason" => fn {json, _} -> Jason.decode!(json) end,
   "Poison" => fn {json, _} -> Poison.decode!(json) end,
   "JSX" => fn {json, _} -> JSX.decode!(json, [:strict]) end,

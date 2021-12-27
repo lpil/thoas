@@ -131,11 +131,11 @@ defmodule Jason.DecodeTest do
   end
 
   defp parse!(json, opts \\ []) do
-    {:ok, x} = :jaserl.decode(json, opts)
+    {:ok, x} = :thoas.decode(json, opts)
     x
   end
 
   defp assert_fail_with(string, error) do
-    assert {:error, error} == :jaserl.decode(string, [])
+    assert {:error, error} == :thoas.decode(string, [])
   end
 end
