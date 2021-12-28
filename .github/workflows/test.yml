@@ -17,6 +17,8 @@ jobs:
           otp-version: "24.2"
           elixir-version: "1.13.1"
 
+      - run: rebar3 eunit
+
       - run: mix deps.get
         working-directory: mix_tests
 
