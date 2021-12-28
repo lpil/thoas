@@ -66,8 +66,12 @@ Thoas has a couple feature differences compared to Jason.
 - Thoas has no support for pretty-printing JSON.
 - Thoas has no support for detecting duplicate object keys.
 - Thoas always uses binary strings when decoding object keys.
+- Thoas has an additional non-recursive encoder API that may be useful when
+  working within statically typed languages such as Gleam, or when you wish to
+  avoid the overhead of creating intermediate data structures to then convert
+  into JSON.
 
-## Why convert Jason to Erlang?
+## Why not use Jason?
 
 Jason rocks, but if you're writing Erlang, Gleam, or some other BEAM language
 you probably don't want to pull in the Elixir compiler and their standard
@@ -75,6 +79,9 @@ libraries just to get a really fast JSON parser.
 
 Thoas is just Erlang and uses rebar3, so it can be easily added as a dependency
 to projects written in any BEAM language.
+
+Thoas also has a non-recursive API that may be useful from statically typed
+languages or in highly performance constrained scenarios.
 
 ## License
 
