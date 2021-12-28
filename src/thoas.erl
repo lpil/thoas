@@ -11,7 +11,8 @@
 ]).
 
 -type decode_options() :: #{
-    strings => reference | copy
+    strings => reference | copy,
+    null_as => null | nil %% default is `nil`
 }.
 
 -type encode_options() :: #{
