@@ -1,13 +1,98 @@
 -module(thoas_encode).
 
--compile([{inline, [{float_, 1}, {integer, 1}]},
-          {inline, [{error_invalid_byte_error, 2}]}]).
+-compile([
+    {no_auto_import, [float/1]},
+    {inline, [{float, 1}, {integer, 1}, {error_invalid_byte_error, 2}]}
+]).
 
--export([atom/2, encode/2, float_/1, integer/1, key/2, keyword/2, map/2,
-         string/2, value/2]).
+%%% Normal reflection based API that turns Erlang terms into JSON.
+-export([encode/2]).
 
-atom(Atom, Escape) ->
-    encode_atom(Atom, Escape).
+%%% Non-recursive API that expects sub-objects to already be encoded. Likely
+%%% useful for statically typed languages such as Gleam.
+-export([
+    true/0, false/0, null/0, boolean/1, integer/1, float/1, string/1,
+    non_recursive_array/1, non_recursive_object/1
+]).
+
+%%% A boolean value as JSON.
+-spec boolean(boolean()) -> iodata().
+boolean('true') -> <<"true">>;
+boolean('false') -> <<"false">>.
+
+%%% The JSON value `true`.
+-spec true() -> iodata().
+true() -> <<"true">>.
+
+%%% The JSON value `false`.
+-spec false() -> iodata().
+false() -> <<"false">>.
+
+%%% The JSON value `null`.
+-spec null() -> iodata().
+null() -> <<"null">>.
+
+%%% A float in JSON format.
+-spec float(float()) -> iodata().
+float(Float) ->
+    io_lib_format:fwrite_g(Float).
+
+%%% An integer in JSON format.
+-spec integer(integer()) -> iodata().
+integer(Int) ->
+    integer_to_list(Int).
+
+%%% A string in JSON format, using normal JSON escaping of the contents.
+-spec string(binary()) -> iodata().
+string(String) ->
+    encode_string(String, fun escape_json/3).
+
+%%% An array of JSON values.
+%%%
+%%% Important: The values supplied in the list are not processed and **must**
+%%% already encoded into JSON using one of the other functions, such as
+%%% `integer/1` or `string/1`.
+%%% 
+-spec non_recursive_array(list(iodata())) -> iodata().
+non_recursive_array([]) ->
+    <<"[]">>;
+non_recursive_array([First | Rest]) ->
+    [$[, First | non_recursive_array_loop(Rest)].
+
+non_recursive_array_loop([]) ->
+    [$]];
+non_recursive_array_loop([First | Rest]) ->
+    [$,, First | non_recursive_array_loop(Rest)].
+
+
+%%% An object of JSON values.
+%%%
+%%% Important: The values supplied in the list are not processed and **must**
+%%% already encoded into JSON using one of the other functions, such as
+%%% `integer/1` or `string/1`.
+%%% Keys are processed as strings and get escaped using normal JSON escaping.
+%%% 
+-spec non_recursive_object(list({binary(), iodata()})) -> iodata().
+non_recursive_object([]) ->
+    <<"{}">>;
+non_recursive_object([{Key, Value} | Tail]) ->
+    Escape = fun escape_json/3,
+    [
+        <<"{\"">>, key(Key, Escape), <<"\":">>, Value 
+        | non_recursive_object_loop(Tail, Escape)
+    ].
+
+non_recursive_object_loop([], _Escape) ->
+    [$}];
+non_recursive_object_loop([{Key, Value} | Tail], Escape) ->
+    [
+        <<",\"">>, key(Key, Escape), <<"\":">>, Value 
+        | non_recursive_object_loop(Tail, Escape)
+    ].
+
+%%%%
+%%%% Recursive encoding functions
+%%%%
 
 encode(Value, Opts) ->
     value(Value, escape_function(Opts)).
@@ -18,7 +103,7 @@ encode_atom(false, _Escape) -> <<"false">>;
 encode_atom(Atom, Escape) -> encode_string(atom_to_binary(Atom, utf8), Escape).
 
 encode_string(String, Escape) ->
-    [34, Escape(String, String, 0), 34].
+    [$", Escape(String, String, 0), $"].
 
 escape(0) -> <<"\\u0000">>;
 escape(1) -> <<"\\u0001">>;
@@ -1589,12 +1674,6 @@ escape_unicode_chunk(<<Byte/integer,_Rest/bitstring>>,
                      _Acc, Input, _Skip, _Len) ->
     error_invalid_byte_error(Byte, Input).
 
-float_(_float@1) ->
-    io_lib_format:fwrite_g(_float@1).
-
-integer(_integer@1) ->
-    integer_to_list(_integer@1).
-
 key(String, Escape) when is_binary(String) ->
     Escape(String, String, 0);
 key(Atom, Escape) when is_atom(Atom) ->
@@ -1604,28 +1683,15 @@ key(_charlist@1, Escape) when is_list(_charlist@1) ->
     String = list_to_binary(_charlist@1),
     Escape(String, String, 0).
 
-keyword(_list@1, _) when _list@1 == [] ->
-    <<"{}">>;
-keyword(_list@1, Escape) when is_list(_list@1) ->
-    map_naive(_list@1, Escape).
-
 list([], _Escape) ->
     <<"[]">>;
-list([_head@1 | Tail], Escape) ->
-    [91, value(_head@1, Escape) | list_loop(Tail, Escape)].
+list([First | Tail], Escape) ->
+    [91, value(First, Escape) | list_loop(Tail, Escape)].
 
 list_loop([], _Escape) ->
     [93];
-list_loop([_head@1 | Tail], Escape) ->
-    [44, value(_head@1, Escape) | list_loop(Tail, Escape)].
-
-map(Value, Escape) ->
-    case maps:to_list(Value) of
-        [] ->
-            <<"{}">>;
-        Keyword ->
-            map_naive(Keyword, Escape)
-    end.
+list_loop([First | Tail], Escape) ->
+    [44, value(First, Escape) | list_loop(Tail, Escape)].
 
 map_naive([{Key, Value} | Tail], Escape) ->
     [<<"{\"">>,
@@ -1635,16 +1701,13 @@ map_naive([{Key, Value} | Tail], Escape) ->
      map_naive_loop(Tail, Escape)].
 
 map_naive_loop([], _Escape) ->
-    [125];
+    [$}];
 map_naive_loop([{Key, Value} | Tail], Escape) ->
     [<<",\"">>,
      key(Key, Escape),
      <<"\":">>,
      value(Value, Escape) |
      map_naive_loop(Tail, Escape)].
-
-string(String, Escape) ->
-    encode_string(String, Escape).
 
 error_invalid_byte_error(Byte, Input) ->
     error({invalid_byte,
@@ -1658,7 +1721,7 @@ value(Value, Escape) when is_binary(Value) ->
 value(Value, _Escape) when is_integer(Value) ->
     integer(Value);
 value(Value, _Escape) when is_float(Value) ->
-    float_(Value);
+    float(Value);
 value(Value, Escape) when is_list(Value) ->
     list(Value, Escape);
 value(Value, Escape) when is_map(Value) ->
