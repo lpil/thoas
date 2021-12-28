@@ -82,6 +82,10 @@ BEAM language.
 Thoas also has a non-recursive API that may be useful from statically typed
 languages or in highly performance constrained scenarios.
 
+## Why is it called Thoas?
+
+Thoas is the [son of Jason](https://en.wikipedia.org/wiki/Thoas_(son_of_Jason)).
+
 ## License
 
 Thoas is released under the Apache License 2.0 - see the [LICENSE](LICENSE) file.
