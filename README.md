@@ -65,7 +65,9 @@ Thoas has a couple feature differences compared to Jason.
 - Thoas has no support for Elixir protocols.
 - Thoas has no support for pretty-printing JSON.
 - Thoas has no support for detecting duplicate object keys.
-- Thoas always uses binary strings when decoding object keys.
+- Thoas has no support for decoding objects to ordered dictionaries.
+- Thoas has no support for decoding object keys as atoms.
+- Thoas has no support for decoding floats to Elixir decimals.
 - Thoas has an additional non-recursive encoder API that may be useful when
   working within statically typed languages such as Gleam.
 
