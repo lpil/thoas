@@ -53,7 +53,7 @@ end
 {ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => nil}}
 
 > thoas:decode(<<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\", \"dev\": null}">>, #{null_as => null}).
-{ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => nul}}
+{ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => null}}
 ```
 
 ## Benchmarks
