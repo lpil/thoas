@@ -84,7 +84,7 @@ languages or in highly performance constrained scenarios.
 
 ## Why is it called Thoas?
 
-Thoas is the [son of Jason](https://en.wikipedia.org/wiki/Thoas_(son_of_Jason)).
+Thoas was [a son of Jason](https://en.wikipedia.org/wiki/Thoas_(son_of_Jason)).
 
 ## License
 
