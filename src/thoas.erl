@@ -1,54 +1,71 @@
 -module(thoas).
 
--export_type([decode_opt/0]).
+-export([
+    decode/1, decode/2, encode/1, encode/2, encode_to_iodata/1,
+    encode_to_iodata/2
+]).
 
--type decode_opt() :: {strings, strings()}.
+-export_type([
+    decode_error/0, decode_options/0, encode_options/0, json_term/0,
+    input_term/0
+]).
 
--export_type([strings/0]).
+-type decode_options() :: #{
+    strings => reference | copy
+}.
 
--type strings() :: reference | copy.
+-type encode_options() :: #{
+    escape => json | unicode | html | javascript
+}.
 
--export_type([encode_opt/0]).
+-type json_term() :: 
+    integer() |
+    float() |
+    binary() |
+    list(json_term()) |
+    #{ binary() => json_term() }.
 
--type encode_opt() :: {escape, escape()}.
+-type input_term() :: 
+    integer() |
+    float() |
+    binary() |
+    atom() |
+    list(input_term()) |
+    list({binary() | atom(), input_term()}) |
+    #{ binary() | atom() => input_term() }.
 
--export_type([escape/0]).
+-type decode_error() ::
+    unexpected_end_of_input |
+    {unexpected_byte, binary(), integer()} |
+    {unexpected_sequence, binary(), integer()}.
 
--type escape() :: json | unicode | html | javascript.
+-spec decode(iodata()) -> {ok, json_term()} | {error, decode_error()}.
+decode(Json) ->
+    decode(Json, #{}).
 
--export([decode/1,
-         decode/2,
-         encode/1,
-         encode/2,
-         encode_to_iodata/1,
-         encode_to_iodata/2]).
+-spec decode(iodata(), decode_options()) -> 
+    {ok, json_term()} | {error, decode_error()}.
+decode(Json, Options) when is_map(Options) ->
+    Binary = iolist_to_binary(Json),
+    thoas_decode:decode(Binary, Options).
 
-decode(_@1) ->
-    decode(_@1, []).
+%% Throws on invalid input
+-spec encode(input_term()) -> binary().
+encode(Term) ->
+    encode(Term, #{}).
 
-decode(_input@1, _opts@1) ->
-    _input@2 = iolist_to_binary(_input@1),
-    thoas_decode:parse(_input@2, format_decode_opts(_opts@1)).
+%% Throws on invalid input
+-spec encode(input_term(), encode_options()) -> binary().
+encode(Input, Options) when is_map(Options) ->
+    iolist_to_binary(thoas_encode:encode(Input, Options)).
 
-do_encode(_input@1, _opts@1) ->
-    thoas_encode:encode(_input@1, _opts@1).
+%% Throws on invalid input
+-spec encode_to_iodata(input_term()) -> iodata().
+encode_to_iodata(Term) ->
+    encode_to_iodata(Term, #{}).
 
-encode(_@1) ->
-    encode(_@1, []).
-
-encode(_input@1, _opts@1) ->
-    iolist_to_binary(do_encode(_input@1, format_encode_opts(_opts@1))).
-
-encode_to_iodata(_@1) ->
-    encode_to_iodata(_@1, []).
-
-encode_to_iodata(_input@1, _opts@1) ->
-    do_encode(_input@1, format_encode_opts(_opts@1)).
-
-format_decode_opts(_opts@1) ->
-    'Elixir.Enum':into(_opts@1,
-                       #{keys => strings, strings => reference}).
-
-format_encode_opts(_opts@1) ->
-    'Elixir.Enum':into(_opts@1, #{escape => json, maps => naive}).
+%% Throws on invalid input
+-spec encode_to_iodata(input_term(), encode_options()) -> iodata().
+encode_to_iodata(Input, Options) ->
+    thoas_encode:encode(Input, Options).
 

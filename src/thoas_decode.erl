@@ -5,7 +5,7 @@
     {throw_error, 2}, {continue, 6}
 ]}]).
 
--export([parse/2]).
+-export([decode/2]).
 
 % We use integers instead of atoms to take advantage of the jump table optimization
 -define(terminate, 0).
@@ -992,22 +992,22 @@ object(Data, Input, Skip, Stack, StringDecode, Value) ->
             empty_error(Input, Skip)
     end.
 
-parse(Data, _opts@1) when is_binary(Data) ->
-    StringDecode = string_decode_function(_opts@1),
+decode(Data, Options) when is_binary(Data) andalso is_map(Options) ->
+    StringDecode = string_decode_function(Options),
     try
         {ok, value(Data, Data, 0, [?terminate], StringDecode)}
     catch
-        throw:{position, _position@1}:_ ->
-            case _position@1 == byte_size(Data) of
+        throw:{position, Position}:_ ->
+            case Position == byte_size(Data) of
                 true ->
                     {error, unexpected_end_of_input};
                 false ->
-                    Byte = binary:at(Data, _position@1),
+                    Byte = binary:at(Data, Position),
                     _hex@1 = integer_to_binary(Byte, 16),
-                    {error, {unexpected_byte, <<"0x"/utf8,_hex@1/binary>>, _position@1}}
+                    {error, {unexpected_byte, <<"0x"/utf8,_hex@1/binary>>, Position}}
             end;
-        throw:{token, Token, _position@2}:_ ->
-            {error, {unexpected_sequence, Token, _position@2}}
+        throw:{token, Token, Position}:_ ->
+            {error, {unexpected_sequence, Token, Position}}
     end.
 
 string(Data, Input, Skip, Stack, StringDecode, Len) ->
@@ -1067,10 +1067,11 @@ string(Data, Input, Skip, Stack, StringDecode, Acc, Len) ->
             empty_error(Input, Skip + Len)
     end.
 
-string_decode_function(#{strings := copy}) ->
-    fun binary:copy/1;
-string_decode_function(#{strings := reference}) ->
-    fun(X) -> X end.
+string_decode_function(Options) ->
+    case maps:get(strings, Options, reference) of
+        reference -> fun(X) -> X end;
+        copy -> fun binary:copy/1
+    end.
 
 terminate(<<32/integer,Rest/bitstring>>, Input, Skip, Stack, StringDecode, Value) ->
     terminate(Rest, Input, Skip + 1, Stack, StringDecode, Value);

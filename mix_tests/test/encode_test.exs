@@ -25,17 +25,17 @@ defmodule Jason.EncoderTest do
     assert to_json("\"") == ~s("\\"")
     assert to_json("\0") == ~s("\\u0000")
     assert to_json(<<31>>) == ~s("\\u001F")
-    assert to_json("☃a", escape: :unicode) == ~s("\\u2603a")
-    assert to_json("𝄞b", escape: :unicode) == ~s("\\uD834\\uDD1Eb")
-    assert to_json("\u2028\u2029abc", escape: :javascript) == ~s("\\u2028\\u2029abc")
-    assert to_json("</script>", escape: :html) == ~s("<\\/script>")
+    assert to_json("☃a", %{escape: :unicode}) == ~s("\\u2603a")
+    assert to_json("𝄞b", %{escape: :unicode}) == ~s("\\uD834\\uDD1Eb")
+    assert to_json("\u2028\u2029abc", %{escape: :javascript}) == ~s("\\u2028\\u2029abc")
+    assert to_json("</script>", %{escape: :html}) == ~s("<\\/script>")
 
-    assert to_json(~s(<script>var s = "\u2028\u2029";</script>), escape: :html) ==
+    assert to_json(~s(<script>var s = "\u2028\u2029";</script>), %{escape: :html}) ==
              ~s("<script>var s = \\\"\\u2028\\u2029\\\";<\\/script>")
 
     assert to_json("áéíóúàèìòùâêîôûãẽĩõũ") == ~s("áéíóúàèìòùâêîôûãẽĩõũ")
-    assert to_json("a\u2028a", escape: :javascript) == ~s("a\\u2028a")
-    assert to_json("a\u2028a", escape: :html) == ~s("a\\u2028a")
+    assert to_json("a\u2028a", %{escape: :javascript}) == ~s("a\\u2028a")
+    assert to_json("a\u2028a", %{escape: :html}) == ~s("a\\u2028a")
   end
 
   test "Map" do
@@ -54,12 +54,17 @@ defmodule Jason.EncoderTest do
     assert to_json([1, 2, 3]) == "[1,2,3]"
   end
 
-  test "EncodeError" do
-    catch_throw(:thoas.encode(<<0x80>>, []))
-    catch_throw(:thoas.encode(<<?a, 208>>, []))
+  test "throws error" do
+    assert_raise ErlangError, "Erlang error: {:invalid_byte, \"0x80\", <<128>>}", fn ->
+      :thoas.encode(<<0x80>>, %{})
+    end
+
+    assert_raise ErlangError, "Erlang error: {:invalid_byte, \"0xD0\", <<97, 208>>}", fn ->
+      :thoas.encode(<<?a, 208>>, %{})
+    end
   end
 
-  defp to_json(value, opts \\ []) do
+  defp to_json(value, opts \\ %{}) when is_map(opts) do
     :thoas.encode(value, opts)
   end
 end

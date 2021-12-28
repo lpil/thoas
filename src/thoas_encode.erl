@@ -1,7 +1,7 @@
 -module(thoas_encode).
 
 -compile([{inline, [{float_, 1}, {integer, 1}]},
-          {inline, [{throw_invalid_byte_error, 2}]}]).
+          {inline, [{error_invalid_byte_error, 2}]}]).
 
 -export([atom/2, encode/2, float_/1, integer/1, key/2, keyword/2, map/2,
          string/2, value/2]).
@@ -60,8 +60,8 @@ escape(47) -> <<"\\/">>;
 escape(X) when X < 92 andalso X > 47 -> throw(error);
 escape(92) -> <<"\\\\">>.
 
-escape_function(#{escape := Escape}) ->
-    case Escape of
+escape_function(Options) ->
+    case maps:get(escape, Options, json) of
         json -> fun escape_json/3;
         html -> fun escape_html/3;
         unicode -> fun escape_unicode/3;
@@ -107,7 +107,7 @@ escape_html(<<_Char/utf8,Rest/bitstring>>, Acc, Input, Skip) ->
 escape_html(<<>>, Acc, _Input, _Skip) ->
     Acc;
 escape_html(<<Byte/integer,_Rest/bitstring>>, _Acc, Input, _Skip) ->
-    throw_invalid_byte_error(Byte, Input).
+    error_invalid_byte_error(Byte, Input).
 
 escape_html_chunk(<<Byte/integer,Rest/bitstring>>, Acc, Input, Skip, Len) when Byte < 32 ->
     Part = binary_part(Input, Skip, Len),
@@ -151,7 +151,7 @@ escape_html_chunk(<<>>, Acc, Input, Skip, Len) ->
     Part = binary_part(Input, Skip, Len),
     [Acc | Part];
 escape_html_chunk(<<Byte/integer,_Rest/bitstring>>, _Acc, Input, _Skip, _Len) ->
-    throw_invalid_byte_error(Byte, Input).
+    error_invalid_byte_error(Byte, Input).
 
 escape_js(Data, Input, Skip) ->
     escape_js(Data, [], Input, Skip).
@@ -186,7 +186,7 @@ escape_js(<<_Char/utf8,Rest/bitstring>>, Acc, Input, Skip) ->
 escape_js(<<>>, Acc, _Input, _Skip) ->
     Acc;
 escape_js(<<Byte/integer,_Rest/bitstring>>, _Acc, Input, _Skip) ->
-    throw_invalid_byte_error(Byte, Input).
+    error_invalid_byte_error(Byte, Input).
 
 escape_js_chunk(<<Byte/integer,Rest/bitstring>>, Acc, Input, Skip, Len) when Byte < 32 ->
     Part = binary_part(Input, Skip, Len),
@@ -225,7 +225,7 @@ escape_js_chunk(<<>>, Acc, Input, Skip, Len) ->
     Part = binary_part(Input, Skip, Len),
     [Acc | Part];
 escape_js_chunk(<<Byte/integer,_Rest/bitstring>>, _Acc, Input, _Skip, _Len) ->
-    throw_invalid_byte_error(Byte, Input).
+    error_invalid_byte_error(Byte, Input).
 
 escape_json(Data, Input, Skip) ->
     escape_json(Data, [], Input, Skip).
@@ -254,7 +254,7 @@ escape_json(<<_Char/utf8,Rest/bitstring>>, Acc, Input, Skip) ->
 escape_json(<<>>, Acc, _Input, _Skip) ->
     Acc;
 escape_json(<<Byte/integer,_Rest/bitstring>>, _Acc, Input, _Skip) ->
-    throw_invalid_byte_error(Byte, Input).
+    error_invalid_byte_error(Byte, Input).
 
 escape_json_chunk(<<Byte/integer,Rest/bitstring>>, Acc, Input, Skip, Len) when Byte < 32 ->
     Part = binary_part(Input, Skip, Len),
@@ -284,7 +284,7 @@ escape_json_chunk(<<>>, Acc, Input, Skip, Len) ->
     Part = binary_part(Input, Skip, Len),
     [Acc | Part];
 escape_json_chunk(<<Byte/integer,_Rest/bitstring>>, _Acc, Input, _Skip, _Len) ->
-    throw_invalid_byte_error(Byte, Input).
+    error_invalid_byte_error(Byte, Input).
 
 escape_unicode(Data, Input, Skip) ->
     escape_unicode(Data, [], Input, Skip).
@@ -869,7 +869,7 @@ escape_unicode(<<>>, Acc, _Input, _Skip) ->
     Acc;
 escape_unicode(<<Byte/integer,_Rest/bitstring>>,
                _Acc, Input, _Skip) ->
-    throw_invalid_byte_error(Byte, Input).
+    error_invalid_byte_error(Byte, Input).
 
 escape_unicode_chunk(<<Byte/integer,Rest/bitstring>>,
                      Acc, Input, Skip, Len)
@@ -1587,7 +1587,7 @@ escape_unicode_chunk(<<>>, Acc, Input, Skip, Len) ->
     [Acc | Part];
 escape_unicode_chunk(<<Byte/integer,_Rest/bitstring>>,
                      _Acc, Input, _Skip, _Len) ->
-    throw_invalid_byte_error(Byte, Input).
+    error_invalid_byte_error(Byte, Input).
 
 float_(_float@1) ->
     io_lib_format:fwrite_g(_float@1).
@@ -1646,8 +1646,8 @@ map_naive_loop([{Key, Value} | Tail], Escape) ->
 string(String, Escape) ->
     encode_string(String, Escape).
 
-throw_invalid_byte_error(Byte, Input) ->
-    throw({invalid_byte,
+error_invalid_byte_error(Byte, Input) ->
+    error({invalid_byte,
            <<"0x"/utf8,(integer_to_binary(Byte, 16))/binary>>,
            Input}).
 
