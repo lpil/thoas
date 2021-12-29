@@ -52,7 +52,7 @@ if Code.ensure_loaded?(ExUnitProperties) do
     end
 
     defp json(keys) do
-      simple = one_of([integer(), float(), string(:printable), boolean(), nil])
+      simple = one_of([integer(), float(), string(:printable), boolean(), :null])
 
       tree(simple, fn json ->
         one_of([list_of(json), map_of(keys, json)])
