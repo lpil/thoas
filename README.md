@@ -43,11 +43,11 @@ end
 ## Basic Usage
 
 ```erlang
-> thoas:encode(#{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => null}).
-<<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\", \"dev\": null}">>
+> thoas:encode(#{age => 44, name => <<"Steve Irwin">>, nationality => <<"Australian">>}).
+<<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\"}">>
 
-> thoas:decode(<<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\", \"dev\": null}">>).
-{ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => null}}
+> thoas:decode(<<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\"}">>).
+{ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>}}
 ```
 
 ## JSON <-> Erlang mapping
