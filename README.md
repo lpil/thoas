@@ -50,6 +50,29 @@ end
 {ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => null}}
 ```
 
+## JSON <-> Erlang mapping
+
+Erlang                        | JSON
+------                        | ------
+`null`                        | `null`
+`true`                        | `true`
+`false`                       | `false`
+`nil`                         | `"nil"`
+`undefined`                   | `"undefined"`
+`other_atom`                  | `"other_atom"`
+`1`                           | `1`
+`1.1`                         | `1.1`
+`-2.0`                        | `-2.0`
+`[]`                          | `[]`
+`[1, 2]`                      | `[1,2]`
+`"chars"`                     | `[99,104,97,114,115]`
+`<<"text">>`                  | `"text"`
+`<<"\n">>`                    | `"\\n"`
+`#{}`                         | `{}`
+`#{<<"name">> => <<"Lucy">>}` | `{"name":"Lucy"}`
+`#{score => 42, win => true}` | `{"score":42,"win":true}`
+
+
 ## Benchmarks
 
 Benchmarks against most popular Elixir & Erlang json libraries can be executed after
