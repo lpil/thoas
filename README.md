@@ -50,7 +50,7 @@ end
 {ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>}}
 ```
 
-## JSON <-> Erlang mapping
+## Erlang <-> JSON mapping
 
 Erlang                        | JSON
 ------                        | ------
