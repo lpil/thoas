@@ -5,7 +5,7 @@ decode_jobs = %{
   "JSX" => fn {json, _} -> JSX.decode!(json, [:strict]) end,
   "Tiny" => fn {json, _} -> Tiny.decode!(json) end,
   "jsone" => fn {json, _} -> :jsone.decode(json) end,
-  # "jiffy" => fn {json, _} -> :jiffy.decode(json, [:return_maps, :use_nil]) end,
+  "jiffy" => fn {json, _} -> :jiffy.decode(json, [:return_maps]) end,
   "JSON" => fn {json, _} -> JSON.decode!(json) end
   # "binary_to_term/1" => fn {_, etf} -> :erlang.binary_to_term(etf) end,
 }
