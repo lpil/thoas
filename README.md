@@ -43,7 +43,7 @@ end
 ## Basic Usage
 
 ```erlang
-> thoas:encode(#{"age" => 44, "name" => "Steve Irwin", "nationality" => "Australian"}).
+> thoas:encode(#{age => 44, name => <<"Steve Irwin">>, nationality => <<"Australian">>}).
 <<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\"}">>
 
 > thoas:decode(<<"{\"age"\:44,"\name"\:\"Steve Irwin\",\"nationality\":\"Australian\"}">>).
