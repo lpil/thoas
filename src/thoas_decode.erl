@@ -1136,7 +1136,7 @@ value(Data, Input, Skip, Stack, StringDecode) ->
         <<110/integer,Rest/bitstring>> ->
             case Rest of
                 <<"ull",Rest1/bitstring>> ->
-                    continue(Rest1, Input, Skip + 4, Stack, StringDecode, nil);
+                    continue(Rest1, Input, Skip + 4, Stack, StringDecode, null);
                 <<_/bitstring>> ->
                     throw_error(Input, Skip)
             end;

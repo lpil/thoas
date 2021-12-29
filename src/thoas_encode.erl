@@ -97,7 +97,7 @@ non_recursive_object_loop([{Key, Value} | Tail], Escape) ->
 encode(Value, Opts) ->
     value(Value, escape_function(Opts)).
 
-encode_atom(nil, _Escape) -> <<"null">>;
+encode_atom(null, _Escape) -> <<"null">>;
 encode_atom(true, _Escape) -> <<"true">>;
 encode_atom(false, _Escape) -> <<"false">>;
 encode_atom(Atom, Escape) -> encode_string(atom_to_binary(Atom, utf8), Escape).
