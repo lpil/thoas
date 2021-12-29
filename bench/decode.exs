@@ -11,11 +11,11 @@ decode_jobs = %{
 }
 
 decode_inputs = [
-  "GitHub"
+  "GitHub",
   "Giphy",
   "GovTrack",
   "Blockchain",
-  "Pokedex"
+  "Pokedex",
   "JSON Generator",
   "JSON Generator (Pretty)",
   "UTF-8 escaped",
