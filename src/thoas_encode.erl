@@ -11,7 +11,7 @@
 %%% Non-recursive API that expects sub-objects to already be encoded. Likely
 %%% useful for statically typed languages such as Gleam.
 -export([
-    true/0, false/0, null/0, nil/0, boolean/1, integer/1, float/1, string/1,
+    true/0, false/0, null/0, boolean/1, integer/1, float/1, string/1,
     non_recursive_array/1, non_recursive_object/1
 ]).
 
@@ -31,10 +31,6 @@ false() -> <<"false">>.
 %%% The JSON value `null`.
 -spec null() -> iodata().
 null() -> <<"null">>.
-
-%%% The JSON value `null`.
--spec nil() -> iodata().
-nil() -> <<"null">>.
 
 %%% A float in JSON format.
 -spec float(float()) -> iodata().
@@ -101,7 +97,6 @@ non_recursive_object_loop([{Key, Value} | Tail], Escape) ->
 encode(Value, Opts) ->
     value(Value, escape_function(Opts)).
 
-encode_atom(nil, _Escape) -> <<"null">>;
 encode_atom(null, _Escape) -> <<"null">>;
 encode_atom(true, _Escape) -> <<"true">>;
 encode_atom(false, _Escape) -> <<"false">>;

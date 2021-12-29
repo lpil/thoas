@@ -3,7 +3,7 @@
 -compile([{no_auto_import, [float/1]}]).
 
 -import(thoas_encode, [
-    true/0, false/0, null/0, nil/0, boolean/1, integer/1, float/1, string/1,
+    true/0, false/0, null/0, boolean/1, integer/1, float/1, string/1,
     non_recursive_array/1, non_recursive_object/1
 ]).
 
@@ -21,9 +21,6 @@ boolean_false_test() ->
 
 null_test() ->
     ?assertEqual(null(), <<"null">>).
-
-nil_test() ->
-    ?assertEqual(nil(), <<"null">>).
 
 integer_test_() ->
     Cases = [

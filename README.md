@@ -43,16 +43,10 @@ end
 ## Basic Usage
 
 ```erlang
-> thoas:encode(#{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => nil}).
-<<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\", \"dev\": null}">>
-
 > thoas:encode(#{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => null}).
 <<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\", \"dev\": null}">>
 
 > thoas:decode(<<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\", \"dev\": null}">>).
-{ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => nil}}
-
-> thoas:decode(<<"{\"age\":44,\"name\":\"Steve Irwin\",\"nationality\":\"Australian\", \"dev\": null}">>, #{null_as => null}).
 {ok, #{<<"age">> => 44, <<"name">> => <<"Steve Irwin">>, <<"nationality">> => <<"Australian">>, <<"dev">> => null}}
 ```
 
@@ -74,7 +68,6 @@ Thoas has a couple feature differences compared to Jason.
 - Thoas has no support for decoding objects to ordered dictionaries.
 - Thoas has no support for decoding object keys as atoms.
 - Thoas has no support for decoding floats to Elixir decimals.
-- Thaos allows specifying atom for value for decoding of `null` (`#{null_as => null | nil*}`)
 - Thoas has an additional non-recursive encoder API that may be useful when
   working within statically typed languages such as Gleam.
 

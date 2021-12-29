@@ -994,7 +994,6 @@ object(Data, Input, Skip, Stack, StringDecode, Value) ->
 
 decode(Data, Options) when is_binary(Data) andalso is_map(Options) ->
     StringDecode = string_decode_function(Options),
-    ok = null_as_option(Options),
     try
         {ok, value(Data, Data, 0, [?terminate], StringDecode)}
     catch
@@ -1074,13 +1073,6 @@ string_decode_function(Options) ->
         copy -> fun binary:copy/1
     end.
 
-null_as_option(Options) ->
-    case maps:get(null_as, Options, nil) of
-        nil -> put(null_as, nil);
-        null -> put(null_as, null)
-    end,
-    ok.
-
 terminate(<<32/integer,Rest/bitstring>>, Input, Skip, Stack, StringDecode, Value) ->
     terminate(Rest, Input, Skip + 1, Stack, StringDecode, Value);
 terminate(<<13/integer,Rest/bitstring>>, Input, Skip, Stack, StringDecode, Value) ->
@@ -1144,7 +1136,7 @@ value(Data, Input, Skip, Stack, StringDecode) ->
         <<110/integer,Rest/bitstring>> ->
             case Rest of
                 <<"ull",Rest1/bitstring>> ->
-                    continue(Rest1, Input, Skip + 4, Stack, StringDecode, get(null_as));
+                    continue(Rest1, Input, Skip + 4, Stack, StringDecode, null);
                 <<_/bitstring>> ->
                     throw_error(Input, Skip)
             end;
