@@ -17,7 +17,11 @@ jobs:
           otp-version: "24.2"
           elixir-version: "1.13.1"
 
-      - run: rebar3 eunit
+      - run: rebar3 eunit -c
+
+      - run: rebar3 proper -c
+
+      - run: rebar3 cover -v -m 50  # min 50% rebar3-based test coverage
 
       - run: mix deps.get
         working-directory: mix_tests
