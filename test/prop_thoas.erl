@@ -54,7 +54,31 @@ prop_input_term_encodable_decodable() ->
            ?assertMatch({ok, _}, thoas:decode(Encoded)),
            true
        end).
-    
+
+prop_truncated_no_crash() ->
+    ?FORALL(
+       {Json, CutAt},                         % at least 2 char JSON and position in it where to cut
+       ?LET(Json,
+            ?SUCHTHAT(Json,
+                      ?LET({Term, EncOpts},
+                           {json_term(), encode_options()},
+                           thoas:encode(Term, EncOpts)),
+                      byte_size(Json) > 1),
+            {Json, integer(1, byte_size(Json) - 1)}),
+       begin
+           Part = binary:part(Json, 0, CutAt),
+           case thoas:decode(Part) of
+               {error, unexpected_end_of_input} ->
+                   true;
+               {error, {unexpected_byte, _, _}} ->
+                   true;
+               {ok, Num} when is_number(Num) ->
+                   %% Integers can be truncated without anyone noticing
+                   true;
+               Other ->
+                   error({unexpected_return, Other})
+           end
+       end).
 
 prop_thoas_encode_jsx_decode_match() ->
     ?FORALL(
