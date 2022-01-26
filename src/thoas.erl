@@ -19,6 +19,7 @@
 }.
 
 -type json_term() :: 
+    null |
     integer() |
     float() |
     binary() |
@@ -26,12 +27,12 @@
     #{ binary() => json_term() }.
 
 -type input_term() :: 
+    null |
     integer() |
     float() |
     binary() |
     atom() |
     list(input_term()) |
-    list({binary() | atom(), input_term()}) |
     #{ binary() | atom() => input_term() }.
 
 -type decode_error() ::
