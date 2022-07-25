@@ -82,7 +82,7 @@ A HTML report of the benchmarks (after their execution) can be found in
 
 ## Differences to Jason
 
-Thoas has a couple feature differences compared to Jason.
+Thoas has some feature differences compared to Jason.
 
 - Thoas is written in Erlang.
 - Thoas has no support for Elixir protocols.
