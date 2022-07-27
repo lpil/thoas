@@ -1722,6 +1722,8 @@ value(Value, _Escape) when is_integer(Value) ->
     integer(Value);
 value(Value, _Escape) when is_float(Value) ->
     float(Value);
+value([{_, _} | _] = Keyword, Escape) ->
+    map_naive(Keyword, Escape);
 value(Value, Escape) when is_list(Value) ->
     list(Value, Escape);
 value(Value, Escape) when is_map(Value) ->
