@@ -4,7 +4,7 @@
 
 -import(thoas_encode, [
     true/0, false/0, null/0, boolean/1, integer/1, float/1, string/1,
-    non_recursive_array/1, non_recursive_object/1
+    non_recursive_array/1, non_recursive_object/1, encode/2
 ]).
 
 true_test() ->
@@ -105,5 +105,15 @@ non_recursive_object_test_() ->
     ],
     [ 
         ?_assertEqual(Expected, iolist_to_binary(non_recursive_object(Input)))
+        || {Input, Expected} <- Cases
+    ].
+
+encode_test_() ->
+    Cases = [
+        {[{<<"foo">>, 1}], <<"{\"foo\":1}">>},
+        {#{<<"bar">> => 2}, <<"{\"bar\":2}">>}
+    ],
+    [
+        ?_assertEqual(Expected, iolist_to_binary(encode(Input, #{})))
         || {Input, Expected} <- Cases
     ].

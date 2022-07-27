@@ -71,6 +71,7 @@ Erlang                        | JSON
 `#{}`                         | `{}`
 `#{<<"name">> => <<"Lucy">>}` | `{"name":"Lucy"}`
 `#{score => 42, win => true}` | `{"score":42,"win":true}`
+`[{proplists, true}]`         | `{"proplists":true}`
 
 
 ## Benchmarks
