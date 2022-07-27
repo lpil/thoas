@@ -122,13 +122,13 @@ escape_surrogate(<<_Rest/bitstring>>, Input, Skip, _Stack, _StringDecode, _Acc, 
     throw_error(Input, Skip + 6).
 
 
-escapeu_1(Rest, Input, Skip, Stack, StringDecode, Acc, Last, X) ->
+escapeu_1(<<_/bitstring>> = Rest, Input, Skip, Stack, StringDecode, Acc, Last, X) ->
     A = 6 bsl 5 + (X bsl 2) + (Last bsr 6),
     B = 2 bsl 6 + Last band 63,
     C = [Acc, A, B],
     string(Rest, Input, Skip + 6, Stack, StringDecode, C, 0).
 
-escapeu_2(Rest, Input, Skip, Stack, StringDecode, Acc, Last, X) ->
+escapeu_2(<<_/bitstring>> = Rest, Input, Skip, Stack, StringDecode, Acc, Last, X) ->
     A = 14 bsl 4 + (X bsr 4),
     B = 2 bsl 6 + (X band 15 bsl 2) + (Last bsr 6),
     C = 2 bsl 6 + Last band 63,
