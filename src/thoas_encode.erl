@@ -1681,6 +1681,9 @@ key(Atom, Escape) when is_atom(Atom) ->
     Escape(String, String, 0);
 key(_charlist@1, Escape) when is_list(_charlist@1) ->
     String = list_to_binary(_charlist@1),
+    Escape(String, String, 0);
+key(Int, Escape) when is_integer(Int) ->
+    String = integer_to_binary(Int),
     Escape(String, String, 0).
 
 list([], _Escape) ->
