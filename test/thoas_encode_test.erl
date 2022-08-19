@@ -63,6 +63,17 @@ string_test_() ->
         || {Input, Expected} <- Cases
     ].
 
+latin1_string_test() ->
+    % Note:
+    % String is "c:/ProgramData/RabbitMQ Sérvér/log/rabbit@localhost.log"
+    Str = [99,58,47,80,114,111,103,114,97,109,68,97,116,97,47,82,97,98,
+           98,105,116,77,81,32,83,233,114,118,233,114,47,108,111,103,
+           47,114,97,98,98,105,116,64,108,111,99,97,108,104,111,115,116,
+           46,108,111,103],
+    StrBin = list_to_binary(Str),
+    Expected = <<"\"c:/ProgramData/RabbitMQ Sérvér/log/rabbit@localhost.log\"">>,
+    ?assertEqual(Expected, iolist_to_binary(string(StrBin))).
+
 
 non_recursive_array_test_() ->
     Cases = [
