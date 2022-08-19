@@ -71,7 +71,7 @@ latin1_string_test() ->
            47,114,97,98,98,105,116,64,108,111,99,97,108,104,111,115,116,
            46,108,111,103],
     StrBin = list_to_binary(Str),
-    Expected = <<"\"c:/ProgramData/RabbitMQ Sérvér/log/rabbit@localhost.log\"">>,
+    Expected = <<"\"c:/ProgramData/RabbitMQ Sérvér/log/rabbit@localhost.log\""/utf8>>,
     ?assertEqual(Expected, iolist_to_binary(string(StrBin))).
 
 

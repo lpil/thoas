@@ -103,7 +103,17 @@ encode_atom(false, _Escape) -> <<"false">>;
 encode_atom(Atom, Escape) -> encode_string(atom_to_binary(Atom, utf8), Escape).
 
 encode_string(String, Escape) ->
-    [$", Escape(String, String, 0), $"].
+    try
+        [$", Escape(String, String, 0), $"]
+    catch
+        error:{invalid_byte, _, _}=Reason0:Stack0 ->
+            case unicode:characters_to_binary(String, latin1) of
+                String1 when is_binary(String1) ->
+                    [$", Escape(String1, String1, 0), $"];
+                _Error ->
+                    erlang:raise(error, Reason0, Stack0)
+            end
+    end.
 
 escape(0) -> <<"\\u0000">>;
 escape(1) -> <<"\\u0001">>;
