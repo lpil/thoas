@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.3.1 - 2022-08-24
+
+- Adds support for integer keys.
+
 ## v0.3.0 - 2022-07-27
 
 - Proplists may now be encoded with `thoas:encode/2`.
