@@ -31,7 +31,7 @@ integer_test_() ->
         {-100000, "-100000"},
         {100000, "100000"}
     ],
-    [ 
+    [
         ?_assertEqual(Expected, integer(Input))
         || {Input, Expected} <- Cases
     ].
@@ -45,7 +45,7 @@ float_test_() ->
         {-100000.4234, "-100000.4234"},
         {100000.214, "100000.214"}
     ],
-    [ 
+    [
         ?_assertEqual(Expected, float(Input))
         || {Input, Expected} <- Cases
     ].
@@ -58,7 +58,7 @@ string_test_() ->
         {<<"🤔">>, <<"\"\\u0014\"">>},
         {<<"Goodbye, Joe">>, <<"\"Goodbye, Joe\"">>}
     ],
-    [ 
+    [
         ?_assertEqual(Expected, iolist_to_binary(string(Input)))
         || {Input, Expected} <- Cases
     ].
@@ -71,7 +71,7 @@ non_recursive_array_test_() ->
         {[true(), string(<<"\n">>)], <<"[true,\"\\n\"]">>},
         {[], <<"[]">>}
     ],
-    [ 
+    [
         ?_assertEqual(Expected, iolist_to_binary(non_recursive_array(Input)))
         || {Input, Expected} <- Cases
     ].
@@ -82,28 +82,28 @@ non_recursive_object_test_() ->
             [
                 {<<"name">>, string(<<"Gleam">>)},
                 {<<"isCool">>, true()}
-            ], 
+            ],
             <<"{\"name\":\"Gleam\",\"isCool\":true}">>
         },
         {
             [
                 {<<"\n">>, string(<<"That needed to be escaped">>)}
-            ], 
+            ],
             <<"{\"\\n\":\"That needed to be escaped\"}">>
         },
         {
             [
                 {<<"isCool">>, true()}
-            ], 
+            ],
             <<"{\"isCool\":true}">>
         },
         {
             [
-            ], 
+            ],
             <<"{}">>
         }
     ],
-    [ 
+    [
         ?_assertEqual(Expected, iolist_to_binary(non_recursive_object(Input)))
         || {Input, Expected} <- Cases
     ].

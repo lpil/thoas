@@ -52,7 +52,7 @@ string(String) ->
 %%% Important: The values supplied in the list are not processed and **must**
 %%% already encoded into JSON using one of the other functions, such as
 %%% `integer/1` or `string/1`.
-%%% 
+%%%
 -spec non_recursive_array(list(iodata())) -> iodata().
 non_recursive_array([]) ->
     <<"[]">>;
@@ -71,14 +71,14 @@ non_recursive_array_loop([First | Rest]) ->
 %%% already encoded into JSON using one of the other functions, such as
 %%% `integer/1` or `string/1`.
 %%% Keys are processed as strings and get escaped using normal JSON escaping.
-%%% 
+%%%
 -spec non_recursive_object(list({binary(), iodata()})) -> iodata().
 non_recursive_object([]) ->
     <<"{}">>;
 non_recursive_object([{Key, Value} | Tail]) ->
     Escape = fun escape_json/3,
     [
-        <<"{\"">>, key(Key, Escape), <<"\":">>, Value 
+        <<"{\"">>, key(Key, Escape), <<"\":">>, Value
         | non_recursive_object_loop(Tail, Escape)
     ].
 
@@ -86,7 +86,7 @@ non_recursive_object_loop([], _Escape) ->
     [$}];
 non_recursive_object_loop([{Key, Value} | Tail], Escape) ->
     [
-        <<",\"">>, key(Key, Escape), <<"\":">>, Value 
+        <<",\"">>, key(Key, Escape), <<"\":">>, Value
         | non_recursive_object_loop(Tail, Escape)
     ].
 
@@ -1663,7 +1663,7 @@ escape_unicode_chunk(<<Char/utf8,Rest/bitstring>>,
     Part = binary_part(Input, Skip, Len),
     Acc2 = [Acc, Part, <<"\\uD">>,
         integer_to_list(2048 bor (_char@2 bsr 10), 16),
-        <<"\\uD">> 
+        <<"\\uD">>
         | integer_to_list(3072 bor _char@2 band 1023, 16)
     ],
     escape_unicode(Rest, Acc2, Input, Skip + Len + 4);
