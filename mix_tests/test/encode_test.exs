@@ -43,6 +43,7 @@ defmodule Jason.EncoderTest do
     assert to_json(%{"foo" => "bar"}) == ~s({"foo":"bar"})
     assert to_json(%{foo: :bar}) == ~s({"foo":"bar"})
     assert to_json(%{'foo' => :bar}) == ~s({"foo":"bar"})
+    assert to_json(%{0 => 0}) == ~s({"0":0})
 
     multi_key_map = %{"foo" => "foo1", :foo => "foo2"}
 
