@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.3.1 - 2022-08-24
+## v0.4.0 - 2022-08-26
 
 - Adds support for integer keys.
 
