@@ -22,6 +22,8 @@
     integer() |
     float() |
     binary() |
+    boolean() |
+    'null' |
     list(json_term()) |
     #{ binary() => json_term() }.
 
