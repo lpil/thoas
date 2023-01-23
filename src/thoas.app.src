@@ -1,6 +1,6 @@
 {application, thoas,
  [{description, "A blazing fast JSON parser and generator in pure Erlang."},
-  {vsn, "0.4.0"},
+  {vsn, "0.4.1"},
   {registered, []},
   {applications,
    [kernel,

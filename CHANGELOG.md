@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.1 - 2023-01-23
+
+- Corrected the `json_term` type to include `null`, `true`, and `false`.
+
 ## v0.4.0 - 2022-08-26
 
 - Adds support for integer keys.
