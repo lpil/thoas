@@ -16,6 +16,7 @@ jobs:
         with:
           otp-version: "24.2"
           elixir-version: "1.13.1"
+          rebar3-version: "3"
 
       - run: rebar3 eunit
 
