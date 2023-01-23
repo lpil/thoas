@@ -35,7 +35,7 @@ null() -> <<"null">>.
 %%% A float in JSON format.
 -spec float(float()) -> iodata().
 float(Float) ->
-    io_lib_format:fwrite_g(Float).
+    erlang:float_to_binary(Float, [short]).
 
 %%% An integer in JSON format.
 -spec integer(integer()) -> iodata().
