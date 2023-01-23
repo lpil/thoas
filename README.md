@@ -36,7 +36,7 @@ gleam add thoas
 ```elixir
 # mix.exs
 def deps do
-  [{:thoas, "~> 0.3"}]
+  [{:thoas, "~> 1.0"}]
 end
 ```
 
