@@ -1727,6 +1727,31 @@ value(Value, _Escape) when is_float(Value) ->
     float(Value);
 value([{_, _} | _] = Keyword, Escape) ->
     map_naive(Keyword, Escape);
+value({Y, M, D}, Escape) when is_integer(Y) andalso Y >= 0 andalso Y =< 9999 andalso
+                              is_integer(M) andalso M >= 0 andalso M =< 12 andalso
+                              is_integer(D) andalso D >= 0 andalso D =< 31 ->
+    DateTime = io_lib:format("~4..0b-~2..0b-~2..0b", [Y, M, D]),
+    encode_string(iolist_to_binary(DateTime), Escape);
+value({{Y, M, D}, {H, I, S}}, Escape) when is_integer(S) ->
+    Dt = io_lib:format("~4..0b-~2..0b-~2..0bT~2..0b:~2..0b:~sZ",
+                       [Y, M, D, H, I, integer_to_list(S)]),
+    encode_string(iolist_to_binary(Dt), Escape);
+value({{Y, M, D}, {H, I, S}}, Escape) when is_float(S) ->
+    Dt = io_lib:format("~4..0b-~2..0b-~2..0bT~2..0b:~2..0b:~sZ",
+                       [Y, M, D, H, I, float_to_binary(S, [short])]),
+    encode_string(iolist_to_binary(Dt), Escape);
+value({_, _, _, _} = IpV4, Escape) ->
+    encode_string(list_to_binary(inet:ntoa(IpV4)), Escape);
+value({{_, _, _, _} = IpV4, Mask}, Escape) ->
+    Cidr = <<(list_to_binary(inet:ntoa(IpV4)))/binary,
+             "/", (integer_to_binary(Mask))/binary>>,
+    encode_string(Cidr, Escape);
+value({_, _, _, _, _, _, _, _} = IpV6, Escape) ->
+    encode_string(list_to_binary(inet:ntoa(IpV6)), Escape);
+value({{_, _, _, _, _, _, _, _} = IpV6, Mask}, Escape) ->
+    Cidr = <<(list_to_binary(inet:ntoa(IpV6)))/binary,
+             "/", (integer_to_binary(Mask))/binary>>,
+    encode_string(Cidr, Escape);
 value(Value, Escape) when is_list(Value) ->
     list(Value, Escape);
 value(Value, Escape) when is_map(Value) ->
