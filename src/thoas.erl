@@ -27,11 +27,18 @@
     list(json_term()) |
     #{ binary() => json_term() }.
 
+-type ip_address()  :: inet:ip4_address() | inet:ip6_address().
+-type ip_cidr()     :: {inet:ip4_address(), 0..32} | {inet:ip6_address(), 0..64}.
+
 -type input_term() :: 
     integer() |
     float() |
     binary() |
     atom() |
+    ip_address() |
+    ip_cidr() |
+    calendar:date_time() |
+    calendar:date() |
     list(input_term()) |
     list({binary() | atom(), input_term()}) |
     #{ binary() | atom() => input_term() }.
