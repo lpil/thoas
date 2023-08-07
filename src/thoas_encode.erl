@@ -1740,16 +1740,20 @@ value({{Y, M, D}, {H, I, S}}, Escape) when is_float(S) ->
     Dt = io_lib:format("~4..0b-~2..0b-~2..0bT~2..0b:~2..0b:~sZ",
                        [Y, M, D, H, I, float_to_binary(S, [short])]),
     encode_string(iolist_to_binary(Dt), Escape);
-value({_, _, _, _} = IpV4, Escape) ->
-    encode_string(list_to_binary(inet:ntoa(IpV4)), Escape);
-value({{_, _, _, _} = IpV4, Mask}, Escape) ->
-    Cidr = <<(list_to_binary(inet:ntoa(IpV4)))/binary,
+value({_, _, _, _} = Ip, Escape) ->
+    Ipv4 = ip_to_binary_(Ip),
+    encode_string(Ipv4, Escape);
+value({{_, _, _, _} = Ip, Mask}, Escape) ->
+    IpV4 = ip_to_binary_(Ip),
+    Cidr = <<IpV4/binary,
              "/", (integer_to_binary(Mask))/binary>>,
     encode_string(Cidr, Escape);
-value({_, _, _, _, _, _, _, _} = IpV6, Escape) ->
-    encode_string(list_to_binary(inet:ntoa(IpV6)), Escape);
-value({{_, _, _, _, _, _, _, _} = IpV6, Mask}, Escape) ->
-    Cidr = <<(list_to_binary(inet:ntoa(IpV6)))/binary,
+value({_, _, _, _, _, _, _, _} = Ip, Escape) ->
+    IpV6 = ip_to_binary_(Ip),
+    encode_string(IpV6, Escape);
+value({{_, _, _, _, _, _, _, _} = Ip, Mask}, Escape) ->
+    IpV6 = ip_to_binary_(Ip),
+    Cidr = <<IpV6/binary,
              "/", (integer_to_binary(Mask))/binary>>,
     encode_string(Cidr, Escape);
 value(Value, Escape) when is_list(Value) ->
@@ -1762,3 +1766,10 @@ value(Value, Escape) when is_map(Value) ->
             map_naive(Keyword, Escape)
     end.
 
+ip_to_binary_(Ip) ->
+    case inet:ntoa(Ip) of
+        {error, einval} ->
+            error(invalid_ip);
+        IpStr ->
+            list_to_binary(IpStr)
+    end.
