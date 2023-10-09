@@ -86,7 +86,9 @@ defmodule Jason.DecodeTest do
     bs = :binary.copy("b", 102)
 
     # Copy decode, copies the key
-    assert [{key, value}] = :maps.to_list(parse!(~s({"#{as}": "#{bs}"}), %{strings: :copy}))
+    assert [{key, value}] =
+             :maps.to_list(parse!(~s({"#{as}": "#{bs}"}), %{strings: :copy, keys: :copy}))
+
     assert key == as
     assert value == bs
     assert :binary.referenced_byte_size(key) == byte_size(as)
