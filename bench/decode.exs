@@ -1,4 +1,6 @@
 decode_jobs = %{
+  # "thoas_key_to_atom" => fn {json, _} -> :thoas.decode(json, %{keys: :to_atom}) end,
+  # "thoas_key_to_existing_atom" => fn {json, _} -> :thoas.decode(json, %{keys: :to_existing_atom}) end,
   "thoas" => fn {json, _} -> :thoas.decode(json) end,
   "Jason" => fn {json, _} -> Jason.decode!(json) end,
   "Poison" => fn {json, _} -> Poison.decode!(json) end,
