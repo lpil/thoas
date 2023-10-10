@@ -95,7 +95,7 @@ non_recursive_object_loop([{Key, Value} | Tail], Escape) ->
 %%%%
 
 encode(Value, Opts) ->
-    value(Value, escape_function(Opts)).
+    value(Value, escape_function(Opts), encoders(Opts)).
 
 encode_atom(null, _Escape) -> <<"null">>;
 encode_atom(true, _Escape) -> <<"true">>;
@@ -152,6 +152,21 @@ escape_function(Options) ->
         unicode -> fun escape_unicode/3;
         javascript -> fun escape_js/3
     end.
+
+encoders(Options) ->
+    Defaults = #{
+        atom => fun(Atom, Escape, _) -> encode_atom(Atom, Escape) end,
+        binary => fun(Bin, Escape, _) -> encode_string(Bin, Escape) end,
+        integer => fun(Int, _, _) -> integer(Int) end,
+        float => fun(Float, _, _) -> float(Float) end,
+        proplist => fun map_naive/3,
+        list => fun list/3,
+        map => fun map/3,
+        date => fun(Date, Escape, _) -> date(Date, Escape) end,
+        datetime => fun(Date, Escape, _) -> datetime(Date, Escape) end,
+        unknown => fun(_, _, _) -> error(invalid_type) end
+    },
+    maps:merge(Defaults, maps:get(encoders, Options, #{})).
 
 escape_html(Data, Input, Skip) ->
     escape_html(Data, [], Input, Skip).
@@ -1686,79 +1701,83 @@ key(Int, Escape) when is_integer(Int) ->
     String = integer_to_binary(Int),
     Escape(String, String, 0).
 
-list([], _Escape) ->
+list([], _Escape, _Encoders) ->
     <<"[]">>;
-list([First | Tail], Escape) ->
-    [91, value(First, Escape) | list_loop(Tail, Escape)].
+list([First | Tail], Escape, Encoders) ->
+    [91, value(First, Escape, Encoders) | list_loop(Tail, Escape, Encoders)].
 
-list_loop([], _Escape) ->
+list_loop([], _Escape, _) ->
     [93];
-list_loop([First | Tail], Escape) ->
-    [44, value(First, Escape) | list_loop(Tail, Escape)].
+list_loop([First | Tail], Escape, Encoders) ->
+    [44, value(First, Escape, Encoders) | list_loop(Tail, Escape, Encoders)].
 
-map_naive([{Key, Value} | Tail], Escape) ->
+map_naive([{Key, Value} | Tail], Escape, Encoders) ->
     [<<"{\"">>,
      key(Key, Escape),
      <<"\":">>,
-     value(Value, Escape) |
-     map_naive_loop(Tail, Escape)].
+     value(Value, Escape, Encoders) |
+     map_naive_loop(Tail, Escape, Encoders)].
 
-map_naive_loop([], _Escape) ->
+map_naive_loop([], _Escape, _Encoders) ->
     [$}];
-map_naive_loop([{Key, Value} | Tail], Escape) ->
+map_naive_loop([{Key, Value} | Tail], Escape, Encoders) ->
     [<<",\"">>,
      key(Key, Escape),
      <<"\":">>,
-     value(Value, Escape) |
-     map_naive_loop(Tail, Escape)].
+     value(Value, Escape, Encoders) |
+     map_naive_loop(Tail, Escape, Encoders)].
+
+map(Map, _Escape, _Encoders) when Map =:= #{} ->
+    <<"{}">>;
+map(Map, Escape, Encoders) ->
+    map_naive(maps:to_list(Map), Escape, Encoders).
+
+date({YYYY, MM, DD}, Escape) ->
+    DateTime = io_lib:format("~4..0b-~2..0b-~2..0b", [YYYY, MM, DD]),
+    encode_string(iolist_to_binary(DateTime), Escape).
+
+datetime({Date, {H, M, S}}, Escape) when is_integer(S) ->
+    do_datetime({Date, {H, M, integer_to_list(S)}}, Escape);
+datetime({Date, {H, M, S}}, Escape) when is_float(S) ->
+    do_datetime({Date, {H, M, float_to_binary(S, [short])}}, Escape).
+
+do_datetime({{YYYY, MM, DD}, {H, M, S}}, Escape) ->
+    Dt = io_lib:format("~4..0b-~2..0b-~2..0bT~2..0b:~2..0b:~sZ",
+                       [YYYY, MM, DD, H, M, S]),
+    encode_string(iolist_to_binary(Dt), Escape).
 
 error_invalid_byte_error(Byte, Input) ->
     error({invalid_byte,
            <<"0x"/utf8,(integer_to_binary(Byte, 16))/binary>>,
            Input}).
 
-value(Value, Escape) when is_atom(Value) ->
-    encode_atom(Value, Escape);
-value(Value, Escape) when is_binary(Value) ->
-    encode_string(Value, Escape);
-value(Value, _Escape) when is_integer(Value) ->
-    integer(Value);
-value(Value, _Escape) when is_float(Value) ->
-    float(Value);
-value([{_, _} | _] = Keyword, Escape) ->
-    map_naive(Keyword, Escape);
-value({Y, M, D}, Escape)
-    when is_integer(Y) andalso Y >= 0 andalso Y =< 9999 andalso
-         is_integer(M) andalso M >= 1 andalso M =< 12 andalso
-         is_integer(D) andalso D >= 1 andalso D =< 31 ->
-    DateTime = io_lib:format("~4..0b-~2..0b-~2..0b", [Y, M, D]),
-    encode_string(iolist_to_binary(DateTime), Escape);
-value({{Y, M, D}, {H, I, S}}, Escape)
-    when is_integer(Y) andalso Y >= 0 andalso Y =< 9999 andalso
-         is_integer(M) andalso M >= 1 andalso M =< 12 andalso
-         is_integer(D) andalso D >= 1 andalso D =< 31 andalso
+value(Value, Escape, #{atom := Encode} = Encoders) when is_atom(Value) ->
+    Encode(Value, Escape, Encoders);
+value(Value, Escape, #{binary := Encode} = Encoders) when is_binary(Value) ->
+    Encode(Value, Escape, Encoders);
+value(Value, Escape, #{integer := Encode} = Encoders) when is_integer(Value) ->
+    Encode(Value, Escape, Encoders);
+value(Value, Escape, #{float := Encode} = Encoders) when is_float(Value) ->
+    Encode(Value, Escape, Encoders);
+value({YYYY, MM, DD} = Value, Escape, #{date := Encode} = Encoders)
+    when is_integer(YYYY) andalso YYYY >= 0 andalso YYYY =< 9999 andalso
+         is_integer(MM) andalso MM >= 1 andalso MM =< 12 andalso
+         is_integer(DD) andalso DD >= 1 andalso DD =< 31 ->
+    Encode(Value, Escape, Encoders);
+value({{YYYY, MM, DD}, {H, M, S}} = Value, Escape, #{datetime := Encode} = Encoders)
+    when is_integer(YYYY) andalso YYYY >= 0 andalso YYYY =< 9999 andalso
+         is_integer(MM) andalso MM >= 1 andalso MM =< 12 andalso
+         is_integer(DD) andalso DD >= 1 andalso DD =< 31 andalso
          is_integer(H) andalso H >= 0 andalso H =< 23 andalso
-         is_integer(I) andalso I >= 0 andalso I =< 59 andalso
-         is_integer(S) andalso S >= 0 andalso S =< 59 ->
-    Dt = io_lib:format("~4..0b-~2..0b-~2..0bT~2..0b:~2..0b:~sZ",
-                       [Y, M, D, H, I, integer_to_list(S)]),
-    encode_string(iolist_to_binary(Dt), Escape);
-value({{Y, M, D}, {H, I, S}}, Escape)
-    when is_integer(Y) andalso Y >= 0 andalso Y =< 9999 andalso
-         is_integer(M) andalso M >= 1 andalso M =< 12 andalso
-         is_integer(D) andalso D >= 1 andalso D =< 31 andalso
-         is_integer(H) andalso H >= 0 andalso H =< 23 andalso
-         is_integer(I) andalso I >= 0 andalso I =< 59 andalso
-         is_float(S) andalso S >= 0 andalso S < 60 ->
-    Dt = io_lib:format("~4..0b-~2..0b-~2..0bT~2..0b:~2..0b:~sZ",
-                       [Y, M, D, H, I, float_to_binary(S, [short])]),
-    encode_string(iolist_to_binary(Dt), Escape);
-value(Value, Escape) when is_list(Value) ->
-    list(Value, Escape);
-value(Value, Escape) when is_map(Value) ->
-    case maps:to_list(Value) of
-        [] ->
-            <<"{}">>;
-        Keyword ->
-            map_naive(Keyword, Escape)
-    end.
+         is_integer(M) andalso M >= 0 andalso M =< 59 andalso
+         ((is_integer(S) andalso S >= 0 andalso S =< 59) orelse
+          (is_float(S) andalso S >= 0 andalso S < 60)) ->
+    Encode(Value, Escape, Encoders);
+value([{_, _} | _] = Keyword, Escape, #{proplist := Encode} = Encoders) ->
+    Encode(Keyword, Escape, Encoders);
+value(Value, Escape, #{list := Encode} = Encoders) when is_list(Value) ->
+    Encode(Value, Escape, Encoders);
+value(Value, Escape, #{map := Encode} = Encoders) when is_map(Value) ->
+    Encode(Value, Escape, Encoders);
+value(Value, Escape, #{unknown := Encode} = Encoders) ->
+    Encode(Value, Escape, Encoders).
