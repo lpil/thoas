@@ -1727,6 +1727,32 @@ value(Value, _Escape) when is_float(Value) ->
     float(Value);
 value([{_, _} | _] = Keyword, Escape) ->
     map_naive(Keyword, Escape);
+value({Y, M, D}, Escape)
+    when is_integer(Y) andalso Y >= 0 andalso Y =< 9999 andalso
+         is_integer(M) andalso M >= 1 andalso M =< 12 andalso
+         is_integer(D) andalso D >= 1 andalso D =< 31 ->
+    DateTime = io_lib:format("~4..0b-~2..0b-~2..0b", [Y, M, D]),
+    encode_string(iolist_to_binary(DateTime), Escape);
+value({{Y, M, D}, {H, I, S}}, Escape)
+    when is_integer(Y) andalso Y >= 0 andalso Y =< 9999 andalso
+         is_integer(M) andalso M >= 1 andalso M =< 12 andalso
+         is_integer(D) andalso D >= 1 andalso D =< 31 andalso
+         is_integer(H) andalso H >= 0 andalso H =< 23 andalso
+         is_integer(I) andalso I >= 0 andalso I =< 59 andalso
+         is_integer(S) andalso S >= 0 andalso S =< 59 ->
+    Dt = io_lib:format("~4..0b-~2..0b-~2..0bT~2..0b:~2..0b:~sZ",
+                       [Y, M, D, H, I, integer_to_list(S)]),
+    encode_string(iolist_to_binary(Dt), Escape);
+value({{Y, M, D}, {H, I, S}}, Escape)
+    when is_integer(Y) andalso Y >= 0 andalso Y =< 9999 andalso
+         is_integer(M) andalso M >= 1 andalso M =< 12 andalso
+         is_integer(D) andalso D >= 1 andalso D =< 31 andalso
+         is_integer(H) andalso H >= 0 andalso H =< 23 andalso
+         is_integer(I) andalso I >= 0 andalso I =< 59 andalso
+         is_float(S) andalso S >= 0 andalso S < 60 ->
+    Dt = io_lib:format("~4..0b-~2..0b-~2..0bT~2..0b:~2..0b:~sZ",
+                       [Y, M, D, H, I, float_to_binary(S, [short])]),
+    encode_string(iolist_to_binary(Dt), Escape);
 value(Value, Escape) when is_list(Value) ->
     list(Value, Escape);
 value(Value, Escape) when is_map(Value) ->
@@ -1736,4 +1762,3 @@ value(Value, Escape) when is_map(Value) ->
         Keyword ->
             map_naive(Keyword, Escape)
     end.
-
