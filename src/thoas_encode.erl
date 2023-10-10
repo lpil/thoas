@@ -1729,11 +1729,8 @@ value([{_, _} | _] = Keyword, Escape) ->
     map_naive(Keyword, Escape);
 value(Value, Escape) when is_list(Value) ->
     list(Value, Escape);
+value(Value, _Escape) when Value =:= #{} ->
+    <<"{}">>;
 value(Value, Escape) when is_map(Value) ->
-    case maps:to_list(Value) of
-        [] ->
-            <<"{}">>;
-        Keyword ->
-            map_naive(Keyword, Escape)
-    end.
-
+    Keyword = maps:to_list(Value),
+    map_naive(Keyword, Escape).
