@@ -27,11 +27,13 @@
     list(json_term()) |
     #{ binary() => json_term() }.
 
--type input_term() :: 
+-type input_term() ::
     integer() |
     float() |
     binary() |
     atom() |
+    calendar:date_time() |
+    calendar:date() |
     list(input_term()) |
     list({binary() | atom(), input_term()}) |
     #{ binary() | atom() => input_term() }.

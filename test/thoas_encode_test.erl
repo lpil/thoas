@@ -118,3 +118,14 @@ encode_test_() ->
         ?_assertEqual(Expected, iolist_to_binary(encode(Input, #{})))
         || {Input, Expected} <- Cases
     ].
+
+types_test_() ->
+    Cases =[
+        {#{<<"date">> => {2023,8,7}}, <<"{\"date\":\"2023-08-07\"}">>},
+        {#{<<"datetime">> => {{2023,8,7},{19,2,24}}}, <<"{\"datetime\":\"2023-08-07T19:02:24Z\"}">>},
+        {#{<<"datetime">> => {{2023,8,7},{19,2,24.65432}}}, <<"{\"datetime\":\"2023-08-07T19:02:24.65432Z\"}">>}
+    ],
+    [
+        ?_assertEqual(Expected, iolist_to_binary(encode(Input, #{})))
+        || {Input, Expected} <- Cases
+    ].
