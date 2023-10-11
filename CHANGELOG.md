@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.1 - 2023-10-11
+
+- Corrected an incorrect typespec.
+
 ## v1.1.0 - 2023-10-11
 
 - Dates and datetimes may now be encoded with `thoas:encode/2`.

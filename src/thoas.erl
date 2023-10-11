@@ -32,7 +32,7 @@
     float() |
     binary() |
     atom() |
-    calendar:date_time() |
+    calendar:datetime() |
     calendar:date() |
     list(input_term()) |
     list({binary() | atom(), input_term()}) |
