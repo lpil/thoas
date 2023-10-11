@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.1.0 - 2023-10-11
+
+- Dates and datetimes may now be encoded with `thoas:encode/2`.
+
 ## v1.0.0 - 2023-01-23
 
 - `float_to_binary(Float, [short])` is now used for encoding floats. This
