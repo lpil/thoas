@@ -1,5 +1,10 @@
 # Changelog
 
+## v1.2.0 - 2023-10-17
+
+- The `thoas:decode/2` function now accepts the `keys` option which can be one
+  of `reference`, `copy`, `to_existing_atom`, or `to_atom`.
+
 ## v1.1.1 - 2023-10-11
 
 - Corrected an incorrect typespec.
