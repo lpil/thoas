@@ -19,14 +19,17 @@
     escape => json | unicode | html | javascript
 }.
 
--type json_term() :: 
+-type json_term() ::
     integer() |
     float() |
     binary() |
     boolean() |
     'null' |
     list(json_term()) |
-    #{ binary() => json_term() }.
+    #{
+      binary() => json_term(),
+      atom() => json_term()
+    }.
 
 -type input_term() ::
     integer() |
@@ -74,7 +77,7 @@ decode(Json) ->
 %%     Should preferably only be used if the input data is trusted, or in
 %%     short running VM sessions
 %%
--spec decode(iodata(), decode_options()) -> 
+-spec decode(iodata(), decode_options()) ->
     {ok, json_term()} | {error, decode_error()}.
 decode(Json, Options) when is_map(Options) ->
     Binary = iolist_to_binary(Json),
