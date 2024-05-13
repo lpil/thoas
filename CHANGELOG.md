@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.2.1 - 2024-05-13
+
+- Corrected typespec.
+
 ## v1.2.0 - 2023-10-17
 
 - The `thoas:decode/2` function now accepts the `keys` option which can be one
